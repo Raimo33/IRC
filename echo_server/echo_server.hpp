@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   irc.hpp                                            :+:      :+:    :+:   */
+/*   echo_server.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/30 16:19:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/01 18:55:21 by craimond         ###   ########.fr       */
+/*   Created: 2024/05/01 17:43:43 by craimond          #+#    #+#             */
+/*   Updated: 2024/05/01 18:55:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef IRC_HPP
-# define IRC_HPP
+#ifndef ECHO_SERVER_HPP
+# define ECHO_SERVER_HPP
 
 # include <sys/socket.h>
 # include <netinet/in.h>
@@ -27,22 +27,11 @@
 # include <poll.h>
 # include <sys/epoll.h>
 # include <cstring>
+# include <cstdlib>
 # include <iostream>
-# include <vector>
-
-# include "Channel.hpp"
+# include <cstdio>
+# include <unistd.h>
 
 using namespace std;
-
-class Server
-{
-	public:
-		
-	private:
-		vector<uint8_t>	_clients;
-		vector<Channel>	_channels;
-		vector<pollfd>	_pollfds;
-		
-}
 
 #endif

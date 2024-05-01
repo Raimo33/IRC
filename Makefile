@@ -6,11 +6,11 @@
 #    By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/26 15:33:59 by craimond          #+#    #+#              #
-#    Updated: 2024/04/30 16:03:40 by craimond         ###   ########.fr        #
+#    Updated: 2024/04/30 16:17:34 by craimond         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = irc
+NAME = ircserv
 
 SRCS = $(addprefix srcs/, main.cpp)
 OBJS = $(SRCS:.cpp=.o)
