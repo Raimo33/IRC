@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 17:43:43 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/01 18:55:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/01 22:56:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,5 +33,7 @@
 # include <unistd.h>
 
 using namespace std;
+
+# define BUFFER_SIZE 1024
 
 #endif
