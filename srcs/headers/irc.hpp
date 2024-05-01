@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:19:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/01 18:55:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 00:13:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,20 +29,11 @@
 # include <cstring>
 # include <iostream>
 # include <vector>
+# include <unordered_map>
 
+# include "Server.hpp"
+# include "User.hpp"
 # include "Channel.hpp"
-
-using namespace std;
-
-class Server
-{
-	public:
-		
-	private:
-		vector<uint8_t>	_clients;
-		vector<Channel>	_channels;
-		vector<pollfd>	_pollfds;
-		
-}
+# include "ChannelOperator.hpp"
 
 #endif

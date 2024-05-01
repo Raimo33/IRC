@@ -6,15 +6,15 @@
 #    By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/26 15:33:59 by craimond          #+#    #+#              #
-#    Updated: 2024/04/30 16:17:34 by craimond         ###   ########.fr        #
+#    Updated: 2024/05/02 00:13:29 by craimond         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ircserv
 
-SRCS = $(addprefix srcs/, main.cpp)
+SRCS = $(addprefix srcs/, irc.cpp)
 OBJS = $(SRCS:.cpp=.o)
-HDRS = $(addprefix srcs/headers/, irc.hpp)
+HDRS = $(addprefix srcs/headers/, irc.hpp, Server.hpp, Channel.hpp, User.hpp, ChannelOperator.hpp)
 LEAK_REPORT = leaks.log
 
 CC = c++
