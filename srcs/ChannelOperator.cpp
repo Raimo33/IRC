@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 12:08:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 15:05:25 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 ChannelOperator::ChannelOperator() : User() {}
 
 ChannelOperator::ChannelOperator(const ChannelOperator &copy) : User(copy) {}
+
+ChannelOperator::ChannelOperator(const User &user) : User(user) {}
 
 ChannelOperator::~ChannelOperator() {}
 
@@ -25,9 +27,9 @@ ChannelOperator &ChannelOperator::operator=(const ChannelOperator &rhs)
 	return *this;
 }
 
-void	ChannelOperator::channelKick(const User &user, const Channel &channel) const
+void	ChannelOperator::channelKick(const User &user, Channel &channel) const
 {
 	if (_channels.find(channel.getName()) == _channels.end())
 		throw UserNotInChannelException();
-	channel.removeUser(user);
+	channel.removeUser(&user);
 }

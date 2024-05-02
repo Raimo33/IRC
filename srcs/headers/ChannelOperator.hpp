@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 12:02:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 15:05:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,12 @@ class ChannelOperator : public User
 	public:
 		ChannelOperator();
 		ChannelOperator(const ChannelOperator &copy);
+		ChannelOperator(const User &user); //per promuovere l'user a operator
 		~ChannelOperator();
 		ChannelOperator &operator=(const ChannelOperator &rhs);
 
-		void	channelKick(const user &user, const Channel &channel) const;
-		void	channelInvite(const user &user, const Channel &channel) const;
+		void	channelKick(const User &user, Channel &channel) const;
+		void	channelInvite(const User &user, const Channel &channel) const;
 		string	channelTopicGet(const Channel &channel) const;
 		void	channelTopicSet(const Channel &channel, const string &new_topic) const;
 		//seleziona un canale, seleziona una modalita', e sceglie se deve essere attiva o meno (true/false)

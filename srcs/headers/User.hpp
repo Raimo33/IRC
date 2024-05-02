@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 12:56:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 14:51:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include <map>
 # include <string>
 # include "Channel.hpp"
+
+# define MAX_CHANNELS_PER_USER 10
 
 using namespace std;
 
@@ -31,7 +33,7 @@ class User
 
 		void	authenticate(const string &username, const string &password);
 		void	setNickname(const string &nickname);
-		void	joinChannel(const Channel &channel);
+		void	joinChannel(Channel &channel);
 		void	sendMessage(const Channel &channel, const Message *msg) const;
 		
 		string	getNickname() const;

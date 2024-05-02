@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 13:43:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 15:01:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,13 @@ void	User::setNickname(const string &nickname)
 	_nickname = nickname;
 }
 
-void	User::joinChannel(const Channel &channel)
+// questa funzione viene chiamata solo se il canale esiste gia'
+void	User::joinChannel(Channel &channel)
 {
+	if (_channels.size() > MAX_CHANNELS_PER_USER)
+		throw TooManyChannelsException();
 	if (channel.getMode(MODE_I) == false)
 		_channels[channel.getName()] = &channel;
 	else
 		channel.addRequest(this);
 }
-
-

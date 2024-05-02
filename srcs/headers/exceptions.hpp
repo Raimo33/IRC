@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:26:36 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 12:05:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 14:51:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,12 @@ class UserNotInChannelException : public GeneralException
 {
 	public:
 		UserNotInChannelException() : GeneralException("User is not in this channel") {}
+};
+
+class TooManyChannelsException : public GeneralException
+{
+	public:
+		TooManyChannelsException() : GeneralException("User is not in this server") {}
 };
 
 #endif

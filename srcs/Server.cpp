@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 12:24:35 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 14:44:30 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,9 @@ Server	&Server::operator=(const Server &rhs)
 		_pollfds = rhs._pollfds;
 	}
 	return *this;
+}
+
+void	Server::addChannel(const Channel &channel)
+{
+	_channels[channel.getName()] = &channel;
 }
