@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 00:04:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 11:51:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,16 @@
 # define CHANNEL_HPP
 
 # define N_MODES 5
+
+# include <unordered_map>
+# include <string>
+# include <vector>
+# include <algorithm>
+# include "exceptions.hpp"
+# include "ChannelOperator.hpp"
+
+using namespace std;
+
 typedef enum channel_modes
 {
 	MODE_I = 0,
@@ -23,12 +33,8 @@ typedef enum channel_modes
 	MODE_L = 4
 }	e_channel_modes;
 
-# include <string>
-# include <vector>
-
-using namespace std;
-
 class ChannelOperator;
+class User;
 
 class Channel
 {
@@ -37,16 +43,21 @@ class Channel
 		Channel(const Channel &copy);
 		~Channel();
 		Channel	&operator=(const Channel &rhs);
-		bool	getMode(const channel_modes &mode) const;
+		string	getName() const;
 		string	getTopic() const;
+		bool	getMode(const channel_modes &mode) const;
 	private:
 		//solo l'operator puo' cambiare modes e topic del canale (operator sara' un friend di Channel)
 		friend class ChannelOperator;
-		void	setMode(const ChannelOperator &op, const channel_modes &mode, const bool status);
 		void	setTopic(const string &new_topic);
-		vector<ChannelOperator *>	_operators; //serve per sapere se l'operator che sta provando a cambiare roba e' effettivamente un operator di quel canale
-		bool						_modes[N_MODES];
-		string						_topic;
+		void	setMode(const ChannelOperator &op, const channel_modes &mode, const bool status);
+		void	addUser(const User &user); //aggiungera' l'utente alla lista degli operatori se e' un operator
+		void	removeUser(const User &user);
+		string	_name;
+		string	_topic;
+		unordered_map<string, const ChannelOperator *>	_operators; // {nickname, operator}
+		unordered_map<string, const User *>	_users; // {nickname, user}
+		bool	_modes[N_MODES];
 };
 
 #endif

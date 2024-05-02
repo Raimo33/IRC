@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 00:27:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 11:47:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 
 using namespace std;
 
-class Client;
+class user;
 class Channel;
 
 class Server
@@ -33,11 +33,11 @@ class Server
 		Server	&operator=(const Server &rhs);
 		
 	private:
-		vector<Client>					_clients;
+		vector<user>					_users;
 		unordered_map<string, Channel>	_channels;
 		vector<pollfd>					_pollfds;
 		uint16_t						_port_no; //la porta va da 0 a 65535 (2 bytes)
-		size_t							_pwd_hash; //la password che serve a qualsiasi client per accedere a questo server
+		size_t							_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
 		
 };
 

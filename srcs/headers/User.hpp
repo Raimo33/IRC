@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 00:12:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 11:40:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,10 @@ class User
 		void	setNickname(const string &nickname);
 		void	joinChannel(const Channel &channel);
 		void	sendMessage(const Channel &channel, const string &message) const;
+		
+		string	getNickname() const;
 	protected:
-		map<string, Channel>	_channels;
+		map<string, Channel>	_channels; // {channel_name, channel}
 		string					_nickname;
 		string					_username;
 		size_t					_pwd_hash;
