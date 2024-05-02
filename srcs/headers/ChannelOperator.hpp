@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 11:47:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 12:02:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ class Channel;
 using namespace std;
 
 //L'operator e' un user che assume ruolo di operator solo in determinati canali
+//l'operator pio' essere un operator in piu' canali contemporaneamente
 class ChannelOperator : public User
 {
 	public:
@@ -31,7 +32,6 @@ class ChannelOperator : public User
 		~ChannelOperator();
 		ChannelOperator &operator=(const ChannelOperator &rhs);
 
-		//valutare se omettere il parametro channel essendo che l'operatore è già in un canale
 		void	channelKick(const user &user, const Channel &channel) const;
 		void	channelInvite(const user &user, const Channel &channel) const;
 		string	channelTopicGet(const Channel &channel) const;

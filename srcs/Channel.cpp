@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 11:52:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 12:04:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,14 @@ void	Channel::setMode(const ChannelOperator &op, const channel_modes &mode, cons
 void	Channel::addUser(const User &user)
 {
 	_users[user.getNickname()] = &user;
+}
+
+void	Channel::addOperator(const ChannelOperator &op)
+{
+	if (_users[op.getNickname()] == NULL) //se l'operatore non e' un user di questo canale
+		UserNotInChannelException();
+	else
+		_operators[op.getNickname()] = &op;
 }
 
 void	Channel::removeUser(const User &user)
