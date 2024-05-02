@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:26:36 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 14:51:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 16:15:30 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,21 @@ class UserNotInChannelException : public GeneralException
 class TooManyChannelsException : public GeneralException
 {
 	public:
-		TooManyChannelsException() : GeneralException("User is not in this server") {}
+		TooManyChannelsException() : GeneralException("User belongs to too many channels") {}
 };
+
+class AlreadyAuthenticatedException : public GeneralException
+{
+	public:
+		AlreadyAuthenticatedException() : GeneralException("User is already authenticated") {}
+};
+
+class InvalidCredentialsException : public GeneralException
+{
+	public:
+		InvalidCredentialsException() : GeneralException("Invalid credentials") {}
+};
+
+
 
 #endif

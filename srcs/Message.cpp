@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:59:00 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 15:06:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 15:24:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,11 @@ Message::Message() :
 	_timestamp(0),
 	_sender(NULL) {}
 	
-Message::Message(const string &content, const User *sender) :
+Message::Message(const string &content, const User &sender, const Channel &channel) :
 	_content(content),
 	_timestamp(time(NULL)),
-	_sender(sender) {}
+	_sender(&sender),
+	_channel(&channel) {}
 
 Message::Message(const Message &copy) :
 	_content(copy._content),

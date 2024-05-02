@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 15:01:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 15:38:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,16 @@ User &User::operator=(const User &rhs)
 	return *this;
 }
 
+//questa sara' chiamata solo se l'username non e' nel database (l'utente non e' gia' registrato)
+/*Because of IRC's scandanavian origin, the characters {}| are
+   considered to be the lower case equivalents of the characters []\,
+   respectively. This is a critical issue when determining the
+   equivalence of two nicknames.*/
 void	User::authenticate(const string &username, const string &password)
 {
+	if (_is_authenticated == true)
+		throw AlreadyAuthenticatedException();
+
 	hash<string>	hasher;
 
 	_username = username;
@@ -60,8 +68,8 @@ void	User::joinChannel(Channel &channel)
 {
 	if (_channels.size() > MAX_CHANNELS_PER_USER)
 		throw TooManyChannelsException();
-	if (channel.getMode(MODE_I) == false)
+	if (channel.getMode(MODE_I) == false) //se il canale non e' invite-only
 		_channels[channel.getName()] = &channel;
 	else
-		channel.addRequest(this);
+		channel.addRequest(*this);
 }

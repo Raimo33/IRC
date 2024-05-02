@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 14:51:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 16:04:00 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class User
 		void	setNickname(const string &nickname);
 		void	joinChannel(Channel &channel);
 		void	sendMessage(const Channel &channel, const Message *msg) const;
-		
+
 		string	getNickname() const;
 	protected:
 		map<string, const Channel *>	_channels; // {channel_name, channel}
@@ -45,5 +45,7 @@ class User
 	private:
 		bool							_is_authenticated; //true se l'utente ha effettuato il login, serve per fargli fare la registrazione la prima volta
 };
+
+//class UserException
 
 #endif

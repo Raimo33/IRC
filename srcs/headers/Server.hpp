@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 14:44:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/02 15:37:03 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,14 +37,15 @@ class Server
 		~Server();
 		Server	&operator=(const Server &rhs);
 		void	addChannel(const Channel &channel);
+		void	addClient(Client &client);
 
 	private:
 		uint16_t								_port_no; //la porta va da 0 a 65535 (2 bytes)
 		size_t									_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
+		unordered_map<string, size_t>			_credentials; // {username, pwd_hash}
 		vector<Client *>						_clients;
 		unordered_map<string, const Channel *>	_channels;
-		vector<pollfd>							_pollfds;
-		
+		vector<pollfd>							_pollfds;	
 };
 
 #endif
