@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 15:25:19 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/11 16:15:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,9 @@ class Channel
 		string	getTopic() const;
 		bool	getMode(const channel_modes &mode) const;
 		void	addRequest(const User &user);
+		class 	UserNotInChannelException;
+		class	NotOperatorException;
+		class	NotExistingModeException;
 	private:
 		//solo l'operator puo' cambiare modes e topic del canale (operator sara' un friend di Channel)
 		friend class ChannelOperator;
@@ -62,6 +65,24 @@ class Channel
 		unordered_map<string, const User *>	_users; // {nickname, user}
 		unordered_map<string, const User *>	_requests; // {nickname, user}
 		bool	_modes[N_MODES];
+};
+
+class Channel::UserNotInChannelException : public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class Channel::NotOperatorException : public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class Channel::NotExistingModeException : public exception
+{
+	public:
+		virtual const char	*what() const throw();
 };
 
 #endif

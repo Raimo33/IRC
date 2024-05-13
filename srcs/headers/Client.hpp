@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:35:38 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 15:21:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 16:38:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,24 +20,47 @@ class Client : public User
 {
 	public:
 		Client();
-		Client(const uint16_t port_no, const uint32_t ip_addr);
+		Client(const int socket);
 		Client(const Client &copy);
 		~Client();
 		Client	&operator=(const Client &rhs);
 		bool		getIsConnected() const;
 		uint16_t	getPortNbr() const;
 		uint32_t	getIpAddr() const;
+		int			getSocket() const;
+		Server		*getServer() const;
 		void		setIsConnected(const bool is_connected);
-		void		setPortNbr(const uint16_t port_nbr);
+		void		setPortNbr(const uint16_t port);
 		void		setIpAddr(const uint32_t ip_addr);
-		
+		void		setSocket(const int socket);
+		void		setServer(Server *server);
+		void		run(void);
+		class		UnknownCommandException;
 	private:
+		void		processInput(void);
+		t_input		parseInput(const string &input);
 		string		_host_name; //aka real name
 		bool		_is_connected;
-		uint16_t	_port_nbr;
 		uint32_t	_ip_addr;
+		int			_socket;
 		Server		*_server;
 };
+
+typedef struct s_msg
+{
+	string			prefix;
+	t_cmd			command;
+	vector<string>	params;
+}	t_input;
+
+typedef enum e_cmd
+{
+	NICK,
+	USER,
+	JOIN,
+	PRIVMSG,
+	QUIT,
+}	t_cmd;
 
 
 #endif

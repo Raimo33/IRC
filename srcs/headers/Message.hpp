@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:57:26 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 16:23:50 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 16:12:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define MESSAGE_HPP
 
 # include <string>
+# include <vector>
 
 using namespace std;
 
@@ -28,13 +29,6 @@ IRC messages are always lines of characters terminated with a CR-LF
   	<message>  ::= [':' <prefix> <SPACE> ] <command> <params> <crlf>
 */
 
-struct t_msg
-{
-	string		prefix;
-	string		command;
-	string		params;
-};
-
 //quando si crea l'oggetto messaggio bisogna controllare se _channel.size() e' uguale a 2
 //e in quel caso si promuove (col costruttore copy) a private message
 class Message
@@ -45,12 +39,16 @@ class Message
 		Message(const string &content, const User &sender, const Channel &channel);
 		Message(const Message &copy);
 		~Message();
-		string		getContent() const;
-		time_t		getTimestamp() const;
-		const User	*getSender() const;
-
+		string			getContent() const;
+		time_t			getTimestamp() const;
+		const User		*getSender() const;
+		const Channel	*getChannel() const;
+		void			setContent(const string &content);
+		void			setTimestamp(const time_t timestamp);
+		void			setSender(const User &sender);
+		void			setChannel(const Channel &channel);
 	private:
-		const struct t_msg	_content;
+		const string		_content;
 		const time_t		_timestamp;
 		const User			*_sender;
 		const Channel		*_channel;

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 15:38:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 15:08:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,26 +41,14 @@ User &User::operator=(const User &rhs)
 	return *this;
 }
 
-//questa sara' chiamata solo se l'username non e' nel database (l'utente non e' gia' registrato)
-/*Because of IRC's scandanavian origin, the characters {}| are
-   considered to be the lower case equivalents of the characters []\,
-   respectively. This is a critical issue when determining the
-   equivalence of two nicknames.*/
-void	User::authenticate(const string &username, const string &password)
-{
-	if (_is_authenticated == true)
-		throw AlreadyAuthenticatedException();
-
-	hash<string>	hasher;
-
-	_username = username;
-	_pwd_hash = hasher(password);
-	_is_authenticated = true;
-}
-
 void	User::setNickname(const string &nickname)
 {
 	_nickname = nickname;
+}
+
+void	User::setUsername(const string &username)
+{
+	_username = username;
 }
 
 // questa funzione viene chiamata solo se il canale esiste gia'

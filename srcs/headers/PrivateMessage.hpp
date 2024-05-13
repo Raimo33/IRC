@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/02 15:55:39 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 16:39:04 by craimond         ###   ########.fr       */
+/*   Created: 2024/05/13 16:03:42 by craimond          #+#    #+#             */
+/*   Updated: 2024/05/13 16:14:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ class PrivateMessage: public Message
 	public:
 		PrivateMessage();
 		PrivateMessage(const string &content, const User &sender, const User &receiver);
-		PrivateMessage(const Message &message, const User &receiver);
+		PrivateMessage(const string &content, const User &receiver);
 		PrivateMessage(const PrivateMessage &copy);
 		~PrivateMessage();
 		PrivateMessage	&operator=(const PrivateMessage &rhs);

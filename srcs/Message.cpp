@@ -6,18 +6,18 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:59:00 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 15:24:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/11 16:19:51 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Message.hpp"
 
 Message::Message() :
-	_content(""),
+	_content((t_msg){0}),
 	_timestamp(0),
 	_sender(NULL) {}
 	
-Message::Message(const string &content, const User &sender, const Channel &channel) :
+Message::Message(const t_msg &content, const User &sender, const Channel &channel) :
 	_content(content),
 	_timestamp(time(NULL)),
 	_sender(&sender),
@@ -30,12 +30,12 @@ Message::Message(const Message &copy) :
 
 Message::~Message() {}
 
-string		Message::getContent() const
+t_msg	Message::getContent() const
 {
 	return _content;
 }
 
-time_t		Message::getTimestamp() const
+time_t	Message::getTimestamp() const
 {
 	return _timestamp;
 }

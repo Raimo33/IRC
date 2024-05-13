@@ -1,29 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   irc.cpp                                            :+:      :+:    :+:   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 13:08:51 by craimond         ###   ########.fr       */
+/*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
+/*   Updated: 2024/05/13 16:56:08 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/irc.hpp"
+#include "utils.hpp"
 
-//primo argv e' la porta, il secondo e' la password
-int main(void)
+bool	is_channel_prefix(const char c)
 {
-	try
-	{
-		Server	server;
-		
-		server.run();
-		
-	}
-	catch (const std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
+	return (c == '#' || c == '&' || c == '!' || c == '+'/* || c == '~' || c == '%' || c == '.'*/);
 }

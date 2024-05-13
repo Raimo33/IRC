@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 16:04:00 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 16:33:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,19 @@ class User
 		~User();
 		User	&operator=(const User &rhs);
 
-		void	authenticate(const string &username, const string &password);
 		void	setNickname(const string &nickname);
+		void	setUsername(const string &username);
 		void	joinChannel(Channel &channel);
-		void	sendMessage(const Channel &channel, const Message *msg) const;
+		void 	joinChannel(Channel &channel, const string &key);
+		void	sendMessage(const Channel &channel, const Message &msg) const;
+		void	sendMessage(const User &user, const Message &msg) const; //aka private message
 
 		string	getNickname() const;
+
+		class	TooManyChannelsException;
+		class	AlreadyAuthenticatedException;
+		class	InvalidCredentialsException;
+		
 	protected:
 		map<string, const Channel *>	_channels; // {channel_name, channel}
 		string							_nickname;
@@ -46,6 +53,22 @@ class User
 		bool							_is_authenticated; //true se l'utente ha effettuato il login, serve per fargli fare la registrazione la prima volta
 };
 
-//class UserException
+class User::TooManyChannelsException: public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class User::AlreadyAuthenticatedException: public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class User::InvalidCredentialsException: public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
 
 #endif
