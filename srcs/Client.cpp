@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 17:21:09 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 17:35:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,17 +128,24 @@ void	Client::processInput(const t_input &input)
 			if (is_channel_prefix(input.params[0])) //se il primo carattere e' #, &, + o !
 			{
 				//channel msg PRIVMSG <channel> :<message>
-				Channel *channel = _server->getChannel(input.params[0]);
-				//se il canale ha solo due membri, passare nell'else
+				Channel channel = _server->getChannel(input.params[0]);
+				if (channel->getMembersCount() <= 2)
+				{
+					//promuovo il messaggio a private message
+					User receiver = channel->getMember(input.params[1]);
+					PrivateMessage *msg = new PrivateMessage(input.params[2], *this, receiver);
+					sendMessage(receiver, msg);
+					break;
+				}
 				Message *msg = new Message(input.params[1], *this, *channel);
-				sendMessage(*_server->getChannel(input.params[0]), msg);
+				sendMessage(channel, msg);
 			}
 			else
 			{
 				//private msg PRIVMSG <nickname> :<message>
-				User *receiver = _server->getClient(input.params[0]);
+				User receiver = _server->getClient(input.params[0]);
 				PrivateMessage *msg = new PrivateMessage(input.params[1], *this, receiver);	
-				sendMessage(*_server->getClient(input.params[0]), msg);
+				sendMessage(receiver, msg);
 			}
 			break;
 		//JOIN <channel1,channel2,channel3> <key1,key2,key3>

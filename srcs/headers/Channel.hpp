@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/11 16:15:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 17:33:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,14 +42,18 @@ class Channel
 		Channel();
 		Channel(const Channel &copy);
 		~Channel();
-		Channel	&operator=(const Channel &rhs);
-		string	getName() const;
-		string	getTopic() const;
-		bool	getMode(const channel_modes &mode) const;
-		void	addRequest(const User &user);
-		class 	UserNotInChannelException;
-		class	NotOperatorException;
-		class	NotExistingModeException;
+		Channel		&operator=(const Channel &rhs);
+		string		getName() const;
+		string		getTopic() const;
+		bool		getMode(const channel_modes &mode) const;
+		string		getOperator(const string &nickname) const;
+		string		getMember(const string &nickname) const;
+		string		getRequest(const string &nickname) const;
+		uint32_t	getMembersCount() const;
+		void		addRequest(const User &user);
+		class 		UserNotInChannelException;
+		class		NotOperatorException;
+		class		NotExistingModeException;
 	private:
 		//solo l'operator puo' cambiare modes e topic del canale (operator sara' un friend di Channel)
 		friend class ChannelOperator;
@@ -62,7 +66,7 @@ class Channel
 		string	_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
 		string	_topic;
 		unordered_map<string, const ChannelOperator *>	_operators; // {nickname, operator}
-		unordered_map<string, const User *>	_users; // {nickname, user}
+		unordered_map<string, const User *>	_members; // {nickname, user}
 		unordered_map<string, const User *>	_requests; // {nickname, user}
 		bool	_modes[N_MODES];
 };
