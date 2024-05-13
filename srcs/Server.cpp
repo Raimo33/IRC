@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 14:11:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 18:00:01 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,15 +87,17 @@ void	Server::addClient(void)
 	client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
 	cout << "TCP Connection request from " << client->getIpAddr() << ":" << client->getPortNbr() << endl;
 
+	cout << "SSL handhaking with " << client->getIpAddr() << ":" << client->getPortNbr() << endl;
+	//TODO: aggiungere SSL handshake
+
 	//Add client to the list
 	client = new Client(client_socket);
 	client->setServer(this);
 	client->setIpAddr(inet_ntoa(client_addr.sin_addr));
 	client->setPortNbr(ntohs(client_addr.sin_port));
-	client->setIsConnected(true);
 	_clients.push_back(client);
 
-	thread client_thread(&Client::run, client);
+	thread client_thread(&Client::run, client); //is_connected verra' settato qua dentro dopo il login
 	client_thread.detach();
 
 	cout << "Connection established with " << client->getIpAddr() << ":" << client->getPortNbr() << endl;

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:35:38 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 16:38:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 18:29:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,12 @@ class Client : public User
 		void		setServer(Server *server);
 		void		run(void);
 		class		UnknownCommandException;
+		class 		NotConnectedException;
 	private:
-		void		processInput(void);
-		t_input		parseInput(const string &input);
+		void		checkConnection(void) const;
+		t_input		parseInput(const string &input) const;
+		void		processInput(void); //forse const
+		void		authenticate(void);
 		string		_host_name; //aka real name
 		bool		_is_connected;
 		uint32_t	_ip_addr;

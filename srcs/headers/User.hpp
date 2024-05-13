@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 16:33:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 18:28:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,19 +37,17 @@ class User
 		void 	joinChannel(Channel &channel, const string &key);
 		void	sendMessage(const Channel &channel, const Message &msg) const;
 		void	sendMessage(const User &user, const Message &msg) const; //aka private message
-
-		string	getNickname() const;
-
+		string	getNickname(is_void) const;
+		bool	isAuthenticated(void) const;
 		class	TooManyChannelsException;
 		class	AlreadyAuthenticatedException;
 		class	InvalidCredentialsException;
-		
+		class	NotAuthenticatedException;
 	protected:
 		map<string, const Channel *>	_channels; // {channel_name, channel}
 		string							_nickname;
 		string							_username;
 		size_t							_pwd_hash;
-	private:
 		bool							_is_authenticated; //true se l'utente ha effettuato il login, serve per fargli fare la registrazione la prima volta
 };
 

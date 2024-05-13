@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 17:35:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 18:33:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,7 @@ void	Client::processInput(const t_input &input)
 	switch (input.command)
 	{
 		case PRIVMSG: //usato sia per messaggi privati che per messaggi nei canali
+			checkConnection();
 			if (is_channel_prefix(input.params[0])) //se il primo carattere e' #, &, + o !
 			{
 				//channel msg PRIVMSG <channel> :<message>
@@ -150,7 +151,8 @@ void	Client::processInput(const t_input &input)
 			break;
 		//JOIN <channel1,channel2,channel3> <key1,key2,key3>
 		case JOIN:
-			vector<string> channels = split(input.params[0], ',');
+			checkConnection();
+			vector<string> channels = split(input.params[0], ','); //se non e' in cpp98 mettiamolo in utils
 			vector<string> keys = split(input.params[1], ',');
 			
 			for (size_t i = 0; i < channels.size(); i++)
@@ -162,12 +164,29 @@ void	Client::processInput(const t_input &input)
 					joinChannel(*channel);
 			};
 			break;
+		case MODE:
+			checkConnection();
+			//TODO
+			break;
+		//PASS <connectionpassword>
+		case PASS: //viene usata dagli utenti per autenticarsi
+			hash<string>	hasher;
+			
+			if (_is_connected)
+				UserAlreadyConnectedException();
+			if (hasher(input.params[0]) != _server->getPwdHash())
+				InvalidPasswordException();
+			_is_connected = true;
+			authenticate(_socket); //una volta connesso, l'utente deve autenticarsi
+			break;
 		//NICK <nickname>
 		case NICK:
+			checkConnection();
 			setNickname(input.params[0]);
 			break;
 		//USER <username>
 		case USER:
+			checkConnection();
 			setUsername(input.params[0]);
 			break;
 		//QUIT
@@ -205,3 +224,37 @@ t_input	Client::parseInput(const string &raw_input)
 	}
 }
 //output: {string prefix, enum command, {string param1, string param2, ...}}
+
+void	Client::checkConnection(void) const
+{
+	if (!_is_connected)
+		throw NotConnectedException();
+	if (!_is_authenticated)
+		throw User::NotAuthenticatedException();
+}
+
+void	Client::authenticate(void)
+{
+	char			buffer[1024];
+	hash<string>	hasher;
+
+    // Prompt user for username
+    send(_socket, "Username: ", 10, 0);
+    recv(_socket, buffer, sizeof(buffer), 0);
+	buffer[strlen(buffer) - 1] = '\0';
+	_username = string(buffer);
+
+    // Prompt user for password
+    send(_socket, "Password: ", 10, 0);
+    recv(_socket, buffer, sizeof(buffer), 0);
+	_pwd_hash = hasher(string(buffer));
+
+    // Check credentials
+    if (_server->getPwdHash(_username) != _pwd_hash)
+	{
+		send(_socket, "Invalid credentials\n", 20, 0);
+		_is_authenticated = false;
+	}
+	else
+		_is_authenticated = true;
+}

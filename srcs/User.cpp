@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 15:08:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 18:28:54 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,3 +61,14 @@ void	User::joinChannel(Channel &channel)
 	else
 		channel.addRequest(*this);
 }
+
+void	User::joinChannel(Channel &channel, const string &key)
+{
+	if (_channels.size() > MAX_CHANNELS_PER_USER)
+		throw TooManyChannelsException();
+	if (channel.getMode(MODE_K) == false || channel.getKey() == key)
+		_channels[channel.getName()] = &channel;
+	else
+		throw Channel::InvalidCredentialsException();
+}
+

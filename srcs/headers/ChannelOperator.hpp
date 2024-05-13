@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 15:05:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 17:38:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ class Channel;
 using namespace std;
 
 //L'operator e' un user che assume ruolo di operator solo in determinati canali
-//l'operator pio' essere un operator in piu' canali contemporaneamente
+//l'operator puo' essere un operator in piu' canali contemporaneamente
 class ChannelOperator : public User
 {
 	public:

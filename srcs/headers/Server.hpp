@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 16:10:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 18:32:40 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Server
 		void	run(void);
 		void	addChannel(const Channel &channel);
 		Channel	&getChannel(const string &name) const;
+		size_t	getPwdHash(const string &username) const;
 
 	private:
 		void	addClient(void);
