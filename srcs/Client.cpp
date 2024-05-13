@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 16:53:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/13 17:21:09 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,6 +129,7 @@ void	Client::processInput(const t_input &input)
 			{
 				//channel msg PRIVMSG <channel> :<message>
 				Channel *channel = _server->getChannel(input.params[0]);
+				//se il canale ha solo due membri, passare nell'else
 				Message *msg = new Message(input.params[1], *this, *channel);
 				sendMessage(*_server->getChannel(input.params[0]), msg);
 			}
