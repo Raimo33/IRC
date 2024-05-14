@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 11:58:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:11:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,12 @@ class User::AlreadyAuthenticatedException: public exception
 };
 
 class User::InvalidCredentialsException: public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class User::NotAuthenticatedException: public exception
 {
 	public:
 		virtual const char	*what() const throw();

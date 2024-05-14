@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 18:28:54 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:11:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,26 @@ void	User::joinChannel(Channel &channel, const string &key)
 	if (channel.getMode(MODE_K) == false || channel.getKey() == key)
 		_channels[channel.getName()] = &channel;
 	else
-		throw Channel::InvalidCredentialsException();
+		throw InvalidCredentialsException();
+}
+
+const char *User::TooManyChannelsException::what() const throw()
+{
+	return "User is already in too many channels";
+}
+
+const char *User::AlreadyAuthenticatedException::what() const throw()
+{
+	return "User is already authenticated";
+}
+
+const char *User::InvalidCredentialsException::what() const throw()
+{
+	return "Invalid credentials";
+}
+
+const char *User::NotAuthenticatedException::what() const throw()
+{
+	return "User is not authenticated";
 }
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 11:57:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:13:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,11 +57,6 @@ bool	Client::getIsConnected() const
 	return _is_connected;
 }
 
-uint16_t	Client::getPortNo() const
-{
-	return _port_no;
-}
-
 uint32_t	Client::getIpAddr() const
 {
 	return _ip_addr;
@@ -80,11 +75,6 @@ Server	*Client::getServer() const
 void	Client::setIsConnected(const bool is_connected)
 {
 	_is_connected = is_connected;
-}
-
-void	Client::setPortNo(const uint16_t port_no)
-{
-	_port_no = port_no;
 }
 
 void	Client::setIpAddr(const uint32_t ip_addr)
@@ -173,11 +163,11 @@ void	Client::processInput(const t_input &input)
 			hash<string>	hasher;
 			
 			if (_is_connected)
-				UserAlreadyConnectedException();
+				throw AlreadyConnectedException();
 			if (hasher(input.params[0]) != _server->getPwdHash())
-				InvalidPasswordException();
+				throw InvalidPasswordException();
 			_is_connected = true;
-			authenticate(_socket); //una volta connesso, l'utente deve autenticarsi
+			authenticate(); //una volta connesso, l'utente deve autenticarsi
 			break;
 		//NICK <nickname>
 		case NICK:
@@ -199,11 +189,11 @@ void	Client::processInput(const t_input &input)
 }
 
 //input: ":<prefix> <command> <params> <crlf>"
-t_input	Client::parseInput(const string &raw_input)
+t_input	Client::parseInput(string &raw_input)
 {
 	t_input	input;
 	string	command;
-	static const unordered_map<string, enum e_command> commands = {
+	static const unordered_map<string, t_cmd> commands = {
 		{"PRIVMSG", PRIVMSG},
 		{"JOIN", JOIN},
 		{"MODE", MODE},
@@ -211,6 +201,7 @@ t_input	Client::parseInput(const string &raw_input)
 		{"NICK", NICK},
 		{"USER", USER},
 		{"QUIT", QUIT}
+	};
 
 	input.prefix = NULL;
 	if (raw_input[0] == ':')
@@ -218,7 +209,7 @@ t_input	Client::parseInput(const string &raw_input)
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il prefix
 	command = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il comando come stringa
 
-	unordered_map<string, enum e_command>::const_iterator it;
+	unordered_map<string, t_cmd>::const_iterator it;
 
 	it = commands.find(command);
 	if (it == commands.end())
@@ -275,3 +266,24 @@ void	Client::authenticate(void)
 	else
 		_is_authenticated = true;
 }
+
+const char *Client::UnknownCommandException::what() const throw()
+{
+	return "Unknown command";
+}
+
+const char *Client::NotConnectedException::what() const throw()
+{
+	return "User is not connected";
+}
+
+const char *Client::AlreadyConnectedException::what() const throw()
+{
+	return "User is already connected";
+}
+
+const char *Client::InvalidPasswordException::what() const throw()
+{
+	return "Invalid password";
+}
+
