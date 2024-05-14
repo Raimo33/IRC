@@ -6,22 +6,22 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:35:38 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 12:09:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 16:55:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-# include "User.hpp"
-# include "Server.hpp"
+# include <cstring>
+# include <string>
+# include <vector>
+# include <errno.h>
+# include "hasher.hpp"
 
-typedef struct s_msg
-{
-	string			prefix;
-	t_cmd			command;
-	vector<string>	params;
-}	t_input;
+# include "User.hpp"
+
+using namespace std;
 
 typedef enum e_cmd
 {
@@ -33,6 +33,15 @@ typedef enum e_cmd
 	USER,
 	QUIT
 }	t_cmd;
+
+typedef struct s_input
+{
+	string			prefix;
+	t_cmd			command;
+	vector<string>	params;
+}	t_input;
+
+class Server;
 
 class Client : public User
 {
@@ -51,26 +60,16 @@ class Client : public User
 		void		setSocket(const int socket);
 		void		setServer(Server *server);
 		void		run(void);
-		class		UnknownCommandException;
+		void		checkConnection(void) const;
+		void		authenticate(void);
 		class 		NotConnectedException;
 		class		AlreadyConnectedException;
 		class		InvalidPasswordException;
 	private:
-		void		checkConnection(void) const;
-		t_input		parseInput(const string &input) const;
-		void		processInput(void); //forse const
-		void		authenticate(void);
-		string		_host_name; //aka real name
 		bool		_is_connected;
-		uint32_t	_ip_addr;
+		uint32_t	_ip_addr; //aka hostname
 		int			_socket;
 		Server		*_server;
-};
-
-class Client::UnknownCommandException: public exception
-{
-	public:
-		virtual const char	*what() const throw();
 };
 
 class Client::NotConnectedException: public exception

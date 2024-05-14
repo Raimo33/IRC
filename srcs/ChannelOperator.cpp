@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/02 15:05:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 16:46:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,5 +31,10 @@ void	ChannelOperator::channelKick(const User &user, Channel &channel) const
 {
 	if (_channels.find(channel.getName()) == _channels.end())
 		throw UserNotInChannelException();
-	channel.removeUser(&user);
+	channel.removeUser(user);
+}
+
+const char *ChannelOperator::UserNotInChannelException::what() const throw()
+{
+	return "User is not in the channel";
 }

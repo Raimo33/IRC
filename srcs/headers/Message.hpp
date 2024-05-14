@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:57:26 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 17:22:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 18:09:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,10 @@ class Message : public IMessage
 		Message(const string &content, const User &sender, const Channel &channel);
 		Message(const Message &copy);
 		~Message();
-		const Channel	*getChannel() const;
-		void			setChannel(const Channel &channel);
+		Channel	&getChannel() const;
+		void	setChannel(Channel &channel);
 	private:
-		const Channel		*_channel;
+		Channel	*_channel;
 };
 
 //ad ogni messaggio corrisponde una risposta numerica (vedi RFC)

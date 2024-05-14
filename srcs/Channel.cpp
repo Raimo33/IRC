@@ -6,26 +6,29 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 17:10:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 17:49:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Channel.hpp"
 
+#include "headers/User.hpp"
+#include "headers/ChannelOperator.hpp"
+
 Channel::Channel() :
 	_name(""),
 	_topic(""),
 	_operators(),
-	_users()
-{
-	fill(begin(_modes), end(_modes), false);
-}
+	_members(),
+	_requests(),
+	_modes() {}
 
 Channel::Channel(const Channel &copy) :
 	_name(copy._name),
 	_topic(copy._topic),
 	_operators(copy._operators),
-	_users(copy._users)
+	_members(copy._members),
+	_requests(copy._requests)
 {
 	for (int i = 0; i < N_MODES; i++)
 		_modes[i] = copy._modes[i];
@@ -40,7 +43,7 @@ Channel	&Channel::operator=(const Channel &rhs)
 		_name = rhs._name;
 		_topic = rhs._topic;
 		_operators = rhs._operators; //operator overload di vector fa una deep copy
-		_users = rhs._users;
+		_members = rhs._members;
 		for (int i = 0; i < N_MODES; i++)
 			_modes[i] = rhs._modes[i];
 	}
@@ -57,11 +60,32 @@ string	Channel::getTopic() const
 	return _topic;
 }
 
-bool	Channel::getMode(const channel_modes &mode) const
+bool	Channel::getMode(const t_channel_modes &mode) const
 {
 	if (mode < 0 || mode >= N_MODES)
 		throw NotExistingModeException();
 	return _modes[mode];
+}
+
+User	&Channel::getOperator(const string &nickname) const
+{
+	if (_operators.at(nickname) == NULL)
+		throw OperatorNotFoundException();
+	return *_operators.at(nickname);
+}
+
+User	&Channel::getMember(const string &nickname) const
+{
+	if (_members.at(nickname) == NULL)
+		throw MemberNotFoundException();
+	return *_members.at(nickname);
+}
+
+User	&Channel::getRequest(const string &nickname) const
+{
+	if (_requests.at(nickname) == NULL)
+		throw RequestNotFoundException();
+	return *_requests.at(nickname);
 }
 
 void	Channel::setTopic(const string &new_topic)
@@ -69,7 +93,7 @@ void	Channel::setTopic(const string &new_topic)
 	_topic = new_topic;
 }
 
-void	Channel::setMode(const ChannelOperator &op, const channel_modes &mode, const bool status)
+void	Channel::setMode(const ChannelOperator &op, const t_channel_modes &mode, const bool status)
 {
 	if (mode < 0 || mode >= N_MODES) //modalita' sbagliata
 		throw NotExistingModeException();
@@ -79,26 +103,60 @@ void	Channel::setMode(const ChannelOperator &op, const channel_modes &mode, cons
 		_modes[mode] = status;
 }
 
-void	Channel::addUser(const User &user)
+void	Channel::addUser(User &user)
 {
-	_users[user.getNickname()] = &user;
+	_members[user.getNickname()] = &user;
 }
 
-void	Channel::addOperator(const ChannelOperator &op)
+void	Channel::addOperator(ChannelOperator &op)
 {
-	if (_users[op.getNickname()] == NULL) //se l'operatore non e' un user di questo canale
+	if (_members[op.getNickname()] == NULL) //se l'operatore non e' un user di questo canale
 		throw UserNotInChannelException();
 	else
 		_operators[op.getNickname()] = &op;
 }
 
-void	Channel::addRequest(const User &user)
+void	Channel::addRequest(User &user)
 {
 	_requests[user.getNickname()] = &user;
 }
 
 void	Channel::removeUser(const User &user)
 {
-	_users.erase(user.getNickname());
+	_members.erase(user.getNickname());
 }
 
+const char *Channel::UserNotInChannelException::what() const throw()
+{
+	return "User not in channel";
+}
+
+const char *Channel::NotOperatorException::what() const throw()
+{
+	return "User not an operator";
+}
+
+const char *Channel::NotExistingModeException::what() const throw()
+{
+	return "Mode does not exist";
+}
+
+const char *Channel::InvalidCredentialsException::what() const throw()
+{
+	return "Invalid credentials";
+}
+
+const char *Channel::MemberNotFoundException::what() const throw()
+{
+	return "Member not found";
+}
+
+const char *Channel::OperatorNotFoundException::what() const throw()
+{
+	return "Operator not found";
+}
+
+const char *Channel::RequestNotFoundException::what() const throw()
+{
+	return "Request not found";
+}

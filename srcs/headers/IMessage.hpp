@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 17:16:12 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 17:22:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 18:13:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,17 +22,19 @@ class User;
 class IMessage
 {
 	public:
-		IMessage();
-		virtual ~IMessage() = 0;
-		User	&getSender() const;
-		string	&getContent() const;
-		time_t	getTimestamp() const;
+		IMessage(void);
+		IMessage(const string &content, const User &sender);
+		virtual ~IMessage(void) = 0;
+		User	&getSender(void) const;
+		string	getContent(void) const;
+		time_t	getTimestamp(void) const;
 		void	setContent(const string &content);
 		void	setTimestamp(const time_t timestamp);
-		void	setSender(const User &sender);
+		void	setSender(User &sender);
 	protected:
-		const string		_content;
-		const time_t		_timestamp;
+		string	_content;
+		time_t	_timestamp;
+		User	*_sender;
 };
 
 #endif

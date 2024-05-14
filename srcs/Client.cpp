@@ -6,15 +6,18 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 12:23:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 17:39:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Client.hpp"
 
+# include "headers/User.hpp"
+# include "headers/Server.hpp"
+# include "headers/EventHandler.hpp"
+
 Client::Client() :
 	User(),
-	_host_name(""),
 	_is_connected(false),
 	_ip_addr(0),
 	_socket(0),
@@ -22,7 +25,6 @@ Client::Client() :
 
 Client::Client(const int socket) :
 	User(),
-	_host_name(""),
 	_is_connected(false),
 	_ip_addr(0),
 	_socket(socket),
@@ -30,7 +32,6 @@ Client::Client(const int socket) :
 
 Client::Client(const Client &copy) :
 	User(copy),
-	_host_name(copy._host_name),
 	_is_connected(copy._is_connected),
 	_ip_addr(copy._ip_addr),
 	_socket(copy._socket),
@@ -43,7 +44,6 @@ Client	&Client::operator=(const Client &rhs)
 	if (this != &rhs)
 	{
 		User::operator=(rhs);
-		_host_name = rhs._host_name;
 		_is_connected = rhs._is_connected;
 		_ip_addr = rhs._ip_addr;
 		_socket = rhs._socket;
@@ -96,21 +96,20 @@ void	Client::run(void)
 {
 	char			buffer[BUFFER_SIZE] = {0};
 	t_input			input;
-	EventHandler	dispatcher;
+	EventHandler	handler(this, _server);
 
 	while (_is_connected)
 	{
 		if (recv(_socket, buffer, BUFFER_SIZE - 1, 0) <= 0)
 			break;
 		buffer[BUFFER_SIZE - 1] = '\0';
-		dispatcher.processInput(buffer, *this); //se tutto va bene esegue il cmando
+		handler.processInput(buffer); //se tutto va bene esegue il cmando
 		memset(buffer, 0, BUFFER_SIZE);
 	}
 	_is_connected = false;
-	perror("recv");
+	throw std::runtime_error(strerror(errno));
 }
 //output: {string prefix, enum command, {string param1, string param2, ...}}
-
 void	Client::checkConnection(void) const
 {
 	if (!_is_connected)
@@ -121,19 +120,12 @@ void	Client::checkConnection(void) const
 
 void	Client::authenticate(void)
 {
-	char			buffer[1024];
-	hash<string>	hasher;
-
-    // Prompt user for username
-    send(_socket, "Username: ", 10, 0);
-    recv(_socket, buffer, sizeof(buffer), 0);
-	buffer[strlen(buffer) - 1] = '\0';
-	_username = string(buffer);
+	char					buffer[1024];
 
     // Prompt user for password
     send(_socket, "Password: ", 10, 0);
     recv(_socket, buffer, sizeof(buffer), 0);
-	_pwd_hash = hasher(string(buffer));
+	_pwd_hash = Hasher::hash(string(buffer));
 
     // Check credentials
     if (_server->getPwdHash(_username) != _pwd_hash)
@@ -143,11 +135,6 @@ void	Client::authenticate(void)
 	}
 	else
 		_is_authenticated = true;
-}
-
-const char *Client::UnknownCommandException::what() const throw()
-{
-	return "Unknown command";
 }
 
 const char *Client::NotConnectedException::what() const throw()

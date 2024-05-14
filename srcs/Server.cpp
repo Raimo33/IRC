@@ -6,18 +6,19 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 11:49:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 15:30:38 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Server.hpp"
 
+
 Server::Server() : 
 	_port(DEFAULT_PORT), //default port
 	_clients(),
 	_channels(),
-	_pollfds()
-	_socket(0),
+	_pollfds(),
+	_socket(0)
 {
 	hash<string>	hasher;
 
@@ -87,7 +88,7 @@ void	Server::addClient(void)
 	client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
 	cout << "TCP Connection request from " << client->getIpAddr() << ":" << client->getPortNbr() << endl;
 
-	cout << "SSL handhaking with " << client->getIpAddr() << ":" << client->getPortNbr() << endl;
+	cout << "SSL handshaking with " << client->getIpAddr() << ":" << client->getPortNbr() << endl;
 	handshake(client_socket); //SSL handshake
 
 	//Add client to the list
@@ -105,7 +106,7 @@ void	Server::addClient(void)
 
 void	Server::handshake(int client_socket)
 {
-	//TODO: aggiungere SSL handshake
+	//TODO: SSL handshake	
 }
 
 void	Server::addChannel(const Channel &channel)

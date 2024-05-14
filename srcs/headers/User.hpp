@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 12:11:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 17:58:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 using namespace std;
 
 class Message;
+class PrivateMessage;
 
 class User
 {
@@ -36,7 +37,7 @@ class User
 		void	joinChannel(Channel &channel);
 		void 	joinChannel(Channel &channel, const string &key);
 		void	sendMessage(const Channel &channel, const Message &msg) const;
-		void	sendMessage(const User &user, const Message &msg) const; //aka private message
+		void	sendMessage(const User &receiver, const PrivateMessage &msg) const; //aka private message
 		string	getNickname(void) const;
 		bool	isAuthenticated(void) const;
 		class	TooManyChannelsException;

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 11:59:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 17:49:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 
 # define N_MODES 5
 
-# include <unordered_map>
+# include <map>
 # include <string>
 # include <vector>
 # include <algorithm>
-# include "ChannelOperator.hpp"
+# include <stdint.h>
 
 using namespace std;
 
@@ -45,29 +45,32 @@ class Channel
 		string		getName() const;
 		string		getTopic() const;
 		bool		getMode(const t_channel_modes &mode) const;
-		string		getOperator(const string &nickname) const;
-		string		getMember(const string &nickname) const;
-		string		getRequest(const string &nickname) const;
+		User		&getOperator(const string &nickname) const;
+		User		&getMember(const string &nickname) const;
+		User		&getRequest(const string &nickname) const;
 		uint32_t	getMembersCount() const;
-		void		addRequest(const User &user);
+		void		addRequest(User &user);
 		class 		UserNotInChannelException;
 		class		NotOperatorException;
 		class		NotExistingModeException;
 		class		InvalidCredentialsException;
+		class		MemberNotFoundException;
+		class		OperatorNotFoundException;
+		class		RequestNotFoundException;
 	private:
 		//solo l'operator puo' cambiare modes e topic del canale (operator sara' un friend di Channel)
 		friend class ChannelOperator;
 		void	setName(const string &new_name);
 		void	setTopic(const string &new_topic);
 		void	setMode(const ChannelOperator &op, const t_channel_modes &mode, const bool status);
-		void	addUser(const User &user);
-		void	addOperator(const ChannelOperator &op);
+		void	addUser(User &user);
+		void	addOperator(ChannelOperator &op);
 		void	removeUser(const User &user);
 		string	_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
 		string	_topic;
-		unordered_map<string, const ChannelOperator *>	_operators; // {nickname, operator}
-		unordered_map<string, const User *>	_members; // {nickname, user}
-		unordered_map<string, const User *>	_requests; // {nickname, user}
+		map<string, ChannelOperator *>	_operators; // {nickname, operator}
+		map<string, User *>				_members; // {nickname, user}
+		map<string, User *>				_requests; // {nickname, user}
 		bool	_modes[N_MODES];
 };
 
@@ -84,6 +87,30 @@ class Channel::NotOperatorException : public exception
 };
 
 class Channel::NotExistingModeException : public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class Channel::InvalidCredentialsException : public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class Channel::MemberNotFoundException : public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class Channel::OperatorNotFoundException : public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class Channel::RequestNotFoundException : public exception
 {
 	public:
 		virtual const char	*what() const throw();

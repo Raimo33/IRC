@@ -6,41 +6,32 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:59:00 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/11 16:19:51 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 18:09:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Message.hpp"
 
 Message::Message() :
-	_content((t_msg){0}),
-	_timestamp(0),
-	_sender(NULL) {}
+	IMessage(),
+	_channel(NULL) {}
 	
-Message::Message(const t_msg &content, const User &sender, const Channel &channel) :
-	_content(content),
-	_timestamp(time(NULL)),
-	_sender(&sender),
+Message::Message(const string &content, const User &sender, const Channel &channel) :
+	IMessage(content, sender),
 	_channel(&channel) {}
 
 Message::Message(const Message &copy) :
-	_content(copy._content),
-	_timestamp(copy._timestamp),
-	_sender(copy._sender) {}
+	IMessage(copy),
+	_channel(copy._channel) {}
 
 Message::~Message() {}
 
-t_msg	Message::getContent() const
+Channel &Message::getChannel() const
 {
-	return _content;
+	return *_channel;
 }
 
-time_t	Message::getTimestamp() const
+void Message::setChannel(Channel &channel)
 {
-	return _timestamp;
-}
-
-const User	*Message::getSender() const
-{
-	return _sender;
+	_channel = &channel;
 }
