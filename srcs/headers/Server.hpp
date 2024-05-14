@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 18:32:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 11:49:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ class Server
 
 	private:
 		void	addClient(void);
+		void	handshake(void);
 		void	removeClient(void);
 		uint16_t								_port; //la porta va da 0 a 65535 (2 bytes)
 		size_t									_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server

@@ -1,29 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   irc.cpp                                            :+:      :+:    :+:   */
+/*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 11:41:41 by craimond         ###   ########.fr       */
+/*   Created: 2024/05/14 11:46:06 by craimond          #+#    #+#             */
+/*   Updated: 2024/05/14 11:46:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/irc.hpp"
+#ifndef UTILS_HPP
+# define UTILS_HPP
 
-//primo argv e' la porta, il secondo e' la password
-int main(void)
-{
-	try
-	{
-		Server	server;
+bool	is_channel_prefix(const char c);
 
-		server.run();
-		
-	}
-	catch (const std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
-}
+#endif

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 18:00:01 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 11:49:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void	Server::addClient(void)
 	cout << "TCP Connection request from " << client->getIpAddr() << ":" << client->getPortNbr() << endl;
 
 	cout << "SSL handhaking with " << client->getIpAddr() << ":" << client->getPortNbr() << endl;
-	//TODO: aggiungere SSL handshake
+	handshake(client_socket); //SSL handshake
 
 	//Add client to the list
 	client = new Client(client_socket);
@@ -101,6 +101,11 @@ void	Server::addClient(void)
 	client_thread.detach();
 
 	cout << "Connection established with " << client->getIpAddr() << ":" << client->getPortNbr() << endl;
+}
+
+void	Server::handshake(int client_socket)
+{
+	//TODO: aggiungere SSL handshake
 }
 
 void	Server::addChannel(const Channel &channel)

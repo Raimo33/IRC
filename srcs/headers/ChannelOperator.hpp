@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 17:38:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:00:01 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class ChannelOperator : public User
 		string	channelTopicGet(const Channel &channel) const;
 		void	channelTopicSet(const Channel &channel, const string &new_topic) const;
 		//seleziona un canale, seleziona una modalita', e sceglie se deve essere attiva o meno (true/false)
-		void	channelModeChange(const Channel &channel, const channel_modes &mode, const bool status) const; //questa chiamera' il metodo setMode di Channel
+		void	channelModeChange(const Channel &channel, const t_channel_modes &mode, const bool status) const; //questa chiamera' il metodo setMode di Channel
 };
 
 #endif

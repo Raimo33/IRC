@@ -1,29 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   irc.cpp                                            :+:      :+:    :+:   */
+/*   wrapper_functions.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 11:41:41 by craimond         ###   ########.fr       */
+/*   Created: 2024/05/14 11:47:21 by craimond          #+#    #+#             */
+/*   Updated: 2024/05/14 11:47:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/irc.hpp"
+#ifndef WRAPPER_FUNCTIONS_HPP
+# define WRAPPER_FUNCTIONS_HPP
 
-//primo argv e' la porta, il secondo e' la password
-int main(void)
-{
-	try
-	{
-		Server	server;
+# include "irc.hpp"
 
-		server.run();
-		
-	}
-	catch (const std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
-}
+int	bind_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int	listen_p(int sockfd, int backlog);
+int	accept_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+#endif

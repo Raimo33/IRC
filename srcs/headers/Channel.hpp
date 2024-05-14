@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 18:10:13 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 11:59:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,19 +19,18 @@
 # include <string>
 # include <vector>
 # include <algorithm>
-# include "exceptions.hpp"
 # include "ChannelOperator.hpp"
 
 using namespace std;
 
-typedef enum channel_modes
+typedef enum e_channel_modes
 {
 	MODE_I = 0,
 	MODE_T = 1,
 	MODE_K = 2,
 	MODE_O = 3,
 	MODE_L = 4
-}	e_channel_modes;
+}	t_channel_modes;
 
 class ChannelOperator;
 class User;
@@ -45,7 +44,7 @@ class Channel
 		Channel		&operator=(const Channel &rhs);
 		string		getName() const;
 		string		getTopic() const;
-		bool		getMode(const channel_modes &mode) const;
+		bool		getMode(const t_channel_modes &mode) const;
 		string		getOperator(const string &nickname) const;
 		string		getMember(const string &nickname) const;
 		string		getRequest(const string &nickname) const;
@@ -60,7 +59,7 @@ class Channel
 		friend class ChannelOperator;
 		void	setName(const string &new_name);
 		void	setTopic(const string &new_topic);
-		void	setMode(const ChannelOperator &op, const channel_modes &mode, const bool status);
+		void	setMode(const ChannelOperator &op, const t_channel_modes &mode, const bool status);
 		void	addUser(const User &user);
 		void	addOperator(const ChannelOperator &op);
 		void	removeUser(const User &user);

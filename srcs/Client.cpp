@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/13 18:33:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 11:57:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,12 +202,29 @@ void	Client::processInput(const t_input &input)
 t_input	Client::parseInput(const string &raw_input)
 {
 	t_input	input;
+	string	command;
+	static const unordered_map<string, enum e_command> commands = {
+		{"PRIVMSG", PRIVMSG},
+		{"JOIN", JOIN},
+		{"MODE", MODE},
+		{"PASS", PASS},
+		{"NICK", NICK},
+		{"USER", USER},
+		{"QUIT", QUIT}
 
 	input.prefix = NULL;
 	if (raw_input[0] == ':')
 		input.prefix = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il prefix
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il prefix
-	input.command = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il comando
+	command = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il comando come stringa
+
+	unordered_map<string, enum e_command>::const_iterator it;
+
+	it = commands.find(command);
+	if (it == commands.end())
+		throw UnkonwnCommandException();
+	input.command = commands.at(command); //associo il comando all'enum
+	
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il comando
 	string param;
 	while (raw_input.find(' ') != string::npos) //finchè ci sono parametri
