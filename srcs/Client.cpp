@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 12:13:28 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:23:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,142 +94,20 @@ void	Client::setServer(Server *server)
 
 void	Client::run(void)
 {
-	char	buffer[BUFFER_SIZE] = {0};
-	t_input	input;
+	char			buffer[BUFFER_SIZE] = {0};
+	t_input			input;
+	EventHandler	dispatcher;
 
 	while (_is_connected)
 	{
 		if (recv(_socket, buffer, BUFFER_SIZE - 1, 0) <= 0)
 			break;
 		buffer[BUFFER_SIZE - 1] = '\0';
-		input = parseInput(buffer);
-		processInput(input); //se tutto va bene esegue il cmando
+		dispatcher.processInput(buffer, *this); //se tutto va bene esegue il cmando
 		memset(buffer, 0, BUFFER_SIZE);
 	}
 	_is_connected = false;
 	perror("recv");
-}
-
-void	Client::processInput(const t_input &input)
-{
-	switch (input.command)
-	{
-		case PRIVMSG: //usato sia per messaggi privati che per messaggi nei canali
-			checkConnection();
-			if (is_channel_prefix(input.params[0])) //se il primo carattere e' #, &, + o !
-			{
-				//channel msg PRIVMSG <channel> :<message>
-				Channel channel = _server->getChannel(input.params[0]);
-				if (channel->getMembersCount() <= 2)
-				{
-					//promuovo il messaggio a private message
-					User receiver = channel->getMember(input.params[1]);
-					PrivateMessage *msg = new PrivateMessage(input.params[2], *this, receiver);
-					sendMessage(receiver, msg);
-					break;
-				}
-				Message *msg = new Message(input.params[1], *this, *channel);
-				sendMessage(channel, msg);
-			}
-			else
-			{
-				//private msg PRIVMSG <nickname> :<message>
-				User receiver = _server->getClient(input.params[0]);
-				PrivateMessage *msg = new PrivateMessage(input.params[1], *this, receiver);	
-				sendMessage(receiver, msg);
-			}
-			break;
-		//JOIN <channel1,channel2,channel3> <key1,key2,key3>
-		case JOIN:
-			checkConnection();
-			vector<string> channels = split(input.params[0], ','); //se non e' in cpp98 mettiamolo in utils
-			vector<string> keys = split(input.params[1], ',');
-			
-			for (size_t i = 0; i < channels.size(); i++)
-			{
-				Channel *channel = _server->getChannel(channels[i]);
-				if (i < keys.size())
-					joinChannel(*channel, keys[i]);
-				else
-					joinChannel(*channel);
-			};
-			break;
-		case MODE:
-			checkConnection();
-			//TODO
-			break;
-		//PASS <connectionpassword>
-		case PASS: //viene usata dagli utenti per autenticarsi
-			hash<string>	hasher;
-			
-			if (_is_connected)
-				throw AlreadyConnectedException();
-			if (hasher(input.params[0]) != _server->getPwdHash())
-				throw InvalidPasswordException();
-			_is_connected = true;
-			authenticate(); //una volta connesso, l'utente deve autenticarsi
-			break;
-		//NICK <nickname>
-		case NICK:
-			checkConnection();
-			setNickname(input.params[0]);
-			break;
-		//USER <username>
-		case USER:
-			checkConnection();
-			setUsername(input.params[0]);
-			break;
-		//QUIT
-		case QUIT:
-			//TODO
-			break;
-		default:
-			throw UnkonwnCommandException();
-	}
-}
-
-//input: ":<prefix> <command> <params> <crlf>"
-t_input	Client::parseInput(string &raw_input)
-{
-	t_input	input;
-	string	command;
-	static const unordered_map<string, t_cmd> commands = {
-		{"PRIVMSG", PRIVMSG},
-		{"JOIN", JOIN},
-		{"MODE", MODE},
-		{"PASS", PASS},
-		{"NICK", NICK},
-		{"USER", USER},
-		{"QUIT", QUIT}
-	};
-
-	input.prefix = NULL;
-	if (raw_input[0] == ':')
-		input.prefix = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il prefix
-	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il prefix
-	command = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il comando come stringa
-
-	unordered_map<string, t_cmd>::const_iterator it;
-
-	it = commands.find(command);
-	if (it == commands.end())
-		throw UnkonwnCommandException();
-	input.command = commands.at(command); //associo il comando all'enum
-	
-	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il comando
-	string param;
-	while (raw_input.find(' ') != string::npos) //finchè ci sono parametri
-	{
-		if (raw_input[0] == ':') //se il parametro inizia con ':' allora tutto ciò che segue è il parametro (anche spazi, caratteri speciali)
-		{
-			param = raw_input.substr(1); //prendo tutto il resto apparte il ':'
-			input.params.push_back(param);
-			break;
-		}
-		param = raw_input.substr(0, raw_input.find(' ')); //prendo il parametro
-		input.params.push_back(param); //aggiungo il parametro al vettore
-		raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il parametro
-	}
 }
 //output: {string prefix, enum command, {string param1, string param2, ...}}
 
