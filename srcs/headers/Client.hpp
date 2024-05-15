@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:35:38 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 16:55:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 15:39:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include <string>
 # include <vector>
 # include <errno.h>
-# include "hasher.hpp"
+# include "Hasher.hpp"
 
 # include "User.hpp"
 
@@ -52,14 +52,15 @@ class Client : public User
 		~Client();
 		Client	&operator=(const Client &rhs);
 		bool		getIsConnected() const;
-		uint32_t	getIpAddr() const;
+		uint16_t	getPort() const;
+		string		getIpAddr() const;
 		int			getSocket() const;
 		Server		*getServer() const;
 		void		setIsConnected(const bool is_connected);
-		void		setIpAddr(const uint32_t ip_addr);
+		void		setPort(const uint16_t port);
+		void		setIpAddr(const string ip_addr);
 		void		setSocket(const int socket);
 		void		setServer(Server *server);
-		void		run(void);
 		void		checkConnection(void) const;
 		void		authenticate(void);
 		class 		NotConnectedException;
@@ -67,7 +68,8 @@ class Client : public User
 		class		InvalidPasswordException;
 	private:
 		bool		_is_connected;
-		uint32_t	_ip_addr; //aka hostname
+		uint16_t	_port;
+		string		_ip_addr; //aka hostname
 		int			_socket;
 		Server		*_server;
 };

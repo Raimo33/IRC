@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 17:39:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 15:43:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "headers/Server.hpp"
 # include "headers/EventHandler.hpp"
 
-Client::Client() :
+Client::Client(void) :
 	User(),
 	_is_connected(false),
 	_ip_addr(0),
@@ -52,22 +52,27 @@ Client	&Client::operator=(const Client &rhs)
 	return *this;
 }
 
-bool	Client::getIsConnected() const
+bool	Client::getIsConnected(void) const
 {
 	return _is_connected;
 }
 
-uint32_t	Client::getIpAddr() const
+uint16_t	Client::getPort(void) const
+{
+	return _port;
+}
+
+string	Client::getIpAddr(void) const
 {
 	return _ip_addr;
 }
 
-int		Client::getSocket() const
+int		Client::getSocket(void) const
 {
 	return _socket;
 }
 
-Server	*Client::getServer() const
+Server	*Client::getServer(void) const
 {
 	return _server;
 }
@@ -77,7 +82,12 @@ void	Client::setIsConnected(const bool is_connected)
 	_is_connected = is_connected;
 }
 
-void	Client::setIpAddr(const uint32_t ip_addr)
+void	Client::setPort(const uint16_t port)
+{
+	_port = port;
+}
+
+void	Client::setIpAddr(const string ip_addr)
 {
 	_ip_addr = ip_addr;
 }
@@ -92,23 +102,6 @@ void	Client::setServer(Server *server)
 	_server = server;
 }
 
-void	Client::run(void)
-{
-	char			buffer[BUFFER_SIZE] = {0};
-	t_input			input;
-	EventHandler	handler(this, _server);
-
-	while (_is_connected)
-	{
-		if (recv(_socket, buffer, BUFFER_SIZE - 1, 0) <= 0)
-			break;
-		buffer[BUFFER_SIZE - 1] = '\0';
-		handler.processInput(buffer); //se tutto va bene esegue il cmando
-		memset(buffer, 0, BUFFER_SIZE);
-	}
-	_is_connected = false;
-	throw std::runtime_error(strerror(errno));
-}
 //output: {string prefix, enum command, {string param1, string param2, ...}}
 void	Client::checkConnection(void) const
 {
@@ -128,7 +121,7 @@ void	Client::authenticate(void)
 	_pwd_hash = Hasher::hash(string(buffer));
 
     // Check credentials
-    if (_server->getPwdHash(_username) != _pwd_hash)
+    if (_server->getUserPassword(_username) != _pwd_hash)
 	{
 		send(_socket, "Invalid credentials\n", 20, 0);
 		_is_authenticated = false;
@@ -137,17 +130,17 @@ void	Client::authenticate(void)
 		_is_authenticated = true;
 }
 
-const char *Client::NotConnectedException::what() const throw()
+const char *Client::NotConnectedException::what(void) const throw()
 {
 	return "User is not connected";
 }
 
-const char *Client::AlreadyConnectedException::what() const throw()
+const char *Client::AlreadyConnectedException::what(void) const throw()
 {
 	return "User is already connected";
 }
 
-const char *Client::InvalidPasswordException::what() const throw()
+const char *Client::InvalidPasswordException::what(void) const throw()
 {
 	return "Invalid password";
 }

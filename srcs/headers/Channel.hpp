@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 17:49:27 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 14:57:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,17 +38,18 @@ class User;
 class Channel
 {
 	public:
-		Channel();
+		Channel(void);
 		Channel(const Channel &copy);
-		~Channel();
+		~Channel(void);
 		Channel		&operator=(const Channel &rhs);
-		string		getName() const;
-		string		getTopic() const;
+		string		getName(void) const;
+		string		getKey(void) const;
+		string		getTopic(void) const;
 		bool		getMode(const t_channel_modes &mode) const;
 		User		&getOperator(const string &nickname) const;
 		User		&getMember(const string &nickname) const;
 		User		&getRequest(const string &nickname) const;
-		uint32_t	getMembersCount() const;
+		uint32_t	getMembersCount(void) const;
 		void		addRequest(User &user);
 		class 		UserNotInChannelException;
 		class		NotOperatorException;
@@ -60,18 +61,23 @@ class Channel
 	private:
 		//solo l'operator puo' cambiare modes e topic del canale (operator sara' un friend di Channel)
 		friend class ChannelOperator;
+		Channel(const string &name, const string &key, const string &topic);
 		void	setName(const string &new_name);
+		void	setKey(const string &new_key);
 		void	setTopic(const string &new_topic);
 		void	setMode(const ChannelOperator &op, const t_channel_modes &mode, const bool status);
 		void	addUser(User &user);
 		void	addOperator(ChannelOperator &op);
 		void	removeUser(const User &user);
-		string	_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
-		string	_topic;
+		string							_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
+		string							_key;
+		string							_topic;
 		map<string, ChannelOperator *>	_operators; // {nickname, operator}
 		map<string, User *>				_members; // {nickname, user}
 		map<string, User *>				_requests; // {nickname, user}
-		bool	_modes[N_MODES];
+		bool							_modes[N_MODES];
+		
+		
 };
 
 class Channel::UserNotInChannelException : public exception

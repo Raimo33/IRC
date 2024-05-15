@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 12:11:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 16:04:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,16 @@ void	User::joinChannel(Channel &channel, const string &key)
 		_channels[channel.getName()] = &channel;
 	else
 		throw InvalidCredentialsException();
+}
+
+void	User::sendMessage(User &receiver, Message &msg)
+{
+	//TODO implementare con send
+}
+
+void	User::sendMessage(Channel &channel, Message &msg)
+{
+	//TODO implementare con send
 }
 
 const char *User::TooManyChannelsException::what() const throw()

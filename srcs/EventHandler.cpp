@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 18:02:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 16:31:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,24 @@
 #include "headers/Server.hpp"
 #include "headers/PrivateMessage.hpp"
 #include "headers/Message.hpp"
+#include "headers/Channel.hpp"
 
-EventHandler::EventHandler() : _server(NULL) {}
+EventHandler::EventHandler() :
+	_client(NULL),
+	_server(NULL)
+{
+	_commands["PRIVMSG"] = PRIVMSG;
+	_commands["JOIN"] = JOIN;
+	_commands["MODE"] = MODE;
+	_commands["PASS"] = PASS;
+	_commands["NICK"] = NICK;
+	_commands["USER"] = USER;
+	_commands["QUIT"] = QUIT;
+}
 
 EventHandler::EventHandler(const EventHandler &copy) :
+	_commands(copy._commands),
+	_client(copy._client),
 	_server(copy._server) {}
 
 EventHandler::~EventHandler() {}
@@ -25,7 +39,11 @@ EventHandler::~EventHandler() {}
 EventHandler	&EventHandler::operator=(const EventHandler &rhs)
 {
 	if (this != &rhs)
+	{
+		_commands = rhs._commands;
+		_client = rhs._client;
 		_server = rhs._server;
+	}
 	return *this;
 }
 
@@ -34,15 +52,6 @@ t_input	EventHandler::parseInput(string &raw_input) const
 {
 	t_input	input;
 	string	command;
-	static const map<string, t_cmd> commands = {
-		{"PRIVMSG", PRIVMSG},
-		{"JOIN", JOIN},
-		{"MODE", MODE},
-		{"PASS", PASS},
-		{"NICK", NICK},
-		{"USER", USER},
-		{"QUIT", QUIT}
-	};
 
 	input.prefix = "";
 	if (raw_input[0] == ':')
@@ -52,10 +61,10 @@ t_input	EventHandler::parseInput(string &raw_input) const
 
 	map<string, t_cmd>::const_iterator it;
 
-	it = commands.find(command);
-	if (it == commands.end())
+	it = _commands.find(command);
+	if (it == _commands.end())
 		throw UnknownCommandException();
-	input.command = commands.at(command); //associo il comando all'enum
+	input.command = _commands.at(command); //associo il comando all'enum
 
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il comando
 	string param;
@@ -111,7 +120,8 @@ void	EventHandler::processInput(string raw_input)
 			break;
 		//QUIT
 		case QUIT:
-			//TODO
+			//TODO forse va tolto il client anche da tutti i canali di cui fa parte
+			_server->removeClient(_client);
 			break;
 		default:
 			throw UnknownCommandException();
@@ -162,11 +172,9 @@ void EventHandler::executeCommandJoin(const vector<string> &params)
 
 void EventHandler::executeCommandPass(const vector<string> &params)
 {
-	hash<string>	hasher;
-
 	if (_client->getIsConnected())
 		throw Client::AlreadyConnectedException();
-	if (hasher(params[0]) != _server->getPwdHash())
+	if (Hasher::hash(params[0]) != _server->getPwdHash())
 		throw Client::InvalidPasswordException();
 	_client->setIsConnected(true);
 }

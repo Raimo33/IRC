@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 17:49:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 14:43:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,19 @@ Channel::Channel() :
 	_members(),
 	_requests(),
 	_modes() {}
+
+Channel::Channel(const string &name, const string &key, const string &topic) :
+	_name(name),
+	_key(key),
+	_topic(topic),
+	_operators(),
+	_members(),
+	_requests(),
+	_modes()
+{
+	for (int i = 0; i < N_MODES; i++)
+		_modes[i] = false;
+}
 
 Channel::Channel(const Channel &copy) :
 	_name(copy._name),
@@ -55,6 +68,11 @@ string	Channel::getName() const
 	return _name;
 }
 
+string	Channel::getKey() const
+{
+	return _key;
+}
+
 string	Channel::getTopic() const
 {
 	return _topic;
@@ -86,6 +104,16 @@ User	&Channel::getRequest(const string &nickname) const
 	if (_requests.at(nickname) == NULL)
 		throw RequestNotFoundException();
 	return *_requests.at(nickname);
+}
+
+void	Channel::setName(const string &new_name)
+{
+	_name = new_name;
+}
+
+void	Channel::setKey(const string &new_key)
+{
+	_key = new_key;
 }
 
 void	Channel::setTopic(const string &new_topic)

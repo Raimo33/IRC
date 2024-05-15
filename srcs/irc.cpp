@@ -6,23 +6,46 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 16:32:51 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 16:16:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Server.hpp"
 
+static void	check_args(const int argc, const char **argv);
+static void	get_args(uint16_t *port_nbr, string *password, const char **argv);
+
 //primo argv e' la porta, il secondo e' la password
-int main(void)
+int main(const int argc, const char **argv)
 {
 	try
 	{
-		Server	server;
+		uint16_t	port_nbr;
+		string		password;
 
+		check_args(argc, argv);
+		get_args(&port_nbr, &password, argv);
+
+		Server	server(port_nbr, password);
+
+		server.setup();
 		server.run();
 	}
-	catch (const std::exception &e)
+	catch (const exception &e)
 	{
-		std::cerr << e.what() << std::endl;
+		cerr << e.what() << endl;
 	}
+}
+
+static void	check_args(const int argc, const char **argv)
+{
+	if (argc != 3)
+		throw runtime_error("Usage: ./irc <port> <password>");
+	(void)argv;
+}
+
+static void	get_args(uint16_t *port_nbr, string *password, const char **argv)
+{
+	*port_nbr = atoi(argv[1]);
+	*password = argv[2];
 }

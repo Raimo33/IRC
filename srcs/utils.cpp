@@ -6,11 +6,11 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 16:25:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 14:43:54 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "utils.hpp"
+#include "headers/utils.hpp"
 
 bool	is_channel_prefix(const char c)
 {

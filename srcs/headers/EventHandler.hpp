@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 17:40:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 14:50:40 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,9 @@ class EventHandler
 		void executeCommandPass(const vector<string> &params);
 		void executeCommandQuit(const vector<string> &params);
 		void executeCommandUser(const vector<string> &params);
-		Client		*_client;
-		Server		*_server;
+		map<string, t_cmd>	_commands;
+		Client				*_client;
+		Server				*_server;
 };
 
 class EventHandler::UnknownCommandException : public exception

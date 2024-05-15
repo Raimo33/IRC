@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 18:02:08 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/15 16:26:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,21 @@
 
 # include <vector>
 # include <string>
+# include <cstring>
 # include <map>
 # include <poll.h>
 # include <netinet/in.h>
 # include <iostream>
+# include <arpa/inet.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <stdexcept>
+# include <sstream>
 
 # include "wrappers.hpp"
 # include "Channel.hpp"
 
-# define PASSWORD "beetlejuice"
-# define DEFAULT_PORT 8080
-# define BUFFER_SIZE 512
+# define BUFFER_SIZE 1024
 
 using namespace std;
 
@@ -35,29 +39,31 @@ class Client;
 class Server
 {
 	public:
-		Server();
-		// Server(uint16_t port_no, string &password);
-		Server(const uint16_t port_no);
+		Server(const uint16_t port_no, const string &password);
 		Server(const Server &copy);
 		~Server();
 		Server	&operator=(const Server &rhs);
+		void	setup(void);
 		void	run(void);
-		void	addChannel(const Channel &channel);
+		void	addChannel(Channel &channel);
 		Channel	&getChannel(const string &name) const;
 		size_t	getPwdHash(void) const;
+		size_t	getUserPassword(const string &username) const;
 		Client	&getClient(const string &username) const;
+		void	removeClient(Client *client);
 
 	private:
 		void	addClient(void);
-		void	handshake(void);
-		void	removeClient(void);
-		uint16_t								_port; //la porta va da 0 a 65535 (2 bytes)
-		size_t									_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
-		map<string, size_t>						_credentials; // {username, pwd_hash}
-		vector<Client *>						_clients;
-		map<string, const Channel *>			_channels;
-		vector<pollfd>							_pollfds;
-		int										_socket;
+		void	handleClient(Client *client, size_t *i);
+		void	handshake(const int client_socket) const;
+		void	configureNonBlocking(const int client_socket) const;
+		uint16_t				_port; //la porta va da 0 a 65535 (2 bytes)
+		size_t					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
+		map<string, size_t>		_credentials; // {username, pwd_hash}
+		vector<Client *>		_clients;
+		map<string, Channel *>	_channels;
+		vector<pollfd>			_pollfds;
+		int						_socket;
 };
 
 #endif
