@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 18:15:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 18:28:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,16 +166,8 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{
 		//channel msg PRIVMSG <channel> :<message>
-		Channel channel;
 
-		try
-		{
-			channel = _server->getChannel(params[0]);
-		}
-		catch (Server::ChannelNotFoundException &e)
-		{
-			//TODO create channel (aggiungerlo alla lista di canali del server)
-		}
+		Channel channel = _server->getChannel(params[0]);
 		if (channel.getMembersCount() <= 2)
 		{
 			//promuovo il messaggio a private message
@@ -216,7 +208,17 @@ void EventHandler::executeCommandJoin(const vector<string> &params)
 
 	for (size_t i = 0; i < channels.size(); i++)
 	{
-		Channel channel = _server->getChannel(channels[i]);
+		Channel channel;
+
+		try
+		{
+			channel = _server->getChannel(channels[i]);
+		}
+		catch (Server::ChannelNotFoundException &e)
+		{
+			//TODO create channel (aggiungerlo alla lista di canali del server)
+			//TODO capire la questione delle chiavi, se il canale nuovo deve essere inizializzato con la chiave nel caso in cui l'utente la scriva
+		}
 		if (i < keys.size())
 			_client->joinChannel(channel, keys[i]);
 		else
