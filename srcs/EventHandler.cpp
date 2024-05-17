@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 16:31:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 16:13:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,22 @@
 #include "headers/Message.hpp"
 #include "headers/Channel.hpp"
 
-EventHandler::EventHandler() :
+EventHandler::EventHandler(void) :
 	_client(NULL),
 	_server(NULL)
+{
+	_commands["PRIVMSG"] = PRIVMSG;
+	_commands["JOIN"] = JOIN;
+	_commands["MODE"] = MODE;
+	_commands["PASS"] = PASS;
+	_commands["NICK"] = NICK;
+	_commands["USER"] = USER;
+	_commands["QUIT"] = QUIT;
+}
+
+EventHandler::EventHandler(Client *client, Server *server) :
+	_client(client),
+	_server(server)
 {
 	_commands["PRIVMSG"] = PRIVMSG;
 	_commands["JOIN"] = JOIN;
@@ -34,7 +47,7 @@ EventHandler::EventHandler(const EventHandler &copy) :
 	_client(copy._client),
 	_server(copy._server) {}
 
-EventHandler::~EventHandler() {}
+EventHandler::~EventHandler(void) {}
 
 EventHandler	&EventHandler::operator=(const EventHandler &rhs)
 {
@@ -121,11 +134,31 @@ void	EventHandler::processInput(string raw_input)
 		//QUIT
 		case QUIT:
 			//TODO forse va tolto il client anche da tutti i canali di cui fa parte
-			_server->removeClient(_client);
+			executeCommandQuit(input.params);
 			break;
 		default:
 			throw UnknownCommandException();
 	}
+}
+
+void EventHandler::setClient(Client *client)
+{
+	_client = client;
+}
+
+void EventHandler::setServer(Server *server)
+{
+	_server = server;
+}
+
+Client	&EventHandler::getClient(void) const
+{
+	return *_client;
+}
+
+Server	&EventHandler::getServer(void) const
+{
+	return *_server;
 }
 
 void EventHandler::executeCommandPrivmsg(const vector<string> &params)
@@ -152,6 +185,12 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 		PrivateMessage *msg = new PrivateMessage(params[1], *_client, receiver);	
 		_client->sendMessage(receiver, *msg);
 	}
+}
+
+void EventHandler::executeCommandMode(const vector<string> &params)
+{
+	//TODO
+	(void)params;
 }
 
 void EventHandler::executeCommandJoin(const vector<string> &params)
@@ -183,6 +222,12 @@ void EventHandler::executeCommandNick(const vector<string> &params)
 {
 	//se non e' un nickname gia' in uso
 	_client->setNickname(params[0]);
+}
+
+void EventHandler::executeCommandQuit(const vector<string> &params)
+{
+	(void)params;
+	_server->removeClient(_client);
 }
 
 void EventHandler::executeCommandUser(const vector<string> &params)

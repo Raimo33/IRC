@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 16:29:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 16:14:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Server::Server(const Server &copy) :
 	_pollfds(copy._pollfds),
 	_socket(copy._socket) {}
 
-Server::~Server() {}
+Server::~Server(void) {}
 
 Server	&Server::operator=(const Server &rhs)
 {
@@ -150,10 +150,19 @@ void	Server::addClient(void)
 
 void	Server::removeClient(Client *client)
 {
-		shutdown_p(client->getSocket(), SHUT_RDWR);
-		close_p(client->getSocket());
-		_pollfds.erase(remove(_pollfds.begin(), _pollfds.end(), pollfd{client->getSocket(), POLLIN}), _pollfds.end());
-		_clients.erase(remove(_clients.begin(), _clients.end(), *client), _clients.end());
+		int socket = client->getSocket();
+
+		shutdown_p(socket, SHUT_RDWR);
+		close_p(socket);
+		for (std::vector<pollfd>::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
+		{
+			if (it->fd == socket)
+			{
+				_pollfds.erase(it);
+				break;
+			}
+		}
+		_clients.erase(remove(_clients.begin(), _clients.end(), client), _clients.end());
 		delete client;
 }
 
@@ -180,6 +189,16 @@ void	Server::addChannel(Channel &channel)
 	_channels[channel.getName()] = &channel;
 }
 
+Client	&Server::getClient(const string &nickname) const
+{
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->getNickname() == nickname)
+			return *_clients[i];
+	}
+	throw ClientNotFoundException();
+}
+
 Channel	&Server::getChannel(const string &name) const
 {
 	return *(_channels.at(name));
@@ -193,4 +212,9 @@ size_t	Server::getPwdHash(void) const
 size_t	Server::getUserPassword(const string &username) const
 {
 	return _credentials.at(username);
+}
+
+const char	*Server::ClientNotFoundException::what() const throw()
+{
+	return "Client not found";
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 16:45:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 15:43:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,16 +34,23 @@ class ChannelOperator : public User
 		ChannelOperator &operator=(const ChannelOperator &rhs);
 
 		void	channelKick(const User &user, Channel &channel) const;
-		void	channelInvite(const User &user, const Channel &channel) const;
+		void	channelInvite(User &user, Channel &channel) const;
 		string	channelTopicGet(const Channel &channel) const;
-		void	channelTopicSet(const Channel &channel, const string &new_topic) const;
+		void	channelTopicSet(Channel &channel, const string &new_topic) const;
 		//seleziona un canale, seleziona una modalita', e sceglie se deve essere attiva o meno (true/false)
-		void	channelModeChange(const Channel &channel, const t_channel_modes &mode, const bool status) const; //questa chiamera' il metodo setMode di Channel
-		
+		void	channelModeChange(Channel &channel, const t_channel_modes &mode, const bool status) const; //questa chiamera' il metodo setMode di Channel
+
 		class	UserNotInChannelException;
+		class	OperatorNotInChannelException;
 };
 
 class ChannelOperator::UserNotInChannelException: public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class ChannelOperator::OperatorNotInChannelException: public exception
 {
 	public:
 		virtual const char	*what() const throw();

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:35:38 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 15:39:28 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 15:46:00 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,16 +46,16 @@ class Server;
 class Client : public User
 {
 	public:
-		Client();
+		Client(void);
 		Client(const int socket);
 		Client(const Client &copy);
-		~Client();
+		~Client(void);
 		Client	&operator=(const Client &rhs);
-		bool		getIsConnected() const;
-		uint16_t	getPort() const;
-		string		getIpAddr() const;
-		int			getSocket() const;
-		Server		*getServer() const;
+		bool		getIsConnected(void) const;
+		uint16_t	getPort(void) const;
+		string		getIpAddr(void) const;
+		int			getSocket(void) const;
+		Server		*getServer(void) const;
 		void		setIsConnected(const bool is_connected);
 		void		setPort(const uint16_t port);
 		void		setIpAddr(const string ip_addr);

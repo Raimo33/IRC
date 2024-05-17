@@ -6,13 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 16:04:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 16:17:08 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/User.hpp"
 
-User::User() :
+User::User(void) :
 	_channels(),
 	_nickname(""),
 	_username(""),
@@ -26,7 +26,7 @@ User::User(const User &copy) :
 	_pwd_hash(copy._pwd_hash),
 	_is_authenticated(copy._is_authenticated) {}
 
-User::~User() {}
+User::~User(void) {}
 
 User &User::operator=(const User &rhs)
 {
@@ -72,14 +72,28 @@ void	User::joinChannel(Channel &channel, const string &key)
 		throw InvalidCredentialsException();
 }
 
-void	User::sendMessage(User &receiver, Message &msg)
+void	User::sendMessage(const Channel &channel, const Message &msg) const
 {
 	//TODO implementare con send
+	(void)channel;
+	(void)msg;
 }
 
-void	User::sendMessage(Channel &channel, Message &msg)
+void	User::sendMessage(const User &receiver, const PrivateMessage &msg) const
 {
 	//TODO implementare con send
+	(void)receiver;
+	(void)msg;
+}
+
+string	User::getNickname(void) const
+{
+	return _nickname;
+}
+
+bool	User::isAuthenticated(void) const
+{
+	return _is_authenticated;
 }
 
 const char *User::TooManyChannelsException::what() const throw()

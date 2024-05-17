@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 18:09:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 18:14:01 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 15:49:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ IMessage::IMessage(void) :
 	_timestamp(0),
 	_sender(NULL) {}
 
-IMessage::IMessage(const string &content, const User &sender) :
+IMessage::IMessage(const string &content, User &sender) :
 	_content(content),
 	_timestamp(time(NULL)),
 	_sender(&sender) {}

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/14 17:58:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 16:16:39 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,9 @@ class PrivateMessage;
 class User
 {
 	public:
-		User();
+		User(void);
 		User(const User &copy);
-		~User();
+		~User(void);
 		User	&operator=(const User &rhs);
 
 		void	setNickname(const string &nickname);

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 14:57:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 16:08:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class Channel
 {
 	public:
 		Channel(void);
+		Channel(const string &name, const string &key, const string &topic);
 		Channel(const Channel &copy);
 		~Channel(void);
 		Channel		&operator=(const Channel &rhs);
@@ -61,11 +62,11 @@ class Channel
 	private:
 		//solo l'operator puo' cambiare modes e topic del canale (operator sara' un friend di Channel)
 		friend class ChannelOperator;
-		Channel(const string &name, const string &key, const string &topic);
+		// Channel(const string &name, const string &key, const string &topic);
 		void	setName(const string &new_name);
 		void	setKey(const string &new_key);
 		void	setTopic(const string &new_topic);
-		void	setMode(const ChannelOperator &op, const t_channel_modes &mode, const bool status);
+		void	setMode(const t_channel_modes &mode, const bool status);
 		void	addUser(User &user);
 		void	addOperator(ChannelOperator &op);
 		void	removeUser(const User &user);
@@ -76,8 +77,6 @@ class Channel
 		map<string, User *>				_members; // {nickname, user}
 		map<string, User *>				_requests; // {nickname, user}
 		bool							_modes[N_MODES];
-		
-		
 };
 
 class Channel::UserNotInChannelException : public exception

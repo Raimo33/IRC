@@ -6,13 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:57:54 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 14:56:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 16:19:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Hasher.hpp"
 
-MD5::MD5()
+MD5::MD5(void)
 {
 	init();
 }
@@ -57,6 +57,10 @@ void MD5::update(const unsigned char *input, size_type length)
     memcpy(&buffer[index], &input[i], length - i);
 }
 
+void MD5::update(const char *input, size_type length)
+{
+	update((const unsigned char *)input, length);
+}
 
 MD5& MD5::finalize(void)
 {
@@ -76,7 +80,7 @@ MD5& MD5::finalize(void)
     return *this;
 }
 
-string MD5::hexdigest() const
+string MD5::hexdigest(void) const
 {
     if (!finalized)
         return "";

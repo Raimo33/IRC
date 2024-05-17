@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 14:43:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 15:43:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "headers/User.hpp"
 #include "headers/ChannelOperator.hpp"
 
-Channel::Channel() :
+Channel::Channel(void) :
 	_name(""),
 	_topic(""),
 	_operators(),
@@ -106,6 +106,11 @@ User	&Channel::getRequest(const string &nickname) const
 	return *_requests.at(nickname);
 }
 
+uint32_t	Channel::getMembersCount() const
+{
+	return _members.size();
+}
+
 void	Channel::setName(const string &new_name)
 {
 	_name = new_name;
@@ -121,14 +126,11 @@ void	Channel::setTopic(const string &new_topic)
 	_topic = new_topic;
 }
 
-void	Channel::setMode(const ChannelOperator &op, const t_channel_modes &mode, const bool status)
+void	Channel::setMode(const t_channel_modes &mode, const bool status)
 {
 	if (mode < 0 || mode >= N_MODES) //modalita' sbagliata
 		throw NotExistingModeException();
-	if (_operators[op.getNickname()] == NULL) //se l'user non e' un operatore di questo canale
-		throw NotOperatorException();
-	else
-		_modes[mode] = status;
+	_modes[mode] = status;
 }
 
 void	Channel::addUser(User &user)

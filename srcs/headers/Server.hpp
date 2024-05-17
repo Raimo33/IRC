@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 16:26:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 16:14:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,9 @@ class Server
 		Channel	&getChannel(const string &name) const;
 		size_t	getPwdHash(void) const;
 		size_t	getUserPassword(const string &username) const;
-		Client	&getClient(const string &username) const;
+		Client	&getClient(const string &nickname) const;
 		void	removeClient(Client *client);
-
+		class	ClientNotFoundException;
 	private:
 		void	addClient(void);
 		void	handleClient(Client *client, size_t *i);
@@ -64,6 +64,12 @@ class Server
 		map<string, Channel *>	_channels;
 		vector<pollfd>			_pollfds;
 		int						_socket;
+};
+
+class Server::ClientNotFoundException : public exception
+{
+	public:
+		virtual const char *what() const throw();
 };
 
 #endif
