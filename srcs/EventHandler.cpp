@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 16:13:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 18:15:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,24 +166,39 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{
 		//channel msg PRIVMSG <channel> :<message>
-		Channel channel = _server->getChannel(params[0]);
+		Channel channel;
+
+		try
+		{
+			channel = _server->getChannel(params[0]);
+		}
+		catch (Server::ChannelNotFoundException &e)
+		{
+			//TODO create channel (aggiungerlo alla lista di canali del server)
+		}
 		if (channel.getMembersCount() <= 2)
 		{
 			//promuovo il messaggio a private message
-			User receiver = channel.getMember(params[1]);
+			User receiver;
+
+			receiver = *channel.getUsers().begin()->second;
+			if (receiver.getNickname() == _client->getNickname())
+				receiver = *channel.getUsers().rbegin()->second;
+			if (receiver.getNickname() == _client->getNickname())
+				throw Server::CantSendMessageToYourselfException();
 			PrivateMessage *msg = new PrivateMessage(params[2], *_client, receiver);
-			_client->sendMessage(receiver, *msg);
+			deliverMessage(receiver, *msg);
 			return ;
 		}
 		Message *msg = new Message(params[1], *_client, channel);
-		_client->sendMessage(channel, *msg);
+		deliverMessage(channel, *msg);
 	}
 	else
 	{
 		//private msg PRIVMSG <nickname> :<message>
-		User receiver = _server->getClient(params[0]);
-		PrivateMessage *msg = new PrivateMessage(params[1], *_client, receiver);	
-		_client->sendMessage(receiver, *msg);
+		User receiver = _server->getUser(params[0]);
+		PrivateMessage *msg = new PrivateMessage(params[1], *_client, receiver);
+		deliverMessage(receiver, *msg);
 	}
 }
 
@@ -235,6 +250,37 @@ void EventHandler::executeCommandUser(const vector<string> &params)
 	//se non e' un username gia' in uso
 	_client->setUsername(params[0]);
 	_client->authenticate();
+	//TODO aggiungere l'utente alla lista di utenti del server
+	//TODO aggiungere le credenziali dell'user alla lista di credenziali del server
+}
+
+void	EventHandler::deliverMessage(const Channel &channel, const Message &msg) const
+{
+    std::map<std::string, User*> users = channel.getUsers();
+
+    for (std::map<std::string, User*>::const_iterator it = users.begin(); it != users.end(); ++it) {
+        sendBufferedString(*it->second, msg.getContent());
+    }
+}
+
+void	EventHandler::deliverMessage(const User &receiver, const PrivateMessage &msg) const
+{
+	sendBufferedString(receiver, msg.getContent());
+}
+
+void	EventHandler::sendBufferedString(const User &receiver, const string &string) const
+{
+	const char		*raw_msg = string.c_str();
+	int				socket = _server->getClient(receiver).getSocket();
+	const size_t	total_len = strlen(raw_msg);
+	size_t			chars_sent = 0;
+
+	while (chars_sent < total_len)
+	{
+		size_t len = min(total_len - chars_sent, BUFFER_SIZE - 1);
+		send(socket, raw_msg + chars_sent, len, 0);
+		chars_sent += len;
+	}
 }
 
 const char *EventHandler::UnknownCommandException::what() const throw()

@@ -6,11 +6,16 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 16:17:08 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 17:23:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/User.hpp"
+#include "headers/Channel.hpp"
+#include "headers/Message.hpp"
+#include "headers/PrivateMessage.hpp"
+#include "headers/Server.hpp"
+#include "headers/utils.hpp"
 
 User::User(void) :
 	_channels(),
@@ -72,23 +77,14 @@ void	User::joinChannel(Channel &channel, const string &key)
 		throw InvalidCredentialsException();
 }
 
-void	User::sendMessage(const Channel &channel, const Message &msg) const
-{
-	//TODO implementare con send
-	(void)channel;
-	(void)msg;
-}
-
-void	User::sendMessage(const User &receiver, const PrivateMessage &msg) const
-{
-	//TODO implementare con send
-	(void)receiver;
-	(void)msg;
-}
-
 string	User::getNickname(void) const
 {
 	return _nickname;
+}
+
+string	User::getUsername(void) const
+{
+	return _username;
 }
 
 bool	User::isAuthenticated(void) const

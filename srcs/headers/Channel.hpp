@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 16:08:24 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 17:42:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ class Channel
 		User		&getMember(const string &nickname) const;
 		User		&getRequest(const string &nickname) const;
 		uint32_t	getMembersCount(void) const;
+		map<string, User *>	getUsers(void) const;
 		void		addRequest(User &user);
 		class 		UserNotInChannelException;
 		class		NotOperatorException;
@@ -120,5 +121,6 @@ class Channel::RequestNotFoundException : public exception
 	public:
 		virtual const char	*what() const throw();
 };
+
 
 #endif

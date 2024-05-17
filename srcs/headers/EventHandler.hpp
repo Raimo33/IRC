@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 15:48:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 17:50:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ class EventHandler
 		void 	setServer(Server *server);
 		Client	&getClient(void) const;
 		Server	&getServer(void) const;
+		void	deliverMessage(const User &receiver, const PrivateMessage &message) const;
+		void	deliverMessage(const Channel &receiver, const Message &message) const;
 		class		UnknownCommandException;
 	private:
 		t_input parseInput(string &raw_input) const;
@@ -44,6 +46,7 @@ class EventHandler
 		void executeCommandNick(const vector<string> &params);
 		void executeCommandQuit(const vector<string> &params);
 		void executeCommandUser(const vector<string> &params);
+		void sendBufferedString(const User &receiver, const string &string) const;
 		map<string, t_cmd>	_commands;
 		Client				*_client;
 		Server				*_server;

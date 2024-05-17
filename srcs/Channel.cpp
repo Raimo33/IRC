@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 15:43:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 18:22:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,12 @@ User	&Channel::getRequest(const string &nickname) const
 	return *_requests.at(nickname);
 }
 
-uint32_t	Channel::getMembersCount() const
+map<string, User *>	Channel::getUsers(void) const
+{
+	return _members;
+}
+
+uint32_t	Channel::getMembersCount(void) const
 {
 	return _members.size();
 }
@@ -190,3 +195,4 @@ const char *Channel::RequestNotFoundException::what() const throw()
 {
 	return "Request not found";
 }
+

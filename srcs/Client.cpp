@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 15:43:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 18:14:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,21 +113,41 @@ void	Client::checkConnection(void) const
 
 void	Client::authenticate(void)
 {
-	char					buffer[1024];
-
+	char	buffer[1024];
     // Prompt user for password
     send(_socket, "Password: ", 10, 0);
     recv(_socket, buffer, sizeof(buffer), 0);
 	_pwd_hash = Hasher::hash(string(buffer));
 
+	//TODO gestire il caso in cui l'utente non ha mai fatto il signup
     // Check credentials
-    if (_server->getUserPassword(_username) != _pwd_hash)
+	try
 	{
-		send(_socket, "Invalid credentials\n", 20, 0);
-		_is_authenticated = false;
+		if (_server->getUserPassword(_username) != _pwd_hash)
+		{
+			send(_socket, "Invalid credentials\n", 20, 0);
+			_is_authenticated = false;
+			return ;
+		}
 	}
-	else
-		_is_authenticated = true;
+	catch(const Server::UserNotFoundException &e)
+	{
+		send(_socket, "User not found: signing up\n", 28, 0);
+		send(_socket, "Password: ", 10, 0);
+    	recv(_socket, buffer, sizeof(buffer), 0);
+		_pwd_hash = Hasher::hash(string(buffer));
+		send(_socket, "Repeat password: ", 17, 0);
+		recv(_socket, buffer, sizeof(buffer), 0);
+		if (_pwd_hash != Hasher::hash(string(buffer)))
+		{
+			send(_socket, "Passwords don't match\n", 22, 0);
+			_is_authenticated = false;
+			return ;
+		}
+	}
+	_is_authenticated = true;
+	_server->addUser(*this);
+	_server->addCredentials(_username, _pwd_hash);
 }
 
 const char *Client::NotConnectedException::what(void) const throw()

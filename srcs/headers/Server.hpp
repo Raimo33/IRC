@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 16:14:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 18:04:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,12 +46,18 @@ class Server
 		void	setup(void);
 		void	run(void);
 		void	addChannel(Channel &channel);
+		void	addUser(User &user);
+		void	addCredentials(const string &username, const size_t pwd_hash);
 		Channel	&getChannel(const string &name) const;
 		size_t	getPwdHash(void) const;
 		size_t	getUserPassword(const string &username) const;
-		Client	&getClient(const string &nickname) const;
+		User	&getUser(const string &nickname) const;
 		void	removeClient(Client *client);
+		Client	&getClient(const User &user) const;
 		class	ClientNotFoundException;
+		class	CantSendMessageToYourselfException;
+		class	ChannelNotFoundException;
+		class	UserNotFoundException;
 	private:
 		void	addClient(void);
 		void	handleClient(Client *client, size_t *i);
@@ -61,6 +67,7 @@ class Server
 		size_t					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
 		map<string, size_t>		_credentials; // {username, pwd_hash}
 		vector<Client *>		_clients;
+		map<string, User *>		_users;
 		map<string, Channel *>	_channels;
 		vector<pollfd>			_pollfds;
 		int						_socket;
@@ -70,6 +77,24 @@ class Server::ClientNotFoundException : public exception
 {
 	public:
 		virtual const char *what() const throw();
+};
+
+class Server::CantSendMessageToYourselfException : public exception
+{
+	public:
+		virtual const char *what() const throw();
+};
+
+class Server::ChannelNotFoundException : public exception
+{
+	public:
+		virtual const char	*what() const throw();
+};
+
+class Server::UserNotFoundException : public exception
+{
+	public:
+		virtual const char	*what() const throw();
 };
 
 #endif

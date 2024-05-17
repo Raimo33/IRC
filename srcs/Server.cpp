@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 16:14:29 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/17 18:04:25 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ Server::Server(const uint16_t port_no, const string &password) :
 	_port(port_no),
 	_pwd_hash(Hasher::hash(password)),
 	_clients(),
+	_users(),
 	_channels(),
 	_pollfds(),
 	_socket(0) {}
@@ -28,6 +29,7 @@ Server::Server(const Server &copy) :
 	_port(copy._port),
 	_pwd_hash(copy._pwd_hash),
 	_clients(copy._clients),
+	_users(copy._users),
 	_channels(copy._channels),
 	_pollfds(copy._pollfds),
 	_socket(copy._socket) {}
@@ -41,6 +43,7 @@ Server	&Server::operator=(const Server &rhs)
 		_pwd_hash = rhs._pwd_hash;
 		_port = rhs._port;
 		_clients = rhs._clients;
+		_users = rhs._users;
 		_channels = rhs._channels;
 		_pollfds = rhs._pollfds;
 		_socket = rhs._socket;
@@ -189,18 +192,38 @@ void	Server::addChannel(Channel &channel)
 	_channels[channel.getName()] = &channel;
 }
 
-Client	&Server::getClient(const string &nickname) const
+void Server::addUser(User &user)
+{
+	_users[user.getUsername()] = &user;
+}
+
+void	Server::addCredentials(const string &username, const size_t pwd_hash)
+{
+	if (_credentials.find(username) == _credentials.end())
+		_credentials[username] = pwd_hash;
+}
+
+Client	&Server::getClient(const User &user) const
 {
 	for (size_t i = 0; i < _clients.size(); i++)
 	{
-		if (_clients[i]->getNickname() == nickname)
+		if (_clients[i]->getUsername() == user.getUsername())
 			return *_clients[i];
 	}
 	throw ClientNotFoundException();
 }
 
+User	&Server::getUser(const string &nickname) const
+{
+	if (_users.find(nickname) == _users.end())
+		throw UserNotFoundException();
+	return *(_users.at(nickname));
+}
+
 Channel	&Server::getChannel(const string &name) const
 {
+	if (_channels.find(name) == _channels.end())
+		throw ChannelNotFoundException();
 	return *(_channels.at(name));
 }
 
@@ -211,10 +234,27 @@ size_t	Server::getPwdHash(void) const
 
 size_t	Server::getUserPassword(const string &username) const
 {
+	if (_credentials.find(username) == _credentials.end())
+		throw UserNotFoundException();
 	return _credentials.at(username);
 }
 
 const char	*Server::ClientNotFoundException::what() const throw()
 {
 	return "Client not found";
+}
+
+const char	*Server::CantSendMessageToYourselfException::what() const throw()
+{
+	return "You can't send a message to yourself";
+}
+
+const char *Server::ChannelNotFoundException::what() const throw()
+{
+	return "Channel not found";
+}
+
+const char *Server::UserNotFoundException::what() const throw()
+{
+	return "User not found";
 }
