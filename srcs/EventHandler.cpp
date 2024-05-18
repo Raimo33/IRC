@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 11:04:26 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 13:19:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,18 +17,8 @@
 #include "headers/Channel.hpp"
 #include "headers/ChannelOperator.hpp"
 
-EventHandler::EventHandler(void) :
-	_client(NULL),
-	_server(NULL)
-{
-	_commands["PRIVMSG"] = PRIVMSG;
-	_commands["JOIN"] = JOIN;
-	_commands["MODE"] = MODE;
-	_commands["PASS"] = PASS;
-	_commands["NICK"] = NICK;
-	_commands["USER"] = USER;
-	_commands["QUIT"] = QUIT;
-}
+static void checkConnection(const Client *client);
+static void checkAuthentication(const Client *client);
 
 EventHandler::EventHandler(Client *client, Server *server) :
 	_client(client),
@@ -43,22 +33,53 @@ EventHandler::EventHandler(Client *client, Server *server) :
 	_commands["QUIT"] = QUIT;
 }
 
-EventHandler::EventHandler(const EventHandler &copy) :
-	_commands(copy._commands),
-	_client(copy._client),
-	_server(copy._server) {}
-
 EventHandler::~EventHandler(void) {}
 
-EventHandler	&EventHandler::operator=(const EventHandler &rhs)
+//JOIN #channel1,#channel2,#channel3 key1,key2,key3
+void	EventHandler::processInput(string raw_input)
 {
-	if (this != &rhs)
+	t_input	input = parseInput(raw_input);
+
+	switch (input.command)
 	{
-		_commands = rhs._commands;
-		_client = rhs._client;
-		_server = rhs._server;
+		case PRIVMSG: //usato sia per messaggi privati che per messaggi nei canali
+			checkConnection(_client);
+			checkAuthentication(_client);
+			executeCommandPrivmsg(input.params);
+			break;
+		//JOIN <channel1,channel2,channel3> <key1,key2,key3>
+		case JOIN:
+			checkConnection(_client);
+			checkAuthentication(_client);
+			executeCommandJoin(input.params);
+			break;
+		case MODE:
+			checkConnection(_client);
+			checkAuthentication(_client);
+			//TODO
+			break;
+		//PASS <connectionpassword>
+		case PASS: //viene usata dagli utenti per autenticarsi
+			executeCommandPass(input.params);
+			break;
+		//NICK <nickname>
+		case NICK:
+			checkConnection(_client);
+			executeCommandNick(input.params);
+			break;
+		//USER <username>
+		case USER:
+			checkConnection(_client);
+			executeCommandUser(input.params);
+			break;
+		//QUIT
+		case QUIT:
+			//TODO forse va tolto il client anche da tutti i canali di cui fa parte
+			executeCommandQuit(input.params);
+			break;
+		default:
+			throw CommandNotFoundException();
 	}
-	return *this;
 }
 
 //input: ":<prefix> <command> <params> <crlf>"
@@ -66,6 +87,9 @@ t_input	EventHandler::parseInput(string &raw_input) const
 {
 	t_input	input;
 	string	command;
+	
+	if (raw_input.size() >= 2 && raw_input.substr(raw_input.size() - 2) == "\r\n")
+        raw_input = raw_input.substr(0, raw_input.size() - 2);
 
 	input.prefix = "";
 	if (raw_input[0] == ':')
@@ -77,7 +101,7 @@ t_input	EventHandler::parseInput(string &raw_input) const
 
 	it = _commands.find(command);
 	if (it == _commands.end())
-		throw UnknownCommandException();
+		throw CommandNotFoundException();
 	input.command = _commands.at(command); //associo il comando all'enum
 
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il comando
@@ -97,71 +121,6 @@ t_input	EventHandler::parseInput(string &raw_input) const
 	return input;
 }
 
-//JOIN #channel1,#channel2,#channel3 key1,key2,key3
-void	EventHandler::processInput(string raw_input)
-{
-	t_input	input = parseInput(raw_input);
-	switch (input.command)
-	{
-		case PRIVMSG: //usato sia per messaggi privati che per messaggi nei canali
-			_client->checkConnection();
-			executeCommandPrivmsg(input.params);
-			break;
-		//JOIN <channel1,channel2,channel3> <key1,key2,key3>
-		case JOIN:
-			_client->checkConnection();
-			executeCommandJoin(input.params);
-			break;
-		case MODE:
-			_client->checkConnection();
-			//TODO
-			break;
-		//PASS <connectionpassword>
-		case PASS: //viene usata dagli utenti per autenticarsi
-			executeCommandPass(input.params);
-			break;
-		//NICK <nickname>
-		case NICK:
-			if (!_client->getIsConnected())
-				throw Client::NotConnectedException();
-			executeCommandNick(input.params);
-			break;
-		//USER <username>
-		case USER:
-			if (!_client->getIsConnected())
-				throw Client::NotConnectedException();
-			executeCommandUser(input.params);
-			break;
-		//QUIT
-		case QUIT:
-			//TODO forse va tolto il client anche da tutti i canali di cui fa parte
-			executeCommandQuit(input.params);
-			break;
-		default:
-			throw UnknownCommandException();
-	}
-}
-
-void EventHandler::setClient(Client *client)
-{
-	_client = client;
-}
-
-void EventHandler::setServer(Server *server)
-{
-	_server = server;
-}
-
-Client	&EventHandler::getClient(void) const
-{
-	return *_client;
-}
-
-Server	&EventHandler::getServer(void) const
-{
-	return *_server;
-}
-
 void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 {
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
@@ -169,18 +128,20 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 		//channel msg PRIVMSG <channel> :<message>
 
 		Channel channel = _server->getChannel(params[0]);
-		if (channel.getMembersCount() <= 2)
+		int		n_members = channel.getMembersCount();
+
+		if (n_members == 1)
+			throw CantSendMessageToYourselfException();
+		if (n_members == 2)
 		{
 			//promuovo il messaggio a private message
-			User receiver;
+			User *receiver;
 
-			receiver = *channel.getUsers().begin()->second;
-			if (receiver.getNickname() == _client->getNickname())
-				receiver = *channel.getUsers().rbegin()->second;
-			if (receiver.getNickname() == _client->getNickname())
-				throw Server::CantSendMessageToYourselfException();
-			PrivateMessage *msg = new PrivateMessage(params[2], *_client, receiver);
-			deliverMessage(receiver, *msg);
+			receiver = channel.getMembers().begin()->second;
+			if (receiver->getNickname() == _client->getNickname())
+				receiver = channel.getMembers().rbegin()->second;
+			PrivateMessage *msg = new PrivateMessage(params[2], *_client, *receiver);
+			deliverMessage(*receiver, *msg);
 			return ;
 		}
 		Message *msg = new Message(params[1], *_client, channel);
@@ -252,24 +213,22 @@ void EventHandler::executeCommandQuit(const vector<string> &params)
 
 void EventHandler::executeCommandUser(const vector<string> &params)
 {
-	//se non e' un username gia' in uso
 	_client->setUsername(params[0]);
 	_client->authenticate();
-	//TODO aggiungere l'utente alla lista di utenti del server
-	//TODO aggiungere le credenziali dell'user alla lista di credenziali del server
 }
 
 void	EventHandler::deliverMessage(const Channel &channel, const Message &msg) const
 {
-    std::map<std::string, User*> users = channel.getUsers();
+    std::map<std::string, User*> users = channel.getMembers();
 
-    for (std::map<std::string, User*>::const_iterator it = users.begin(); it != users.end(); ++it) {
+    for (std::map<std::string, User*>::const_iterator it = users.begin(); it != users.end(); ++it)
         sendBufferedString(*it->second, msg.getContent());
-    }
 }
 
 void	EventHandler::deliverMessage(const User &receiver, const PrivateMessage &msg) const
 {
+	if (receiver.getNickname() == _client->getNickname())
+		throw CantSendMessageToYourselfException();
 	sendBufferedString(receiver, msg.getContent());
 }
 
@@ -283,7 +242,7 @@ void	EventHandler::sendBufferedString(const User &receiver, const string &string
 	while (chars_sent < total_len)
 	{
 		size_t len = min(total_len - chars_sent, BUFFER_SIZE - 1);
-		send(socket, raw_msg + chars_sent, len, 0);
+		send(socket, raw_msg + chars_sent, len, 0); //TODO gestire errori, provare a inviare di nuovo (mettere in un file di log)
 		chars_sent += len;
 	}
 }
@@ -291,4 +250,16 @@ void	EventHandler::sendBufferedString(const User &receiver, const string &string
 const char *EventHandler::UnknownCommandException::what() const throw()
 {
 	return "Unknown command";
+}
+
+static void checkConnection(const Client *client)
+{
+	if (!client->getIsConnected())
+		throw Client::NotConnectedException();
+}
+
+static void checkAuthentication(const Client *client)
+{
+	if (!client->getIsAuthenticated())
+		throw User::NotAuthenticatedException();
 }

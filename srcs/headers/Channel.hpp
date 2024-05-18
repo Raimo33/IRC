@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 11:27:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 12:50:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 # define CHANNEL_HPP
 
 # define N_MODES 5
+# define MAX_CHANNEL_NAME_LEN 200
+# define MAX_TOPIC_LEN 390
+# define MAX_KEY_LEN 50
+# define DEFAULT_MEMBER_LIMIT 50
 
 # include <map>
 # include <string>
@@ -38,97 +42,49 @@ class User;
 class Channel
 {
 	public: 
-		Channel(const string &name, ChannelOperator &op); //on creation there must be at least one operator
+		explicit Channel(const string &name, ChannelOperator &op); //on creation there must be at least one operator
 		Channel(const string &name, const string &key, ChannelOperator &op);
 		Channel(const Channel &copy);
 		~Channel(void);
-		Channel				&operator=(const Channel &rhs);
-		string				getName(void) const;
-		string				getKey(void) const;
-		string				getTopic(void) const;
-		bool				getMode(const t_channel_modes &mode) const;
-		User				&getOperator(const string &nickname) const;
-		User				&getMember(const string &nickname) const;
-		User				&getRequest(const string &nickname) const;
-		uint32_t			getMembersCount(void) const;
-		map<string, User *>	getUsers(void) const;
-		bool				handleJoinRequest(User &user);
-		class 		UserNotInChannelException;
-		class		NotOperatorException;
-		class		NotExistingModeException;
-		class		InvalidCredentialsException;
-		class		MemberNotFoundException;
-		class		OperatorNotFoundException;
-		class		RequestNotFoundException;
-		class       InvalidNameException;
+	
+		string							getName(void) const;
+		string							getKey(void) const;
+		string							getTopic(void) const;
+		bool							getMode(const t_channel_modes &mode) const;
+		User							&getOperator(const string &username) const;
+		User							&getMember(const string &username) const;
+		User							&getRequest(const string &username) const;
+		uint32_t						getMembersCount(void) const;
+		uint32_t						getMemberLimit(void) const;
+		map<string, User *>				getMembers(void) const;
+		bool							handleJoinRequest(User &user);
+			
+		class       					InvalidNameException; //costruttore
+		class							InvalidTopicException; //setTopic
+		class							InvalidKeyException; //setKey
+		class							UserAlreadyMemberException; //addMember
+		class							UserAlreadyOperatorException; //promoteOperator
+		class							UserNotMemberException; //removeMember
+		class							UnknownModeException; //setMode
 	private:
-		//solo l'operator puo' cambiare modes e topic del canale (operator sara' un friend di Channel)
 		friend class ChannelOperator;
-		// Channel(const string &name, const string &key, const string &topic);
-		void	addRequest(User &user);
-		void	addUser(User &user);
-		void	setKey(const string &new_key);
-		void	setTopic(const string &new_topic);
-		void	setMode(const t_channel_modes &mode, const bool status);
-		void	addOperator(ChannelOperator &op);
-		void	removeUser(const User &user);
+		void							addInvite(User &user);
+		void							addMember(User &user);
+		void							setKey(const string &new_key);
+		void							setTopic(const string &new_topic);
+		void							setMode(const t_channel_modes &mode, const bool status);
+		void							promoteOperator(const string &username);
+		void							removeMember(const User &user);
+
 		const string					_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
 		string							_key;
 		string							_topic;
-		map<string, ChannelOperator *>	_operators; // {nickname, operator}
-		map<string, User *>				_members; // {nickname, user}
-		map<string, User *>				_requests; // {nickname, user}
-		map<string, User *>				_pending_invitations; // {nickname, user} (il channel operator puo fare /invite)
+		uint32_t						_member_limit;
+		map<string, ChannelOperator *>	_operators; // {username, operator}
+		map<string, User *>				_members; // {username, user}
+		map<string, User *>				_requests; // {username, user}
+		map<string, User *>				_pending_invitations; // {username, user} (il channel operator puo fare /invite)
 		bool							_modes[N_MODES];
 };
-
-class Channel::UserNotInChannelException : public exception
-{
-	public:
-		virtual const char	*what() const throw();
-};
-
-class Channel::NotOperatorException : public exception
-{
-	public:
-		virtual const char	*what() const throw();
-};
-
-class Channel::NotExistingModeException : public exception
-{
-	public:
-		virtual const char	*what() const throw();
-};
-
-class Channel::InvalidCredentialsException : public exception
-{
-	public:
-		virtual const char	*what() const throw();
-};
-
-class Channel::MemberNotFoundException : public exception
-{
-	public:
-		virtual const char	*what() const throw();
-};
-
-class Channel::OperatorNotFoundException : public exception
-{
-	public:
-		virtual const char	*what() const throw();
-};
-
-class Channel::RequestNotFoundException : public exception
-{
-	public:
-		virtual const char	*what() const throw();
-};
-
-class Channel::InvalidNameException : public exception
-{
-	public:
-		virtual const char	*what() const throw();
-};
-
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 18:14:42 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 12:49:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,15 +100,6 @@ void	Client::setSocket(const int socket)
 void	Client::setServer(Server *server)
 {
 	_server = server;
-}
-
-//output: {string prefix, enum command, {string param1, string param2, ...}}
-void	Client::checkConnection(void) const
-{
-	if (!_is_connected)
-		throw NotConnectedException();
-	if (!_is_authenticated)
-		throw User::NotAuthenticatedException();
 }
 
 void	Client::authenticate(void)

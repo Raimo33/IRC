@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 17:23:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 13:52:54 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,20 +30,24 @@ class User
 		User(void);
 		User(const User &copy);
 		~User(void);
-		User	&operator=(const User &rhs);
 
-		void	setNickname(const string &nickname);
-		void	setUsername(const string &username);
-		void	joinChannel(Channel &channel);
-		void 	joinChannel(Channel &channel, const string &key);
 		string	getNickname(void) const;
 		string	getUsername(void) const;
-		bool	isAuthenticated(void) const;
-		class	TooManyChannelsException;
-		class	AlreadyAuthenticatedException;
-		class	InvalidCredentialsException;
-		class	NotAuthenticatedException;
+		bool	getIsAuthenticated(void) const;
+		void	setNickname(const string &nickname);
+		void	setUsername(const string &username);
+		void	setAuthenticated(bool is_authenticated);
+		void	setPwdHash(const string &password);
+		void	joinChannel(Channel &channel);
+		void 	joinChannel(Channel &channel, const string &key);
+
+		class	TooManyChannelsException; //joinChannel
+		class	AlreadyAuthenticatedException; //setAuthenticated
+		class	InvalidCredentialsException; //setAuthenticated
+		class	NotAuthenticatedException; //joinChannel
+
 	protected:
+
 		map<string, const Channel *>	_channels; // {channel_name, channel}
 		string							_nickname;
 		string							_username;

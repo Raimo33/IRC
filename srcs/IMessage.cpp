@@ -6,16 +6,11 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 18:09:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 15:49:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 13:08:14 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/IMessage.hpp"
-
-IMessage::IMessage(void) :
-	_content(""),
-	_timestamp(0),
-	_sender(NULL) {}
 
 IMessage::IMessage(const string &content, User &sender) :
 	_content(content),
@@ -24,7 +19,7 @@ IMessage::IMessage(const string &content, User &sender) :
 
 IMessage::~IMessage(void) {}
 
-User	&IMessage::getSender(void) const
+const User	&IMessage::getSender(void) const
 {
 	return *_sender;
 }
@@ -37,20 +32,5 @@ string	IMessage::getContent(void) const
 time_t	IMessage::getTimestamp(void) const
 {
 	return _timestamp;
-}
-
-void	IMessage::setContent(const string &content)
-{
-	_content = content;
-}
-
-void	IMessage::setTimestamp(const time_t timestamp)
-{
-	_timestamp = timestamp;
-}
-
-void	IMessage::setSender(User &sender)
-{
-	_sender = &sender;
 }
 

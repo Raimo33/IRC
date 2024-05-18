@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 11:28:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 12:28:14 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,12 @@ Channel::Channel(const string &name, ChannelOperator &op) :
 	_name(name),
 	_key(""),
 	_topic(""),
+	_member_limit(DEFAULT_MEMBER_LIMIT),
 	_operators(),
 	_members(),
 	_requests()
 {
-	if (_name.empty() || is_channel_prefix(_name[0]) == false)
+	if (_name.empty() || !is_channel_prefix(_name[0]) || _name.length() > MAX_CHANNEL_NAME_LEN)
 		throw InvalidNameException();
 	_operators[op.getNickname()] = &op;
 	_members[op.getNickname()] = &op;
@@ -35,11 +36,12 @@ Channel::Channel(const string &name, ChannelOperator &op) :
 Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
 	_key(key),
 	_topic(""),
+	_member_limit(DEFAULT_MEMBER_LIMIT),
 	_operators(),
 	_members(),
 	_requests()
 {
-	if (_name.empty() || is_channel_prefix(_name[0]) == false)
+	if (_name.empty() || !is_channel_prefix(_name[0]) || _name.length() > MAX_CHANNEL_NAME_LEN)
 		throw InvalidNameException();
 	_operators[op.getNickname()] = &op;
 	_members[op.getNickname()] = &op;
@@ -60,20 +62,6 @@ Channel::Channel(const Channel &copy) :
 }
 
 Channel::~Channel(void) {}
-
-Channel	&Channel::operator=(const Channel &rhs)
-{
-	if (this != &rhs)
-	{
-		_name = rhs._name;
-		_topic = rhs._topic;
-		_operators = rhs._operators; //operator overload di vector fa una deep copy
-		_members = rhs._members;
-		for (int i = 0; i < N_MODES; i++)
-			_modes[i] = rhs._modes[i];
-	}
-	return *this;
-}
 
 string	Channel::getName(void) const
 {
@@ -118,7 +106,7 @@ User	&Channel::getRequest(const string &nickname) const
 	return *_requests.at(nickname);
 }
 
-map<string, User *>	Channel::getUsers(void) const
+map<string, User *>	Channel::getMembers(void) const
 {
 	return _members;
 }
@@ -176,11 +164,6 @@ void	Channel::addOperator(ChannelOperator &op)
 		throw UserNotInChannelException();
 	else
 		_operators[op.getNickname()] = &op;
-}
-
-void	Channel::addRequest(User &user)
-{ 
-	_requests[user.getNickname()] = &user;
 }
 
 void	Channel::removeUser(const User &user)

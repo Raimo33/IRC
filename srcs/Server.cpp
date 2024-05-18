@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 18:04:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 13:38:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ Server	&Server::operator=(const Server &rhs)
 	return *this;
 }
 
-void	Server::setup(void)
+void	Server::setup(void) //TODO metterlo nel costruttore
 {
 	struct sockaddr_in	server_addr;
 	pollfd				server_poll_fd;
@@ -102,7 +102,7 @@ void	Server::run(void)
 
 void	Server::handleClient(Client *client, size_t *i)
 {
-	char			buffer[BUFFER_SIZE];
+	char	buffer[BUFFER_SIZE];
 
 	int	bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
 	if (bytes_read > 0)
@@ -153,20 +153,20 @@ void	Server::addClient(void)
 
 void	Server::removeClient(Client *client)
 {
-		int socket = client->getSocket();
+	int socket = client->getSocket();
 
-		shutdown_p(socket, SHUT_RDWR);
-		close_p(socket);
-		for (std::vector<pollfd>::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
+	shutdown_p(socket, SHUT_RDWR);
+	close_p(socket);
+	for (std::vector<pollfd>::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
+	{
+		if (it->fd == socket)
 		{
-			if (it->fd == socket)
-			{
-				_pollfds.erase(it);
-				break;
-			}
+			_pollfds.erase(it);
+			break;
 		}
-		_clients.erase(remove(_clients.begin(), _clients.end(), client), _clients.end());
-		delete client;
+	}
+	_clients.erase(remove(_clients.begin(), _clients.end(), client), _clients.end());
+	delete client;
 }
 
 void	Server::configureNonBlocking(const int socket) const

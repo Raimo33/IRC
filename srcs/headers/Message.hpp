@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:57:26 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 15:52:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 13:17:25 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,14 @@ class Channel;
 class Message : public IMessage
 {
 	public:
-		Message(void);
 		//un messaggio in un canale di 2 persone deve passare come private message
-		Message(const string &content, User &sender, Channel &channel);
+		explicit Message(const string &content, User &sender, Channel &channel);
 		Message(const Message &copy);
 		~Message(void);
+
 		Channel	&getChannel(void) const;
-		void	setChannel(Channel &channel);
 	private:
-		Channel	*_channel;
+		const Channel	*_channel;
 };
 
 //ad ogni messaggio corrisponde una risposta numerica (vedi RFC)
