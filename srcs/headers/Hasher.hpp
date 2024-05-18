@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Hasher.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:55:59 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 13:06:38 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 15:45:59 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,5 @@ class MD5
 
 const unsigned char PADDING[64] = { 0x80 };
 const char HEX_NUMBERS[] = "0123456789abcdef";
-
-class Hasher
-{
-	public:
-		static size_t hash(const string &data);
-};
 
 #endif

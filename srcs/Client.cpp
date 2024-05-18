@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 12:49:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 16:47:50 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,45 +16,34 @@
 # include "headers/Server.hpp"
 # include "headers/EventHandler.hpp"
 
-Client::Client(void) :
+Client::Client(const Server *server, const int socket, const string &ip_addr, const uint16_t port) :
 	User(),
-	_is_connected(false),
-	_ip_addr(0),
-	_socket(0),
-	_server() {}
-
-Client::Client(const int socket) :
-	User(),
-	_is_connected(false),
-	_ip_addr(0),
+	_is_connected(true),
+	_port(port),
+	_ip_addr(ip_addr),
 	_socket(socket),
-	_server() {}
+	_server(server) {}
 
 Client::Client(const Client &copy) :
 	User(copy),
 	_is_connected(copy._is_connected),
+	_port(copy._port),
 	_ip_addr(copy._ip_addr),
 	_socket(copy._socket),
 	_server(copy._server) {}
 
 Client::~Client() {}
 
-Client	&Client::operator=(const Client &rhs)
-{
-	if (this != &rhs)
-	{
-		User::operator=(rhs);
-		_is_connected = rhs._is_connected;
-		_ip_addr = rhs._ip_addr;
-		_socket = rhs._socket;
-		_server = rhs._server;
-	}
-	return *this;
-}
-
 bool	Client::getIsConnected(void) const
 {
 	return _is_connected;
+}
+
+void	Client::setIsConnected(const bool is_connected)
+{
+	if (_is_connected == is_connected)
+		throw AlreadyConnectedException();
+	_is_connected = is_connected;
 }
 
 uint16_t	Client::getPort(void) const
@@ -62,53 +51,31 @@ uint16_t	Client::getPort(void) const
 	return _port;
 }
 
-string	Client::getIpAddr(void) const
+const string	Client::getIpAddr(void) const
 {
 	return _ip_addr;
 }
 
-int		Client::getSocket(void) const
+int	Client::getSocket(void) const
 {
 	return _socket;
 }
 
-Server	*Client::getServer(void) const
+const Server	*Client::getServer(void) const
 {
 	return _server;
-}
-
-void	Client::setIsConnected(const bool is_connected)
-{
-	_is_connected = is_connected;
-}
-
-void	Client::setPort(const uint16_t port)
-{
-	_port = port;
-}
-
-void	Client::setIpAddr(const string ip_addr)
-{
-	_ip_addr = ip_addr;
-}
-
-void	Client::setSocket(const int socket)
-{
-	_socket = socket;
-}
-
-void	Client::setServer(Server *server)
-{
-	_server = server;
 }
 
 void	Client::authenticate(void)
 {
 	char	buffer[1024];
-    // Prompt user for password
-    send(_socket, "Password: ", 10, 0);
+	// Prompt user for password
+	send(_socket, "Password: ", 10, 0);
     recv(_socket, buffer, sizeof(buffer), 0);
-	_pwd_hash = Hasher::hash(string(buffer));
+
+	MD5		hasher(string(buffer));
+
+	_pwd_hash = hasher.hexdigest();
 
 	//TODO gestire il caso in cui l'utente non ha mai fatto il signup
     // Check credentials

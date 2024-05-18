@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   irc.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 16:16:55 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 15:49:45 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ int main(const int argc, const char **argv)
 
 		Server	server(port_nbr, password);
 
-		server.setup();
 		server.run();
 	}
 	catch (const exception &e)

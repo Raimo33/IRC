@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelOperator.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 12:51:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 14:46:38 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,18 @@ class ChannelOperator : public User
 
 		class	UserNotInChannelException;
 		class	OperatorNotInChannelException;
+};
+
+class ChannelOperator::UserNotInChannelException : public exception
+{
+	public:
+		const char	*what(void) const throw();
+};
+
+class ChannelOperator::OperatorNotInChannelException : public exception
+{
+	public:
+		const char	*what(void) const throw();
 };
 
 #endif

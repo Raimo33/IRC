@@ -3,63 +3,66 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelOperator.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 15:43:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 16:41:20 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/ChannelOperator.hpp"
 
-ChannelOperator::ChannelOperator() : User() {}
+ChannelOperator::ChannelOperator(const User &user) : User(user) {}
 
 ChannelOperator::ChannelOperator(const ChannelOperator &copy) : User(copy) {}
 
-ChannelOperator::ChannelOperator(const User &user) : User(user) {}
-
 ChannelOperator::~ChannelOperator() {}
 
-ChannelOperator &ChannelOperator::operator=(const ChannelOperator &rhs)
+void ChannelOperator::channelKick(const User &user, Channel &channel) const
 {
-	if (this != &rhs)
-		User::operator=(rhs);
-	return *this;
-}
+	std::map<std::string, User *>				members = channel.getMembers();
+	std::map<std::string, ChannelOperator *>	operators = channel.getOperators();
 
-void	ChannelOperator::channelKick(const User &user, Channel &channel) const
-{
-	if (_channels.find(channel.getName()) == _channels.end())
+	if (members.find(user.getNickname()) == members.end())
 		throw UserNotInChannelException();
-	channel.removeUser(user);
-}
-
-void	ChannelOperator::channelInvite(User &user, Channel &channel) const
-{
-	if (_channels.find(channel.getName()) == _channels.end())
+	if (operators.find(getNickname()) == operators.end())
 		throw OperatorNotInChannelException();
-	channel.addUser(user);
+	channel.removeMember(user);
 }
 
-string	ChannelOperator::channelTopicGet(const Channel &channel) const
+void ChannelOperator::channelInvite(User &user, Channel &channel) const
 {
-	if (_channels.find(channel.getName()) == _channels.end())
+	std::map<std::string, ChannelOperator *>	operators = channel.getOperators();
+
+	if (operators.find(getNickname()) == operators.end())
+		throw Channel::UserNotOperatorException();
+	channel.addPendingInvitation(&user);
+}
+
+std::string ChannelOperator::channelTopicGet(const Channel &channel) const
+{
+	std::map<std::string, ChannelOperator *>	operators = channel.getOperators();
+
+	if (operators.find(getNickname()) == operators.end())
 		throw OperatorNotInChannelException();
 	return channel.getTopic();
 }
 
-void	ChannelOperator::channelTopicSet(Channel &channel, const string &new_topic) const
+void ChannelOperator::channelTopicSet(Channel &channel, const std::string &new_topic) const
 {
-	if (_channels.find(channel.getName()) == _channels.end())
+	std::map<std::string, ChannelOperator *>	operators = channel.getOperators();
+
+	if (operators.find(getNickname()) == operators.end())
 		throw OperatorNotInChannelException();
 	channel.setTopic(new_topic);
 }
 
-void	ChannelOperator::channelModeChange(Channel &channel, const t_channel_modes &mode, const bool status) const
+void ChannelOperator::channelModeChange(Channel &channel, const t_channel_modes &mode, const bool status) const
 {
-	if (_channels.find(channel.getName()) == _channels.end())
-		throw OperatorNotInChannelException();
-	channel.setMode(mode, status);
+	//TODO implementare
+	(void)channel;
+	(void)mode;
+	(void)status;
 }
 
 const char *ChannelOperator::UserNotInChannelException::what() const throw()

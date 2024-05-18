@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:35:38 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 13:03:56 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 16:41:41 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,14 @@ class Client : public User
 		Client(const Server *server, const int socket, const string &ip_addr, const uint16_t port);
 		Client(const Client &copy);
 		~Client(void);
+
 		bool			getIsConnected(void) const;
-		uint16_t		getPort(void) const;
-		string			getIpAddr(void) const;
-		int				getSocket(void) const;
-		Server			*getServer(void) const;
 		void			setIsConnected(const bool is_connected);
+		uint16_t		getPort(void) const;
+		const string	getIpAddr(void) const;
+		int				getSocket(void) const;
+		const Server	*getServer(void) const;
+
 		void			authenticate(void);
 
 		class			AlreadyConnectedException; //setIsConnected
@@ -49,6 +51,24 @@ class Client : public User
 		const string	_ip_addr; //aka hostname
 		const int		_socket;
 		const Server	*_server;
+};
+
+class Client::AlreadyConnectedException : public exception
+{
+	public:
+		const char	*what(void) const throw();
+};
+
+class Client::NotConnectedException : public exception
+{
+	public:
+		const char	*what(void) const throw();
+};
+
+class Client::InvalidPasswordException : public exception
+{
+	public:
+		const char	*what(void) const throw();
 };
 
 #endif

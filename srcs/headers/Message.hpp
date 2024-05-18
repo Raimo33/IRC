@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:57:26 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 13:17:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 14:54:22 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ class Message : public IMessage
 		~Message(void);
 
 		Channel	&getChannel(void) const;
+
 	private:
 		const Channel	*_channel;
 };

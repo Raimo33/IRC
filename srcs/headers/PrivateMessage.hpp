@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PrivateMessage.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:03:42 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 13:23:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 14:55:43 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class PrivateMessage: public IMessage
 		explicit PrivateMessage(const string &content, User &sender, const User &receiver);
 		PrivateMessage(const PrivateMessage &copy);
 		~PrivateMessage(void);
+
 		const User	*getReceiver() const;
 
 	private:

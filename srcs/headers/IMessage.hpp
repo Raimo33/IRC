@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   IMessage.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 17:16:12 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 13:16:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 14:55:22 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef IMESSAGE_HPP
-# define IMESSAGE_HPP
+#define IMESSAGE_HPP
 
-# include <string>
+#include <string>
 
 using namespace std;
 
@@ -26,14 +26,14 @@ class IMessage
 		IMessage(const IMessage &copy);
 		virtual ~IMessage(void) = 0;
 
-		const User		&getSender(void) const;
-		string			getContent(void) const;
-		time_t			getTimestamp(void) const;
+		const string getContent(void) const;
+		const time_t getTimestamp(void) const;
+		const User &getSender(void) const;
 
 	protected:
-		const string	_content;
-		const time_t	_timestamp;
-		const User		*_sender;
+		const string _content;
+		const time_t _timestamp;
+		const User *_sender;
 };
 
 #endif

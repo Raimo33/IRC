@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 13:52:54 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 15:53:44 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,28 +31,34 @@ class User
 		User(const User &copy);
 		~User(void);
 
-		string	getNickname(void) const;
-		string	getUsername(void) const;
-		bool	getIsAuthenticated(void) const;
-		void	setNickname(const string &nickname);
-		void	setUsername(const string &username);
-		void	setAuthenticated(bool is_authenticated);
-		void	setPwdHash(const string &password);
-		void	joinChannel(Channel &channel);
-		void 	joinChannel(Channel &channel, const string &key);
+		const map<string, const Channel *>	&getChannels(void) const;
+		void								setChannels(const map<string, const Channel *> &channels);
+		const Channel						*getChannel(const string &channel_name) const;
+		void								setChannel(const string &channel_name, const Channel &channel);
+		const string						getNickname(void) const;
+		void								setNickname(const string &nickname);
+		const string						getUsername(void) const;
+		void								setUsername(const string &username);
+		const string						getPwdHash(void) const;
+		void								setPwdHash(const string &password);
+		bool								getIsAuthenticated(void) const;
+		void								setAuthenticated(bool is_authenticated);
 
-		class	TooManyChannelsException; //joinChannel
-		class	AlreadyAuthenticatedException; //setAuthenticated
-		class	InvalidCredentialsException; //setAuthenticated
-		class	NotAuthenticatedException; //joinChannel
+		void								joinChannel(Channel &channel);
+		void 								joinChannel(Channel &channel, const string &key);
+
+		class								TooManyChannelsException; //joinChannel
+		class								AlreadyAuthenticatedException; //setAuthenticated
+		class								InvalidCredentialsException; //setAuthenticated
+		class								NotAuthenticatedException; //joinChannel
 
 	protected:
 
-		map<string, const Channel *>	_channels; // {channel_name, channel}
-		string							_nickname;
-		string							_username;
-		size_t							_pwd_hash;
-		bool							_is_authenticated; //true se l'utente ha effettuato il login, serve per fargli fare la registrazione la prima volta
+		map<string, const Channel *>		_channels; // {channel_name, channel}
+		string								_nickname;
+		string								_username;
+		size_t								_pwd_hash;
+		bool								_is_authenticated; //true se l'utente ha effettuato il login, serve per fargli fare la registrazione la prima volta
 };
 
 class User::TooManyChannelsException: public exception

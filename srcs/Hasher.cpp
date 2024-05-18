@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Hasher.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:57:54 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 16:19:29 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 15:45:50 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,20 +239,6 @@ inline void MD5::HH(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4
 inline void MD5::II(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
 {
     a = rotate_left(a + I(b, c, d) + x + ac, s) + b;
-}
-
-size_t	Hasher::hash(const string &data)
-{
-	MD5 md5;
-	md5.update(data.c_str(), data.length());
-	md5.finalize();
-	string hashStr = md5.hexdigest();
-	
-	// Convert the first part of MD5 hex digest to size_t
-	size_t hashValue = 0;
-	for (size_t i = 0; i < sizeof(size_t) * 2 && i < hashStr.length(); ++i)
-		hashValue = (hashValue << 4) | (hashStr[i] <= '9' ? hashStr[i] - '0' : hashStr[i] - 'a' + 10);
-	return hashValue;
 }
 
 

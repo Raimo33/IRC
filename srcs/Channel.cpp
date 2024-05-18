@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 12:28:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 16:31:34 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
 	_members(),
 	_requests()
 {
+	setName(name);
 	if (_name.empty() || !is_channel_prefix(_name[0]) || _name.length() > MAX_CHANNEL_NAME_LEN)
 		throw InvalidNameException();
 	_operators[op.getNickname()] = &op;
@@ -63,151 +64,256 @@ Channel::Channel(const Channel &copy) :
 
 Channel::~Channel(void) {}
 
-string	Channel::getName(void) const
+const string Channel::getName(void) const
 {
 	return _name;
 }
 
-string	Channel::getKey(void) const
+void Channel::setName(const string &new_name)
+{
+	if (new_name.empty() || !is_channel_prefix(new_name[0]) || new_name.length() > MAX_CHANNEL_NAME_LEN)
+		throw InvalidNameException();
+	_name = new_name;
+}
+
+const string Channel::getKey(void) const
 {
 	return _key;
 }
 
-string	Channel::getTopic(void) const
+void Channel::setKey(const string &new_key)
+{
+	if (new_key.empty() || new_key.length() > MAX_KEY_LEN)
+		throw InvalidKeyException();
+	_key = new_key;
+}
+
+const string Channel::getTopic(void) const
 {
 	return _topic;
 }
 
-bool	Channel::getMode(const t_channel_modes &mode) const
+void Channel::setTopic(const string &new_topic)
 {
-	if (mode < 0 || mode >= N_MODES)
-		throw NotExistingModeException();
-	return _modes[mode];
+	if (new_topic.length() > MAX_TOPIC_LEN)
+		throw InvalidTopicException();
+	_topic = new_topic;
 }
 
-User	&Channel::getOperator(const string &nickname) const
+uint32_t Channel::getMemberLimit(void) const
 {
-	if (_operators.at(nickname) == NULL)
-		throw OperatorNotFoundException();
-	return *_operators.at(nickname);
+	return _member_limit;
 }
 
-User	&Channel::getMember(const string &nickname) const
+void Channel::setMemberLimit(const uint32_t new_limit)
 {
-	if (_members.at(nickname) == NULL)
-		throw MemberNotFoundException();
-	return *_members.at(nickname);
+	_member_limit = new_limit;
 }
 
-User	&Channel::getRequest(const string &nickname) const
+const map<string, ChannelOperator *> Channel::getOperators(void) const
 {
-	if (_requests.at(nickname) == NULL)
-		throw RequestNotFoundException();
-	return *_requests.at(nickname);
+	return _operators;
 }
 
-map<string, User *>	Channel::getMembers(void) const
+void Channel::setOperators(const map<string, ChannelOperator *> &new_operators)
+{
+	_operators = new_operators;
+}
+
+const User &Channel::getOperator(const string &username) const
+{
+	if (_operators.find(username) == _operators.end())
+		throw UserNotMemberException();
+	return *(_operators.at(username));
+}
+
+User &Channel::addOperator(ChannelOperator *op)
+{
+	if (_operators.find(op->getNickname()) != _operators.end())
+		throw UserAlreadyOperatorException();
+	_operators[op->getNickname()] = op;
+	return *op;
+}
+
+void Channel::removeOperator(const ChannelOperator &op)
+{
+	if (_operators.find(op.getNickname()) == _operators.end())
+		throw UserNotMemberException();
+	_operators.erase(op.getNickname());
+}
+
+const map<string, User *> Channel::getMembers(void) const
 {
 	return _members;
 }
 
-uint32_t	Channel::getMembersCount(void) const
+void Channel::setMembers(const map<string, User *> &new_members)
 {
-	return _members.size();
+	_members = new_members;
 }
 
-void	Channel::setKey(const string &new_key)
+const User &Channel::getMember(const string &username) const
 {
-	_key = new_key;
+	if (_members.find(username) == _members.end())
+		throw UserNotMemberException();
+	return *(_members.at(username));
 }
 
-void	Channel::setTopic(const string &new_topic)
+void Channel::addMember(User *user)
 {
-	_topic = new_topic;
+	if (_members.find(user->getNickname()) != _members.end())
+		throw UserAlreadyMemberException();
+	_members[user->getNickname()] = user;
 }
 
-void	Channel::setMode(const t_channel_modes &mode, const bool status)
+void Channel::removeMember(const User &user)
 {
-	if (mode < 0 || mode >= N_MODES) //modalita' sbagliata
-		throw NotExistingModeException();
-	_modes[mode] = status;
-	//TODO implementare le effettive modifiche alle modalita' del canale. esempio: key deve cambiare la chiave del canale
-}
-
-bool	Channel::handleJoinRequest(User &user)
-{
-	const string nickname = user.getNickname();
-	
-	if (_modes[MODE_I])
-	{
-		if (!_pending_invitations.at(nickname))
-			_requests[nickname] = &user;
-		else
-		{
-			_requests.erase(nickname);
-			_members[nickname] = &user;
-		}
-	}
-	else
-		_members[nickname] = &user;
-	return (_members[nickname] != NULL);
-}
-
-void	Channel::addUser(User &user)
-{
-	_members[user.getNickname()] = &user;
-}
-
-void	Channel::addOperator(ChannelOperator &op)
-{
-	if (_members[op.getNickname()] == NULL) //se l'operatore non e' un user di questo canale
-		throw UserNotInChannelException();
-	else
-		_operators[op.getNickname()] = &op;
-}
-
-void	Channel::removeUser(const User &user)
-{
+	if (_members.find(user.getNickname()) == _members.end())
+		throw UserNotMemberException();
 	_members.erase(user.getNickname());
 }
 
-const char *Channel::UserNotInChannelException::what() const throw()
+const map<string, User *> Channel::getRequests(void) const
 {
-	return "User not in channel";
+	return _requests;
 }
 
-const char *Channel::NotOperatorException::what() const throw()
+void Channel::setRequests(const map<string, User *> &new_requests)
 {
-	return "User not an operator";
+	_requests = new_requests;
 }
 
-const char *Channel::NotExistingModeException::what() const throw()
+const User &Channel::getRequest(const string &username) const
 {
-	return "Mode does not exist";
+	if (_requests.find(username) == _requests.end())
+		throw UserNotMemberException();
+	return *(_requests.at(username));
 }
 
-const char *Channel::InvalidCredentialsException::what() const throw()
+void Channel::addRequest(User *user)
 {
-	return "Invalid credentials";
+	if (_requests.find(user->getNickname()) != _requests.end())
+		throw UserAlreadyMemberException();
+	_requests[user->getNickname()] = user;
 }
 
-const char *Channel::MemberNotFoundException::what() const throw()
+void Channel::removeRequest(const User &user)
 {
-	return "Member not found";
+	if (_requests.find(user.getNickname()) == _requests.end())
+		throw UserNotMemberException();
+	_requests.erase(user.getNickname());
 }
 
-const char *Channel::OperatorNotFoundException::what() const throw()
+const map<string, User *> Channel::getPendingInvitations(void) const
 {
-	return "Operator not found";
+	return _pending_invitations;
 }
 
-const char *Channel::RequestNotFoundException::what() const throw()
+void Channel::setPendingInvitations(const map<string, User *> &new_invitations)
 {
-	return "Request not found";
+	_pending_invitations = new_invitations;
 }
 
-const char *Channel::InvalidNameException::what() const throw()
+const User &Channel::getPendingInvitation(const string &username) const
+{
+	if (_pending_invitations.find(username) == _pending_invitations.end())
+		throw UserNotMemberException();
+	return *(_pending_invitations.at(username));
+}
+
+void Channel::addPendingInvitation(User *user)
+{
+	if (_pending_invitations.find(user->getNickname()) != _pending_invitations.end())
+		throw UserAlreadyMemberException();
+	_pending_invitations[user->getNickname()] = user;
+}
+
+void Channel::removePendingInvitation(const User &user)
+{
+	if (_pending_invitations.find(user.getNickname()) == _pending_invitations.end())
+		throw UserNotMemberException();
+	_pending_invitations.erase(user.getNickname());
+}
+
+bool *Channel::getModes(void) const
+{
+	return (bool *)_modes;
+}
+
+void Channel::setModes(const bool new_modes[N_MODES])
+{
+	for (int i = 0; i < N_MODES; i++)
+		_modes[i] = new_modes[i];
+}
+
+bool Channel::getMode(const t_channel_modes &mode) const
+{
+	return _modes[mode];
+}
+
+void Channel::setMode(const t_channel_modes &mode, const bool value)
+{
+	_modes[mode] = value;
+}
+
+bool Channel::handleJoinRequest(User &user)
+{
+	if (_requests.find(user.getNickname()) == _requests.end())
+		return false;
+	_members[user.getNickname()] = &user;
+	_requests.erase(user.getNickname());
+	return true;
+}
+
+void Channel::promoteOperator(const string &username)
+{
+	if (_operators.find(username) != _operators.end())
+		throw UserAlreadyOperatorException();
+	if (_members.find(username) == _members.end())
+		throw UserNotMemberException();
+	_operators[username] = new ChannelOperator(getMember(username));
+}
+
+void Channel::demoteOperator(const string &username)
+{
+	if (_operators.find(username) == _operators.end())
+		throw UserNotOperatorException();
+	delete _operators[username];
+	_operators.erase(username);
+}
+
+const char	*Channel::InvalidNameException::what() const throw()
 {
 	return "Invalid channel name";
+}
+
+const char *Channel::InvalidTopicException::what() const throw()
+{
+	return "Invalid channel topic";
+}
+
+const char *Channel::InvalidKeyException::what() const throw()
+{
+	return "Invalid channel key";
+}
+
+const char *Channel::UserAlreadyMemberException::what() const throw()
+{
+	return "User is already a member of this channel";
+}
+
+const char *Channel::UserAlreadyOperatorException::what() const throw()
+{
+	return "User is already an operator of this channel";
+}
+
+const char *Channel::UserNotMemberException::what() const throw()
+{
+	return "User is not a member of this channel";
+}
+
+const char *Channel::UnknownModeException::what() const throw()
+{
+	return "Unknown channel mode";
 }
 
