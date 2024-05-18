@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 15:43:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 10:31:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,10 @@ using namespace std;
 class ChannelOperator : public User
 {
 	public:
-		ChannelOperator();
+		ChannelOperator(void);
 		ChannelOperator(const ChannelOperator &copy);
 		ChannelOperator(const User &user); //per promuovere l'user a operator
-		~ChannelOperator();
+		~ChannelOperator(void);
 		ChannelOperator &operator=(const ChannelOperator &rhs);
 
 		void	channelKick(const User &user, Channel &channel) const;

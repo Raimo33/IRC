@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 18:22:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 11:28:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,26 +14,38 @@
 
 #include "headers/User.hpp"
 #include "headers/ChannelOperator.hpp"
+#include "headers/utils.hpp"
 
-Channel::Channel(void) :
-	_name(""),
+Channel::Channel(const string &name, ChannelOperator &op) :
+	_name(name),
+	_key(""),
 	_topic(""),
 	_operators(),
 	_members(),
-	_requests(),
-	_modes() {}
-
-Channel::Channel(const string &name, const string &key, const string &topic) :
-	_name(name),
-	_key(key),
-	_topic(topic),
-	_operators(),
-	_members(),
-	_requests(),
-	_modes()
+	_requests()
 {
+	if (_name.empty() || is_channel_prefix(_name[0]) == false)
+		throw InvalidNameException();
+	_operators[op.getNickname()] = &op;
+	_members[op.getNickname()] = &op;
 	for (int i = 0; i < N_MODES; i++)
 		_modes[i] = false;
+}
+
+Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
+	_key(key),
+	_topic(""),
+	_operators(),
+	_members(),
+	_requests()
+{
+	if (_name.empty() || is_channel_prefix(_name[0]) == false)
+		throw InvalidNameException();
+	_operators[op.getNickname()] = &op;
+	_members[op.getNickname()] = &op;
+	for (int i = 0; i < N_MODES; i++)
+		_modes[i] = false;
+	_modes[MODE_K] = true;
 }
 
 Channel::Channel(const Channel &copy) :
@@ -47,7 +59,7 @@ Channel::Channel(const Channel &copy) :
 		_modes[i] = copy._modes[i];
 }
 
-Channel::~Channel() {}
+Channel::~Channel(void) {}
 
 Channel	&Channel::operator=(const Channel &rhs)
 {
@@ -63,17 +75,17 @@ Channel	&Channel::operator=(const Channel &rhs)
 	return *this;
 }
 
-string	Channel::getName() const
+string	Channel::getName(void) const
 {
 	return _name;
 }
 
-string	Channel::getKey() const
+string	Channel::getKey(void) const
 {
 	return _key;
 }
 
-string	Channel::getTopic() const
+string	Channel::getTopic(void) const
 {
 	return _topic;
 }
@@ -116,11 +128,6 @@ uint32_t	Channel::getMembersCount(void) const
 	return _members.size();
 }
 
-void	Channel::setName(const string &new_name)
-{
-	_name = new_name;
-}
-
 void	Channel::setKey(const string &new_key)
 {
 	_key = new_key;
@@ -136,6 +143,26 @@ void	Channel::setMode(const t_channel_modes &mode, const bool status)
 	if (mode < 0 || mode >= N_MODES) //modalita' sbagliata
 		throw NotExistingModeException();
 	_modes[mode] = status;
+	//TODO implementare le effettive modifiche alle modalita' del canale. esempio: key deve cambiare la chiave del canale
+}
+
+bool	Channel::handleJoinRequest(User &user)
+{
+	const string nickname = user.getNickname();
+	
+	if (_modes[MODE_I])
+	{
+		if (!_pending_invitations.at(nickname))
+			_requests[nickname] = &user;
+		else
+		{
+			_requests.erase(nickname);
+			_members[nickname] = &user;
+		}
+	}
+	else
+		_members[nickname] = &user;
+	return (_members[nickname] != NULL);
 }
 
 void	Channel::addUser(User &user)
@@ -152,7 +179,7 @@ void	Channel::addOperator(ChannelOperator &op)
 }
 
 void	Channel::addRequest(User &user)
-{
+{ 
 	_requests[user.getNickname()] = &user;
 }
 
@@ -194,5 +221,10 @@ const char *Channel::OperatorNotFoundException::what() const throw()
 const char *Channel::RequestNotFoundException::what() const throw()
 {
 	return "Request not found";
+}
+
+const char *Channel::InvalidNameException::what() const throw()
+{
+	return "Invalid channel name";
 }
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 17:23:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 11:23:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,10 +61,8 @@ void	User::joinChannel(Channel &channel)
 {
 	if (_channels.size() > MAX_CHANNELS_PER_USER)
 		throw TooManyChannelsException();
-	if (channel.getMode(MODE_I) == false) //se il canale non e' invite-only
+	if (channel.handleJoinRequest(*this))
 		_channels[channel.getName()] = &channel;
-	else
-		channel.addRequest(*this);
 }
 
 void	User::joinChannel(Channel &channel, const string &key)
@@ -72,7 +70,10 @@ void	User::joinChannel(Channel &channel, const string &key)
 	if (_channels.size() > MAX_CHANNELS_PER_USER)
 		throw TooManyChannelsException();
 	if (channel.getMode(MODE_K) == false || channel.getKey() == key)
-		_channels[channel.getName()] = &channel;
+	{
+		if (channel.handleJoinRequest(*this))
+			_channels[channel.getName()] = &channel;
+	}
 	else
 		throw InvalidCredentialsException();
 }

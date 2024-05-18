@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/17 18:28:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/18 11:04:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "headers/PrivateMessage.hpp"
 #include "headers/Message.hpp"
 #include "headers/Channel.hpp"
+#include "headers/ChannelOperator.hpp"
 
 EventHandler::EventHandler(void) :
 	_client(NULL),
@@ -208,21 +209,23 @@ void EventHandler::executeCommandJoin(const vector<string> &params)
 
 	for (size_t i = 0; i < channels.size(); i++)
 	{
-		Channel channel;
-
 		try
 		{
-			channel = _server->getChannel(channels[i]);
+			Channel	channel = _server->getChannel(channels[i]);
+			if (i < keys.size())
+				_client->joinChannel(channel, keys[i]);
+			else
+				_client->joinChannel(channel);
 		}
 		catch (Server::ChannelNotFoundException &e)
 		{
-			//TODO create channel (aggiungerlo alla lista di canali del server)
-			//TODO capire la questione delle chiavi, se il canale nuovo deve essere inizializzato con la chiave nel caso in cui l'utente la scriva
+			ChannelOperator op(*_client);
+
+			if (i < keys.size())
+				_server->addChannel(Channel(channels[i], keys[i], op));
+			else
+				_server->addChannel(Channel(channels[i], op));
 		}
-		if (i < keys.size())
-			_client->joinChannel(channel, keys[i]);
-		else
-			_client->joinChannel(channel);
 	};
 }
 
