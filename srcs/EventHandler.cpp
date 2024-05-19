@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:19:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:21:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	return input;
 }
 
-void EventHandler::executeCommandPrivmsg(const vector<string> &params)
+void EventHandler::executeCommandPrivmsg(const vector<const string> &params)
 {
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{

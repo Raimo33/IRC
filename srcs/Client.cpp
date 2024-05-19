@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:00:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:30:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ uint16_t	Client::getPort(void) const
 	return _port;
 }
 
-const string	Client::getIpAddr(void) const
+const string	&Client::getIpAddr(void) const
 {
 	return _ip_addr;
 }

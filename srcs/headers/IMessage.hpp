@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 17:16:12 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:17:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:24:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ class User;
 class IMessage
 {
 	public:
-		explicit IMessage(const string &content, User &sender);
+		explicit IMessage(const string &content, const User &sender);
 		IMessage(const IMessage &copy);
 		virtual ~IMessage(void) = 0;
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PrivateMessage.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:03:42 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 14:55:43 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:23:39 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,11 @@ class Channel;
 class PrivateMessage: public IMessage
 {
 	public:
-		explicit PrivateMessage(const string &content, User &sender, const User &receiver);
+		explicit PrivateMessage(const string &content, const User &sender, const User &receiver);
 		PrivateMessage(const PrivateMessage &copy);
 		~PrivateMessage(void);
 
-		const User	*getReceiver() const;
+		const User	*getReceiver(void) const;
 
 	private:
 		const User	*_receiver;

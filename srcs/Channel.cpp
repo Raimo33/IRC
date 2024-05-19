@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 14:28:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:29:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ Channel::Channel(const Channel &copy) :
 
 Channel::~Channel(void) {}
 
-const string Channel::getName(void) const
+const string &Channel::getName(void) const
 {
 	return _name;
 }
@@ -67,7 +67,7 @@ void Channel::setName(const string &new_name)
 	_name = new_name;
 }
 
-const string Channel::getKey(void) const
+const string &Channel::getKey(void) const
 {
 	return _key;
 }
@@ -79,7 +79,7 @@ void Channel::setKey(const string &new_key)
 	_key = new_key;
 }
 
-const string Channel::getTopic(void) const
+const string &Channel::getTopic(void) const
 {
 	return _topic;
 }
@@ -101,7 +101,7 @@ void Channel::setMemberLimit(const uint32_t new_limit)
 	_member_limit = new_limit;
 }
 
-const map<string, ChannelOperator *> Channel::getOperators(void) const
+const map<string, ChannelOperator *> &Channel::getOperators(void) const
 {
 	return _operators;
 }
@@ -133,7 +133,7 @@ void Channel::removeOperator(const ChannelOperator &op)
 	_operators.erase(op.getNickname());
 }
 
-const map<string, User *> Channel::getMembers(void) const
+const map<string, User *> &Channel::getMembers(void) const
 {
 	return _members;
 }
@@ -164,7 +164,7 @@ void Channel::removeMember(const User &user)
 	_members.erase(user.getNickname());
 }
 
-const map<string, User *> Channel::getPendingInvitations(void) const
+const map<string, User *> &Channel::getPendingInvitations(void) const
 {
 	return _pending_invitations;
 }
@@ -195,9 +195,9 @@ void Channel::removePendingInvitation(const User &user)
 	_pending_invitations.erase(user.getNickname());
 }
 
-bool *Channel::getModes(void) const
+const bool *Channel::getModes(void) const
 {
-	return (bool *)_modes;
+	return _modes;
 }
 
 void Channel::setModes(const bool new_modes[N_MODES])

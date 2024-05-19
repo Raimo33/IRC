@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:57:26 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:01:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:26:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,11 @@ class Message : public IMessage
 {
 	public:
 		//un messaggio in un canale di 2 persone deve passare come private message
-		explicit Message(const string &content, User &sender, Channel &channel);
+		explicit Message(const string &content, const User &sender, const Channel &channel);
 		Message(const Message &copy);
 		~Message(void);
 
-		Channel	&getChannel(void) const;
+		const Channel	*getChannel(void) const;
 
 	private:
 		const Channel	*_channel;

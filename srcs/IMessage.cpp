@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 18:09:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 13:08:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:31:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ const User	&IMessage::getSender(void) const
 	return *_sender;
 }
 
-string	IMessage::getContent(void) const
+const string	&IMessage::getContent(void) const
 {
 	return _content;
 }

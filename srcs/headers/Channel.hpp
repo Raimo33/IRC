@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:18:59 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:29:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ class Channel
 		const User								&getPendingInvitation(const string &username) const;
 		void									addPendingInvitation(User *user);
 		void									removePendingInvitation(const User &user);
-		bool									*getModes(void) const;
+		const bool								*getModes(void) const;
 		void									setModes(const bool new_modes[N_MODES]);
 		bool									getMode(const t_channel_modes &mode) const;
 		void									setMode(const t_channel_modes &mode, const bool value);

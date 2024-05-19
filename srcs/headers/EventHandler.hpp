@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:17:38 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:22:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,9 @@ enum e_cmd_type
 
 struct s_input
 {
-	string			prefix;
-	e_cmd_type		command;
-	vector<string>	params;
+	string					prefix;
+	e_cmd_type				command;
+	vector<const string>	params;
 };
 
 //esiste un event handler per ogni client, che si occupa di gestire i comandi ricevuti dal client
