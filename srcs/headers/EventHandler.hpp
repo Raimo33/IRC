@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:22:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:45:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,12 +43,13 @@ struct s_input
 class EventHandler
 {
 	public:
-		explicit EventHandler(Client *client, Server *server);
+		EventHandler(void);
+		EventHandler(const EventHandler &copy);
 		~EventHandler(void);
 
 		const map<string, e_cmd_type>	&getCommands(void) const;
 		const Client					*getClient(void) const;
-		const Server					*getServer(void) const;
+		void							setClient(Client *client);
 
 		void 							processInput(string raw_input);
 		void							deliverMessage(const User &receiver, const PrivateMessage &message) const;
@@ -60,19 +61,19 @@ class EventHandler
 	private:
 
 		s_input							parseInput(string &raw_input) const;
-		void							executeCommandPrivmsg(const vector<string> &params);
-		void							executeCommandMode(const vector<string> &params);
-		void							executeCommandJoin(const vector<string> &params);
-		void							executeCommandPass(const vector<string> &params);
-		void							executeCommandNick(const vector<string> &params);
-		void							executeCommandQuit(const vector<string> &params);
-		void							executeCommandUser(const vector<string> &params);
+		void							executeCommandPrivmsg(const vector<const string> &params);
+		void							executeCommandMode(const vector<const string> &params);
+		void							executeCommandJoin(const vector<const string> &params);
+		void							executeCommandPass(const vector<const string> &params);
+		void							executeCommandNick(const vector<const string> &params);
+		void							executeCommandQuit(const vector<const string> &params);
+		void							executeCommandUser(const vector<const string> &params);
 		void							sendBufferedString(const User &receiver, const string &string) const;
 		const map<string, e_cmd_type>	&initCommandMap(void) const;
 
-		const map<string, e_cmd_type>	_commands;
-		const Client					*_client;
-		const Server					*_server;
+		const map<string, e_cmd_type>	_commands; //TODO spostare fuori (pseudo globale) altrimenti viene creato ad ogni evento per ogni client
+		Client							*_client;
+		Server							*_server;
 };
 
 class EventHandler::CommandNotFoundException : public exception

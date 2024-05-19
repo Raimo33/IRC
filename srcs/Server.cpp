@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:00:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:58:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,8 @@
 Server::Server(const uint16_t port_no, const string &password) :
 	_port(port_no),
 	_pwd_hash(Hasher::hash(password)),
-	_clients(),
-	_users(),
-	_channels(),
-	_pollfds(),
-	_socket(socket_p(AF_INET, SOCK_STREAM, 0))
+	_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
+	_event_handler(EventHandler())
 {
 	struct sockaddr_in server_addr;
 	pollfd server_poll_fd;
@@ -48,7 +45,8 @@ Server::Server(const Server &copy) :
 	_users(copy._users),
 	_channels(copy._channels),
 	_pollfds(copy._pollfds),
-	_socket(copy._socket) {}
+	_socket(copy._socket),
+	_event_handler(copy._event_handler) {}
 
 Server::~Server(void) {}
 
@@ -239,7 +237,7 @@ int	Server::getSocket(void) const
 	return _socket;
 }
 
-const string	Server::getUserPassword(const string &username) const
+const string	&Server::getUserPassword(const string &username) const
 {
 	for (map<string, User *>::const_iterator it = _users.begin(); it != _users.end(); it++)
 	{
@@ -257,8 +255,9 @@ void Server::handleClient(Client *client, size_t *i)
 	if (bytes_read > 0)
 	{
 		buffer[bytes_read - 1] = '\0';
-		EventHandler handler(client, this);
-		handler.processInput(buffer); // se tutto va bene esegue il comando
+		_event_handler.setClient(client);
+		_event_handler.processInput(buffer); // se tutto va bene esegue il comando
+		_event_handler.setClient(NULL);
 	}
 	else if (bytes_read <= 0)
 	{
@@ -267,7 +266,7 @@ void Server::handleClient(Client *client, size_t *i)
 		(*i)--;
 		// Error
 		if (bytes_read < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
-			throw runtime_error(strerror(errno));
+			throw SystemErrorException(strerror(errno));
 	}
 }
 

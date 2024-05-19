@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:35:38 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:17:26 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:48:30 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class Server;
 class Client : public User
 {
 	public:
-		Client(Server *server, const int socket, const string &ip_addr, const uint16_t port);
+		explicit Client(Server *server, const int socket, const string &ip_addr, const uint16_t port);
 		Client(const Client &copy);
 		~Client(void);
 

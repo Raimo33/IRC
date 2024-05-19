@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:18:08 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:58:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <vector>
 # include <string>
 # include <cstring>
+# include <cstdlib>
 # include <map>
 # include <poll.h>
 # include <netinet/in.h>
@@ -28,16 +29,18 @@
 # include <stdexcept>
 # include <sstream>
 
+# include "EventHandler.hpp"
 # include "SystemCalls.hpp"
-# include "Channel.hpp"
 
 # define BUFFER_SIZE 1024
 # define MAX_PASSWORD_LEN 64
 
 using namespace std;
 
-class user;
+class User;
 class Client;
+class Channel;
+class EventHandler;
 
 class Server
 {
@@ -45,17 +48,6 @@ class Server
 		explicit Server(const uint16_t port_no, const string &password);
 		Server(const Server &copy);
 		~Server(void);
-
-		void							run(void);
-
-		class							ChannelAlreadyExistsException; //addChannel
-		class							ChannelNotFoundException; //getChannel, User::joinChannel
-		class							UserAlreadyExistsException; //addUser
-		class							UserNotFoundException; //getUserPassword, getUser
-		class 							InvalidPasswordException; //constructor
-		class							ClientNotFoundException; //removeClient, getClient
-		class							ClientAlreadyExistsException; //addClient
-		class 							HandshakeFailedException; //handshake
 
 		uint16_t						getPort(void) const;
 		size_t							getPwdHash(void) const;
@@ -80,12 +72,24 @@ class Server
 		void							removePollfd(const pollfd pollfd);
 		void							removePollfd(const int socket);
 		int								getSocket(void) const;
+		EventHandler					&getEventHandler(void);
+		void							setEventHandler(const EventHandler &event_handler);
 
 		const string					&getUserPassword(const string &username) const;
 		void							handleClient(Client *client, size_t *i);
 		void							disconnectClient(Client *client);
 		void							handshake(const int client_socket) const;
 		void							configureNonBlocking(const int client_socket) const;
+		void							run(void);
+
+		class							ChannelAlreadyExistsException; //addChannel
+		class							ChannelNotFoundException; //getChannel, User::joinChannel
+		class							UserAlreadyExistsException; //addUser
+		class							UserNotFoundException; //getUserPassword, getUser
+		class 							InvalidPasswordException; //constructor
+		class							ClientNotFoundException; //removeClient, getClient
+		class							ClientAlreadyExistsException; //addClient
+		class 							HandshakeFailedException; //handshake
 
 	private:
 		const uint16_t					_port; //la porta va da 0 a 65535 (2 bytes)
@@ -95,6 +99,7 @@ class Server
 		map<string, Channel *>			_channels;
 		vector<pollfd>					_pollfds;
 		const int						_socket;
+		EventHandler					_event_handler;
 };
 
 class Server::ChannelAlreadyExistsException : public exception

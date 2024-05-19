@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:21:56 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:49:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,13 @@
 static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
 
-EventHandler::EventHandler(Client *client, Server *server) :
+EventHandler::EventHandler(void) :
 	_commands(initCommandMap()),
-	_client(client),
-	_server(server) {}
+	_client(NULL) {}
 
 EventHandler::~EventHandler(void) {}
 
-const map<string, e_cmd_type>	EventHandler::getCommands(void) const
+const map<string, e_cmd_type>	&EventHandler::getCommands(void) const
 {
 	return _commands;
 }
@@ -37,9 +36,9 @@ const Client	*EventHandler::getClient(void) const
 	return _client;
 }
 
-const Server	*EventHandler::getServer(void) const
+void	EventHandler::setClient(Client *client)
 {
-	return _server;
+	_client = client;
 }
 
 //JOIN #channel1,#channel2,#channel3 key1,key2,key3
@@ -177,13 +176,13 @@ void EventHandler::executeCommandPrivmsg(const vector<const string> &params)
 	}
 }
 
-void EventHandler::executeCommandMode(const vector<string> &params)
+void EventHandler::executeCommandMode(const vector<const string> &params)
 {
 	//TODO
 	(void)params;
 }
 
-void EventHandler::executeCommandJoin(const vector<string> &params)
+void EventHandler::executeCommandJoin(const vector<const string> &params)
 {
 	//JOIN <channel1,channel2,channel3> <key1,key2,key3>
 	vector<string> channels = split(params[0], ','); //se non e' in cpp98 mettiamolo in utils
@@ -211,7 +210,7 @@ void EventHandler::executeCommandJoin(const vector<string> &params)
 	};
 }
 
-void EventHandler::executeCommandPass(const vector<string> &params)
+void EventHandler::executeCommandPass(const vector<const string> &params)
 {
 	if (_client->getIsConnected())
 		throw Client::AlreadyConnectedException();
@@ -220,19 +219,19 @@ void EventHandler::executeCommandPass(const vector<string> &params)
 	_client->setIsConnected(true);
 }
 
-void EventHandler::executeCommandNick(const vector<string> &params)
+void EventHandler::executeCommandNick(const vector<const string> &params)
 {
 	//TODO se non e' un nickname gia' in uso
 	_client->setNickname(params[0]);
 }
 
-void EventHandler::executeCommandQuit(const vector<string> &params)
+void EventHandler::executeCommandQuit(const vector<const string> &params)
 {
 	(void)params;
-	_server->removeClient(_client);
+	_server->removeClient(*_client);
 }
 
-void EventHandler::executeCommandUser(const vector<string> &params)
+void EventHandler::executeCommandUser(const vector<const string> &params)
 {
 	_client->setUsername(params[0]);
 	_client->authenticate();
