@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 16:31:34 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 09:46:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,9 @@
 
 Channel::Channel(const string &name, ChannelOperator &op) :
 	_name(name),
-	_key(""),
-	_topic(""),
 	_member_limit(DEFAULT_MEMBER_LIMIT),
-	_operators(),
-	_members(),
-	_requests()
 {
-	if (_name.empty() || !is_channel_prefix(_name[0]) || _name.length() > MAX_CHANNEL_NAME_LEN)
+	if (!is_valid_channel_name(name))
 		throw InvalidNameException();
 	_operators[op.getNickname()] = &op;
 	_members[op.getNickname()] = &op;
@@ -34,15 +29,11 @@ Channel::Channel(const string &name, ChannelOperator &op) :
 }
 
 Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
+	_name(name),
 	_key(key),
-	_topic(""),
 	_member_limit(DEFAULT_MEMBER_LIMIT),
-	_operators(),
-	_members(),
-	_requests()
 {
-	setName(name);
-	if (_name.empty() || !is_channel_prefix(_name[0]) || _name.length() > MAX_CHANNEL_NAME_LEN)
+	if (!is_valid_channel_name(name))
 		throw InvalidNameException();
 	_operators[op.getNickname()] = &op;
 	_members[op.getNickname()] = &op;
@@ -56,7 +47,7 @@ Channel::Channel(const Channel &copy) :
 	_topic(copy._topic),
 	_operators(copy._operators),
 	_members(copy._members),
-	_requests(copy._requests)
+	_pending_invitations(copy._pending_invitations),
 {
 	for (int i = 0; i < N_MODES; i++)
 		_modes[i] = copy._modes[i];
@@ -71,7 +62,7 @@ const string Channel::getName(void) const
 
 void Channel::setName(const string &new_name)
 {
-	if (new_name.empty() || !is_channel_prefix(new_name[0]) || new_name.length() > MAX_CHANNEL_NAME_LEN)
+	if (!is_valid_channel_name(new_name))
 		throw InvalidNameException();
 	_name = new_name;
 }
@@ -173,37 +164,6 @@ void Channel::removeMember(const User &user)
 	_members.erase(user.getNickname());
 }
 
-const map<string, User *> Channel::getRequests(void) const
-{
-	return _requests;
-}
-
-void Channel::setRequests(const map<string, User *> &new_requests)
-{
-	_requests = new_requests;
-}
-
-const User &Channel::getRequest(const string &username) const
-{
-	if (_requests.find(username) == _requests.end())
-		throw UserNotMemberException();
-	return *(_requests.at(username));
-}
-
-void Channel::addRequest(User *user)
-{
-	if (_requests.find(user->getNickname()) != _requests.end())
-		throw UserAlreadyMemberException();
-	_requests[user->getNickname()] = user;
-}
-
-void Channel::removeRequest(const User &user)
-{
-	if (_requests.find(user.getNickname()) == _requests.end())
-		throw UserNotMemberException();
-	_requests.erase(user.getNickname());
-}
-
 const map<string, User *> Channel::getPendingInvitations(void) const
 {
 	return _pending_invitations;
@@ -254,15 +214,6 @@ bool Channel::getMode(const t_channel_modes &mode) const
 void Channel::setMode(const t_channel_modes &mode, const bool value)
 {
 	_modes[mode] = value;
-}
-
-bool Channel::handleJoinRequest(User &user)
-{
-	if (_requests.find(user.getNickname()) == _requests.end())
-		return false;
-	_members[user.getNickname()] = &user;
-	_requests.erase(user.getNickname());
-	return true;
 }
 
 void Channel::promoteOperator(const string &username)

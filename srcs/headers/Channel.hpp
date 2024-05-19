@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 16:31:15 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 09:51:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,11 +66,6 @@ class Channel
 		const User								&getMember(const string &username) const;
 		void									addMember(User *user);
 		void									removeMember(const User &user);
-		const map<string, User *>				getRequests(void) const;
-		void									setRequests(const map<string, User *> &new_requests);
-		const User								&getRequest(const string &username) const;
-		void									addRequest(User *user);
-		void									removeRequest(const User &user);
 		const map<string, User *>				getPendingInvitations(void) const;
 		void									setPendingInvitations(const map<string, User *> &new_invitations);
 		const User								&getPendingInvitation(const string &username) const;
@@ -95,11 +90,9 @@ class Channel
 		friend class 							ChannelOperator;
 
 	private:
-		// void									addInvite(User &user);
-		// void									addMember(User &user);
+
 		void									promoteOperator(const string &username);
 		void									demoteOperator(const string &username);
-		// void									removeMember(const User &user);
 
 		string									_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
 		string									_key;
@@ -107,7 +100,6 @@ class Channel
 		uint32_t								_member_limit;
 		map<string, ChannelOperator *>			_operators; // {username, operator}
 		map<string, User *>						_members; // {username, user}
-		map<string, User *>						_requests; // {username, user}
 		map<string, User *>						_pending_invitations; // {username, user} (il channel operator puo fare /invite)
 		bool									_modes[N_MODES];
 };

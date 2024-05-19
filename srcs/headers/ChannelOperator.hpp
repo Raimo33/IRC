@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelOperator.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 14:46:38 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 09:41:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ class ChannelOperator : public User
 
 		void	channelKick(const User &user, Channel &channel) const; //chiama removeMember di Channel
 		void	channelInvite(User &user, Channel &channel) const; //chiama addInvite di Channel
-		string	channelTopicGet(const Channel &channel) const; // chiama getTopic di Channel
 		void	channelTopicSet(Channel &channel, const string &new_topic) const; // chiama setTopic di Channel
 		void	channelModeChange(Channel &channel, const t_channel_modes &mode, const bool status) const; // chiama setMode di Channel
 
