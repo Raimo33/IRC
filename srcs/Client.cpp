@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 16:47:50 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 10:18:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 Client::Client(const Server *server, const int socket, const string &ip_addr, const uint16_t port) :
 	User(),
-	_is_connected(true),
+	_is_connected(false),
 	_port(port),
 	_ip_addr(ip_addr),
 	_socket(socket),
@@ -42,7 +42,12 @@ bool	Client::getIsConnected(void) const
 void	Client::setIsConnected(const bool is_connected)
 {
 	if (_is_connected == is_connected)
-		throw AlreadyConnectedException();
+	{
+		if (is_connected)
+			throw AlreadyConnectedException();
+		else
+			throw AlreadyDisconnectedException();
+	}
 	_is_connected = is_connected;
 }
 
@@ -78,7 +83,6 @@ void	Client::authenticate(void)
 	_pwd_hash = hasher.hexdigest();
 
 	//TODO gestire il caso in cui l'utente non ha mai fatto il signup
-    // Check credentials
 	try
 	{
 		if (_server->getUserPassword(_username) != _pwd_hash)
@@ -110,12 +114,17 @@ void	Client::authenticate(void)
 
 const char *Client::NotConnectedException::what(void) const throw()
 {
-	return "User is not connected";
+	return "Client is not connected";
 }
 
 const char *Client::AlreadyConnectedException::what(void) const throw()
 {
-	return "User is already connected";
+	return "Client is already connected";
+}
+
+const char *Client::AlreadyDisconnectedException::what(void) const throw()
+{
+	return "Client is already disconnected";
 }
 
 const char *Client::InvalidPasswordException::what(void) const throw()

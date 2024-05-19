@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 16:03:54 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 10:10:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,10 @@ void	Server::run(void)
 					addClient(client);
 					cout << "TCP Connection request from " << client->getIpAddr() << endl;
 					handshake(client_socket); // SSL handshake
+					client->setIsConnected(true);
+
 					pollfd client_poll_fd;
+
 					client_poll_fd.fd = client_socket;
 					client_poll_fd.events = POLLIN;
 					addPollfd(client_poll_fd);

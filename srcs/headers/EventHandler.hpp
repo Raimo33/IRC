@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 16:43:25 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 10:18:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ class EventHandler
 		explicit EventHandler(Client *client, Server *server);
 		~EventHandler(void);
 
-		const map<string, t_cmd>	getCommands(void) const;
+		const map<string, t_cmd>		getCommands(void) const;
 		const Client					*getClient(void) const;
 		const Server					*getServer(void) const;
 

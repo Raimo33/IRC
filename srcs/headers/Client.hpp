@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:35:38 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 16:41:41 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 10:13:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Client : public User
 		void			authenticate(void);
 
 		class			AlreadyConnectedException; //setIsConnected
+		class 			AlreadyDisconnectedException; //setIsConnected
 		class 			NotConnectedException; //EventHandler
 		class			InvalidPasswordException; //authenticate
 
@@ -54,6 +55,12 @@ class Client : public User
 };
 
 class Client::AlreadyConnectedException : public exception
+{
+	public:
+		const char	*what(void) const throw();
+};
+
+class Client::AlreadyDisconnectedException : public exception
 {
 	public:
 		const char	*what(void) const throw();

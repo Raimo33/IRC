@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 13:19:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 10:23:25 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,21 @@ EventHandler::EventHandler(Client *client, Server *server) :
 
 EventHandler::~EventHandler(void) {}
 
+const map<string, t_cmd>	EventHandler::getCommands(void) const
+{
+	return _commands;
+}
+
+const Client	*EventHandler::getClient(void) const
+{
+	return _client;
+}
+
+const Server	*EventHandler::getServer(void) const
+{
+	return _server;
+}
+
 //JOIN #channel1,#channel2,#channel3 key1,key2,key3
 void	EventHandler::processInput(string raw_input)
 {
@@ -56,7 +71,7 @@ void	EventHandler::processInput(string raw_input)
 		case MODE:
 			checkConnection(_client);
 			checkAuthentication(_client);
-			//TODO
+			//TODO mode
 			break;
 		//PASS <connectionpassword>
 		case PASS: //viene usata dagli utenti per autenticarsi
@@ -74,12 +89,26 @@ void	EventHandler::processInput(string raw_input)
 			break;
 		//QUIT
 		case QUIT:
-			//TODO forse va tolto il client anche da tutti i canali di cui fa parte
 			executeCommandQuit(input.params);
 			break;
 		default:
 			throw CommandNotFoundException();
 	}
+}
+
+void	EventHandler::deliverMessage(const Channel &channel, const Message &msg) const
+{
+    std::map<std::string, User*> users = channel.getMembers();
+
+    for (std::map<std::string, User*>::const_iterator it = users.begin(); it != users.end(); ++it)
+        sendBufferedString(*it->second, msg.getContent());
+}
+
+void	EventHandler::deliverMessage(const User &receiver, const PrivateMessage &msg) const
+{
+	if (receiver.getNickname() == _client->getNickname())
+		throw CantSendMessageToYourselfException();
+	sendBufferedString(receiver, msg.getContent());
 }
 
 //input: ":<prefix> <command> <params> <crlf>"
@@ -201,7 +230,7 @@ void EventHandler::executeCommandPass(const vector<string> &params)
 
 void EventHandler::executeCommandNick(const vector<string> &params)
 {
-	//se non e' un nickname gia' in uso
+	//TODO se non e' un nickname gia' in uso
 	_client->setNickname(params[0]);
 }
 
@@ -215,21 +244,6 @@ void EventHandler::executeCommandUser(const vector<string> &params)
 {
 	_client->setUsername(params[0]);
 	_client->authenticate();
-}
-
-void	EventHandler::deliverMessage(const Channel &channel, const Message &msg) const
-{
-    std::map<std::string, User*> users = channel.getMembers();
-
-    for (std::map<std::string, User*>::const_iterator it = users.begin(); it != users.end(); ++it)
-        sendBufferedString(*it->second, msg.getContent());
-}
-
-void	EventHandler::deliverMessage(const User &receiver, const PrivateMessage &msg) const
-{
-	if (receiver.getNickname() == _client->getNickname())
-		throw CantSendMessageToYourselfException();
-	sendBufferedString(receiver, msg.getContent());
 }
 
 void	EventHandler::sendBufferedString(const User &receiver, const string &string) const
@@ -247,11 +261,6 @@ void	EventHandler::sendBufferedString(const User &receiver, const string &string
 	}
 }
 
-const char *EventHandler::UnknownCommandException::what() const throw()
-{
-	return "Unknown command";
-}
-
 static void checkConnection(const Client *client)
 {
 	if (!client->getIsConnected())
@@ -262,4 +271,10 @@ static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
 		throw User::NotAuthenticatedException();
+}
+
+
+const char *EventHandler::UnknownCommandException::what() const throw()
+{
+	return "Unknown command";
 }
