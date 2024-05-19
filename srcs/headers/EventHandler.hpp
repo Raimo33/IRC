@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 10:18:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:17:38 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,23 +21,23 @@
 
 using namespace std;
 
-typedef enum e_cmd
+enum e_cmd_type
 {
-	CMD_PASS = 0,
-	CMD_NICK = 1,
-	CMD_USER = 2,
-	CMD_JOIN = 3,
-	CMD_PRIVMSG = 4,
-	CMD_MODE = 5,
-	CMD_QUIT = 6
-}	t_cmd;
+	PASS = 0,
+	NICK = 1,
+	USER = 2,
+	JOIN = 3,
+	PRIVMSG = 4,
+	MODE = 5,
+	QUIT = 6
+};
 
-typedef struct s_input
+struct s_input
 {
 	string			prefix;
-	t_cmd			command;
+	e_cmd_type		command;
 	vector<string>	params;
-}	t_input;
+};
 
 //esiste un event handler per ogni client, che si occupa di gestire i comandi ricevuti dal client
 class EventHandler
@@ -46,7 +46,7 @@ class EventHandler
 		explicit EventHandler(Client *client, Server *server);
 		~EventHandler(void);
 
-		const map<string, t_cmd>		getCommands(void) const;
+		const map<string, e_cmd_type>	&getCommands(void) const;
 		const Client					*getClient(void) const;
 		const Server					*getServer(void) const;
 
@@ -59,7 +59,7 @@ class EventHandler
 
 	private:
 
-		t_input							parseInput(string &raw_input) const;
+		s_input							parseInput(string &raw_input) const;
 		void							executeCommandPrivmsg(const vector<string> &params);
 		void							executeCommandMode(const vector<string> &params);
 		void							executeCommandJoin(const vector<string> &params);
@@ -68,10 +68,23 @@ class EventHandler
 		void							executeCommandQuit(const vector<string> &params);
 		void							executeCommandUser(const vector<string> &params);
 		void							sendBufferedString(const User &receiver, const string &string) const;
+		const map<string, e_cmd_type>	&initCommandMap(void) const;
 
-		const map<string, t_cmd>		_commands;
+		const map<string, e_cmd_type>	_commands;
 		const Client					*_client;
 		const Server					*_server;
+};
+
+class EventHandler::CommandNotFoundException : public exception
+{
+	public:
+		const char	*what(void) const throw();
+};
+
+class EventHandler::CantSendMessageToYourselfException : public exception
+{
+	public:
+		const char	*what(void) const throw();
 };
 
 #endif

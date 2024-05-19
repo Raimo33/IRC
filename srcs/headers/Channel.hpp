@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 10:02:55 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:18:59 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,25 +48,25 @@ class Channel
 		Channel(const Channel &copy);
 		~Channel(void);
 	
-		const string							getName(void) const;
+		const string							&getName(void) const;
 		void									setName(const string &new_name);
-		const string							getKey(void) const;
+		const string							&getKey(void) const;
 		void									setKey(const string &new_key);
-		const string							getTopic(void) const;
+		const string							&getTopic(void) const;
 		void									setTopic(const string &new_topic);
 		uint32_t								getMemberLimit(void) const;
 		void									setMemberLimit(const uint32_t new_limit);
-		const map<string, ChannelOperator *>	getOperators(void) const;
+		const map<string, ChannelOperator *>	&getOperators(void) const;
 		void									setOperators(const map<string, ChannelOperator *> &new_operators);
 		const User								&getOperator(const string &username) const;
 		User									&addOperator(ChannelOperator *op);
 		void									removeOperator(const ChannelOperator &op);
-		const map<string, User *>				getMembers(void) const;
+		const map<string, User *>				&getMembers(void) const;
 		void									setMembers(const map<string, User *> &new_members);
 		const User								&getMember(const string &username) const;
 		void									addMember(User *user);
 		void									removeMember(const User &user);
-		const map<string, User *>				getPendingInvitations(void) const;
+		const map<string, User *>				&getPendingInvitations(void) const;
 		void									setPendingInvitations(const map<string, User *> &new_invitations);
 		const User								&getPendingInvitation(const string &username) const;
 		void									addPendingInvitation(User *user);
@@ -75,8 +75,6 @@ class Channel
 		void									setModes(const bool new_modes[N_MODES]);
 		bool									getMode(const t_channel_modes &mode) const;
 		void									setMode(const t_channel_modes &mode, const bool value);
-		
-		bool									handleJoinRequest(User &user);
 			
 		class       							InvalidNameException; //constructor
 		class									InvalidTopicException; //setTopic

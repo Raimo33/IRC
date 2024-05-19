@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 09:46:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 14:28:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 Channel::Channel(const string &name, ChannelOperator &op) :
 	_name(name),
-	_member_limit(DEFAULT_MEMBER_LIMIT),
+	_member_limit(DEFAULT_MEMBER_LIMIT)
 {
 	if (!is_valid_channel_name(name))
 		throw InvalidNameException();
@@ -31,7 +31,7 @@ Channel::Channel(const string &name, ChannelOperator &op) :
 Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
 	_name(name),
 	_key(key),
-	_member_limit(DEFAULT_MEMBER_LIMIT),
+	_member_limit(DEFAULT_MEMBER_LIMIT)
 {
 	if (!is_valid_channel_name(name))
 		throw InvalidNameException();
@@ -47,7 +47,7 @@ Channel::Channel(const Channel &copy) :
 	_topic(copy._topic),
 	_operators(copy._operators),
 	_members(copy._members),
-	_pending_invitations(copy._pending_invitations),
+	_pending_invitations(copy._pending_invitations)
 {
 	for (int i = 0; i < N_MODES; i++)
 		_modes[i] = copy._modes[i];

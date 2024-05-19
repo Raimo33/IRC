@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 16:01:07 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:18:08 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 # include <stdexcept>
 # include <sstream>
 
-# include "wrappers.hpp"
+# include "SystemCalls.hpp"
 # include "Channel.hpp"
 
 # define BUFFER_SIZE 1024
@@ -57,7 +57,6 @@ class Server
 		class							ClientAlreadyExistsException; //addClient
 		class 							HandshakeFailedException; //handshake
 
-	private:
 		uint16_t						getPort(void) const;
 		size_t							getPwdHash(void) const;
 		const vector<Client *>			&getClients(void) const;
@@ -82,12 +81,13 @@ class Server
 		void							removePollfd(const int socket);
 		int								getSocket(void) const;
 
-		const string					getUserPassword(const string &username) const;
+		const string					&getUserPassword(const string &username) const;
 		void							handleClient(Client *client, size_t *i);
 		void							disconnectClient(Client *client);
 		void							handshake(const int client_socket) const;
 		void							configureNonBlocking(const int client_socket) const;
 
+	private:
 		const uint16_t					_port; //la porta va da 0 a 65535 (2 bytes)
 		const size_t					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
 		vector<Client *>				_clients;

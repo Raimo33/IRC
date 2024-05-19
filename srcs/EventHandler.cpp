@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 10:23:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:19:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,21 +21,13 @@ static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
 
 EventHandler::EventHandler(Client *client, Server *server) :
+	_commands(initCommandMap()),
 	_client(client),
-	_server(server)
-{
-	_commands["PRIVMSG"] = PRIVMSG;
-	_commands["JOIN"] = JOIN;
-	_commands["MODE"] = MODE;
-	_commands["PASS"] = PASS;
-	_commands["NICK"] = NICK;
-	_commands["USER"] = USER;
-	_commands["QUIT"] = QUIT;
-}
+	_server(server) {}
 
 EventHandler::~EventHandler(void) {}
 
-const map<string, t_cmd>	EventHandler::getCommands(void) const
+const map<string, e_cmd_type>	EventHandler::getCommands(void) const
 {
 	return _commands;
 }
@@ -53,7 +45,7 @@ const Server	*EventHandler::getServer(void) const
 //JOIN #channel1,#channel2,#channel3 key1,key2,key3
 void	EventHandler::processInput(string raw_input)
 {
-	t_input	input = parseInput(raw_input);
+	s_input	input = parseInput(raw_input);
 
 	switch (input.command)
 	{
@@ -112,9 +104,9 @@ void	EventHandler::deliverMessage(const User &receiver, const PrivateMessage &ms
 }
 
 //input: ":<prefix> <command> <params> <crlf>"
-t_input	EventHandler::parseInput(string &raw_input) const
+s_input	EventHandler::parseInput(string &raw_input) const
 {
-	t_input	input;
+	s_input	input;
 	string	command;
 	
 	if (raw_input.size() >= 2 && raw_input.substr(raw_input.size() - 2) == "\r\n")
@@ -126,7 +118,7 @@ t_input	EventHandler::parseInput(string &raw_input) const
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il prefix
 	command = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il comando come stringa
 
-	map<string, t_cmd>::const_iterator it;
+	map<string, e_cmd_type>::const_iterator it;
 
 	it = _commands.find(command);
 	if (it == _commands.end())
@@ -157,7 +149,7 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 		//channel msg PRIVMSG <channel> :<message>
 
 		Channel channel = _server->getChannel(params[0]);
-		int		n_members = channel.getMembersCount();
+		int		n_members = channel.getMembers().size();
 
 		if (n_members == 1)
 			throw CantSendMessageToYourselfException();
@@ -261,6 +253,22 @@ void	EventHandler::sendBufferedString(const User &receiver, const string &string
 	}
 }
 
+const map<string, e_cmd_type>	&EventHandler::initCommandMap(void) const
+{
+	static map<string, e_cmd_type>	commands;
+
+	if (!commands.empty()) //se il map e' gia' stato inizializzato
+		return commands;
+	commands["PRIVMSG"] = CMD_PRIVMSG;
+	commands["JOIN"] = CMD_JOIN;
+	commands["MODE"] = CMD_MODE;
+	commands["PASS"] = CMD_PASS;
+	commands["NICK"] = CMD_NICK;
+	commands["USER"] = CMD_USER;
+	commands["QUIT"] = CMD_QUIT;
+	return commands;
+}
+
 static void checkConnection(const Client *client)
 {
 	if (!client->getIsConnected())
@@ -273,8 +281,12 @@ static void checkAuthentication(const Client *client)
 		throw User::NotAuthenticatedException();
 }
 
-
-const char *EventHandler::UnknownCommandException::what() const throw()
+const char	*EventHandler::CommandNotFoundException::what(void) const throw()
 {
-	return "Unknown command";
+	return "Command not found";
+}
+
+const char	*EventHandler::CantSendMessageToYourselfException::what(void) const throw()
+{
+	return "You can't send a message to yourself";
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:35:38 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 10:13:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:17:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,16 @@ class Server;
 class Client : public User
 {
 	public:
-		Client(const Server *server, const int socket, const string &ip_addr, const uint16_t port);
+		Client(Server *server, const int socket, const string &ip_addr, const uint16_t port);
 		Client(const Client &copy);
 		~Client(void);
 
 		bool			getIsConnected(void) const;
 		void			setIsConnected(const bool is_connected);
 		uint16_t		getPort(void) const;
-		const string	getIpAddr(void) const;
+		const string	&getIpAddr(void) const;
 		int				getSocket(void) const;
-		const Server	*getServer(void) const;
+		Server			*getServer(void) const;
 
 		void			authenticate(void);
 
@@ -51,7 +51,7 @@ class Client : public User
 		const uint16_t	_port;
 		const string	_ip_addr; //aka hostname
 		const int		_socket;
-		const Server	*_server;
+		Server			*_server;
 };
 
 class Client::AlreadyConnectedException : public exception

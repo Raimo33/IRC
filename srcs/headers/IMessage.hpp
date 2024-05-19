@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IMessage.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 17:16:12 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 14:55:22 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:17:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,14 @@ class IMessage
 		IMessage(const IMessage &copy);
 		virtual ~IMessage(void) = 0;
 
-		const string getContent(void) const;
-		const time_t getTimestamp(void) const;
-		const User &getSender(void) const;
+		const string	&getContent(void) const;
+		time_t 			getTimestamp(void) const;
+		const User		&getSender(void) const;
 
 	protected:
-		const string _content;
-		const time_t _timestamp;
-		const User *_sender;
+		const string	_content;
+		const time_t	_timestamp;
+		const User		*_sender;
 };
 
 #endif

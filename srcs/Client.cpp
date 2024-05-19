@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 10:18:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:00:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,9 @@
 # include "headers/User.hpp"
 # include "headers/Server.hpp"
 # include "headers/EventHandler.hpp"
+# include "headers/SystemCalls.hpp"
 
-Client::Client(const Server *server, const int socket, const string &ip_addr, const uint16_t port) :
+Client::Client(Server *server, const int socket, const string &ip_addr, const uint16_t port) :
 	User(),
 	_is_connected(false),
 	_port(port),
@@ -66,7 +67,7 @@ int	Client::getSocket(void) const
 	return _socket;
 }
 
-const Server	*Client::getServer(void) const
+Server	*Client::getServer(void) const
 {
 	return _server;
 }
@@ -74,42 +75,49 @@ const Server	*Client::getServer(void) const
 void	Client::authenticate(void)
 {
 	char	buffer[1024];
-	// Prompt user for password
-	send(_socket, "Password: ", 10, 0);
-    recv(_socket, buffer, sizeof(buffer), 0);
+	MD5		hasher;
+	uint32_t len;
 
-	MD5		hasher(string(buffer));
-
+	send_p(_socket, "Password: ", 10, 0);
+    len = recv_p(_socket, buffer, sizeof(buffer), 0);
+	hasher.update(buffer, len);
 	_pwd_hash = hasher.hexdigest();
-
-	//TODO gestire il caso in cui l'utente non ha mai fatto il signup
 	try
 	{
-		if (_server->getUserPassword(_username) != _pwd_hash)
+		const User user = _server->getUser(_username);
+
+		if (user.getPwdHash() == _pwd_hash)
 		{
-			send(_socket, "Invalid credentials\n", 20, 0);
+			_is_authenticated = true;
+			_server->addUser(this);
+		}
+		else
+		{
+			send_p(_socket, "Invalid credentials\n", 20, 0);
 			_is_authenticated = false;
-			return ;
 		}
 	}
 	catch(const Server::UserNotFoundException &e)
 	{
-		send(_socket, "User not found: signing up\n", 28, 0);
-		send(_socket, "Password: ", 10, 0);
-    	recv(_socket, buffer, sizeof(buffer), 0);
-		_pwd_hash = Hasher::hash(string(buffer));
-		send(_socket, "Repeat password: ", 17, 0);
-		recv(_socket, buffer, sizeof(buffer), 0);
-		if (_pwd_hash != Hasher::hash(string(buffer)))
+		send_p(_socket, "User not found: signing up\n", 28, 0);
+		send_p(_socket, "Password: ", 10, 0);
+    	len = recv_p(_socket, buffer, sizeof(buffer), 0);
+		hasher.update(buffer, len);
+		_pwd_hash = hasher.hexdigest();
+		send_p(_socket, "Repeat password: ", 17, 0);
+		len = recv_p(_socket, buffer, sizeof(buffer), 0);
+		hasher.update(buffer, len);
+		if (_pwd_hash == hasher.hexdigest())
 		{
-			send(_socket, "Passwords don't match\n", 22, 0);
+			_is_authenticated = true;
+			_server->addUser(this);
+		}
+		else
+		{
+			send_p(_socket, "Passwords don't match\n", 22, 0);
 			_is_authenticated = false;
-			return ;
 		}
 	}
-	_is_authenticated = true;
-	_server->addUser(*this);
-	_server->addCredentials(_username, _pwd_hash);
 }
 
 const char *Client::NotConnectedException::what(void) const throw()

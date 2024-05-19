@@ -6,7 +6,7 @@
 #    By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/26 15:33:59 by craimond          #+#    #+#              #
-#    Updated: 2024/05/17 16:21:34 by craimond         ###   ########.fr        #
+#    Updated: 2024/05/19 15:00:46 by craimond         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ NAME = ircserv
 
 SRCS = $(addprefix srcs/, irc.cpp Channel.cpp ChannelOperator.cpp Client.cpp EventHandler.cpp IMessage.cpp Message.cpp PrivateMessage.cpp Server.cpp User.cpp utils.cpp wrappers.cpp Hasher.cpp)
 OBJS = $(SRCS:.cpp=.o)
-HDRS = $(addprefix srcs/headers/, Channel.hpp ChannelOperator.hpp Client.hpp EventHandler.hpp IMessage.hpp Message.hpp PrivateMessage.hpp Server.hpp User.hpp utils.hpp wrappers.hpp Hasher.hpp)
+HDRS = $(addprefix srcs/headers/, Channel.hpp ChannelOperator.hpp Client.hpp EventHandler.hpp IMessage.hpp Message.hpp PrivateMessage.hpp Server.hpp User.hpp utils.hpp SystemCalls.hpp Hasher.hpp)
 LEAK_REPORT = leaks.log
 
 CC = c++

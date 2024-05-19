@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   wrappers.hpp                                       :+:      :+:    :+:   */
+/*   SystemCalls.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:47:21 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/15 16:30:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 14:59:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,5 +30,13 @@ int	socket_p(int domain, int type, int protocol);
 int	close_p(int fd);
 int poll_p(struct pollfd *fds, nfds_t nfds, int timeout);
 int shutdown_p(int sockfd, int how);
+ssize_t send_p(int sockfd, const void *buf, size_t len, int flags);
+ssize_t recv_p(int sockfd, void *buf, size_t len, int flags);
+
+class SystemErrorException : public runtime_error
+{
+	public:
+		explicit SystemErrorException(const string &msg);
+};
 
 #endif
