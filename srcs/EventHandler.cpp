@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:40:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:58:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,10 @@ s_input	EventHandler::parseInput(string &raw_input) const
 {
 	s_input	input;
 	string	command;
-	
+
+	if (raw_input.length() > MAX_INPUT_LENGTH)
+		throw InputTooLongException();
+
 	if (raw_input.size() >= 2 && raw_input.substr(raw_input.size() - 2) == "\r\n")
         raw_input = raw_input.substr(0, raw_input.size() - 2);
 
@@ -170,7 +173,7 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 		if (n_members == 2)
 		{
 			//promuovo il messaggio a private message
-			User *receiver;
+			User	*receiver;
 
 			receiver = channel.getMembers().begin()->second;
 			if (receiver->getNickname() == _client->getNickname())

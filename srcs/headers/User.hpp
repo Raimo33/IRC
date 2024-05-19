@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:39:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:45:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,9 +48,6 @@ class User
 		void								joinChannel(Channel &channel);
 		void								joinChannel(Channel &channel, const string &key);
 		void								leaveChannel(Channel &channel);
-		//void								sendMessage(const Channel &channel, const Message &message) const;
-		//void								sendMessage(const User &receiver, const PrivateMessage &message) const;
-
 
 		class								TooManyChannelsException; //joinChannel
 		class								AlreadyAuthenticatedException; //setAuthenticated

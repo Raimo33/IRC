@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:57:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:58:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 
 # include "Client.hpp"
 # include "utils.hpp"
+
+# define MAX_INPUT_LENGTH 512
 
 using namespace std;
 
@@ -55,10 +57,10 @@ class EventHandler
 
 		void 							processInput(string raw_input);
 
-		//TODO mettere deliverMessage direttamente dentro User::sendMessage che chiamera Channel::receiveMessage
 		void							deliverMessage(const User &receiver, const PrivateMessage &message) const;
 		void							deliverMessage(const Channel &receiver, const Message &message) const;
 
+		class							InputTooLongException; //parseInput
 		class							CommandNotFoundException; //processInput, parseInput
 		class							CantSendMessageToYourselfException; //deliverMessage
 
@@ -75,9 +77,15 @@ class EventHandler
 		void							sendBufferedString(const User &receiver, const string &string) const;
 		const map<string, e_cmd_type>	&initCommandMap(void) const;
 
-		const map<string, e_cmd_type>		_commands; //TODO spostare fuori (pseudo globale) altrimenti viene creato per ogni server
-		Client								*_client;
-		Server								*_server;
+		const map<string, e_cmd_type>	_commands; //TODO spostare fuori (pseudo globale) altrimenti viene creato per ogni server
+		Client							*_client;
+		Server							*_server;
+};
+
+class EventHandler::InputTooLongException : public exception
+{
+	public:
+		const char	*what(void) const throw();
 };
 
 class EventHandler::CommandNotFoundException : public exception
