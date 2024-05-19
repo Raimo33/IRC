@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:23:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:34:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,8 +97,8 @@ class Server
 		const uint16_t					_port; //la porta va da 0 a 65535 (2 bytes)
 		const string					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
 		map<int, Client *>				_clients; //{socket, Client *}
-		map<string, User *>				_users;
-		map<string, Channel *>			_channels;
+		map<string, User *>				_users; // {username, User *}
+		map<string, Channel *>			_channels; // {channel_name, Channel *}
 		vector<pollfd>					_pollfds;
 		const int						_socket;
 		EventHandler					_event_handler;

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:44:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:39:30 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class User
 		class								TooManyChannelsException; //joinChannel
 		class								AlreadyAuthenticatedException; //setAuthenticated
 		class								AlreadyDisauthenticatedException; //setAuthenticated
+		class								NicknameAlreadyInUseException; //setNickname
 		class								InvalidCredentialsException; //setAuthenticated
 		class								NotAuthenticatedException; //joinChannel
 		class								UserNotInChannelException; //getChannel
@@ -78,6 +79,12 @@ class User::TooManyChannelsException: public exception
 };
 
 class User::AlreadyAuthenticatedException: public exception
+{
+	public:
+		virtual const char	*what(void) const throw();
+};
+
+class User::NicknameAlreadyInUseException: public exception
 {
 	public:
 		virtual const char	*what(void) const throw();

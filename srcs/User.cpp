@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:47:29 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:40:00 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,27 +145,32 @@ void	User::leaveChannel(Channel &channel)
 	removeChannel(channel);
 }
 
-const char *User::TooManyChannelsException::what() const throw()
+const char	*User::TooManyChannelsException::what() const throw()
 {
 	return "User is already in too many channels";
 }
 
-const char *User::AlreadyAuthenticatedException::what() const throw()
+const char	*User::AlreadyAuthenticatedException::what() const throw()
 {
 	return "User is already authenticated";
 }
 
-const char *User::InvalidCredentialsException::what() const throw()
+const char	*User::NicknameAlreadyInUseException::what() const throw()
+{
+	return "Nickname is already in use";
+}
+
+const char	*User::InvalidCredentialsException::what() const throw()
 {
 	return "Invalid credentials";
 }
 
-const char *User::NotAuthenticatedException::what() const throw()
+const char	*User::NotAuthenticatedException::what() const throw()
 {
 	return "User is not authenticated";
 }
 
-const char *User::UserNotInChannelException::what() const throw()
+const char	*User::UserNotInChannelException::what() const throw()
 {
 	return "User is not in the channel";
 }

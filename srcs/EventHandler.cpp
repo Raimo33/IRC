@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:54:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:39:00 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ void	EventHandler::processInput(string raw_input)
 		case MODE:
 			checkConnection(_client);
 			checkAuthentication(_client);
-			//TODO mode
+			executeCommandMode(input.params);
 			break;
 		//PASS <connectionpassword>
 		case PASS: //viene usata dagli utenti per autenticarsi
@@ -193,7 +193,7 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 
 void EventHandler::executeCommandMode(const vector<string> &params)
 {
-	//TODO
+	//TODO implementare
 	(void)params;
 }
 
@@ -240,6 +240,11 @@ void EventHandler::executeCommandPass(const vector<string> &params)
 void EventHandler::executeCommandNick(const vector<string> &params)
 {
 	//TODO se non e' un nickname gia' in uso
+	for (map<string, User *>::const_iterator it = _server->getUsers().begin(); it != _server->getUsers().end(); ++it)
+	{
+		if (it->second->getNickname() == params[0])
+			throw User::NicknameAlreadyInUseException();
+	}
 	_client->setNickname(params[0]);
 }
 
