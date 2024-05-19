@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:42:08 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:32:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,37 +235,48 @@ void Channel::demoteOperator(const string &username)
 	_operators.erase(username);
 }
 
-const char	*Channel::InvalidNameException::what() const throw()
+const char	*Channel::InvalidNameException::what(void) const throw()
 {
 	return "Invalid channel name";
 }
 
-const char *Channel::InvalidTopicException::what() const throw()
+const char	*Channel::InvalidTopicException::what(void) const throw()
 {
 	return "Invalid channel topic";
 }
 
-const char *Channel::InvalidKeyException::what() const throw()
+const char	*Channel::InvalidKeyException::what(void) const throw()
 {
 	return "Invalid channel key";
 }
 
-const char *Channel::UserAlreadyMemberException::what() const throw()
+const char	*Channel::ChannelFullException::what(void) const throw()
 {
-	return "User is already a member of this channel";
+	return "Channel is full";
 }
 
-const char *Channel::UserAlreadyOperatorException::what() const throw()
+const char	*Channel::UserAlreadyMemberException::what(void) const throw()
 {
-	return "User is already an operator of this channel";
+	return "User is already a member of the channel";
 }
 
-const char *Channel::UserNotMemberException::what() const throw()
+const char	*Channel::UserAlreadyOperatorException::what(void) const throw()
 {
-	return "User is not a member of this channel";
+	return "User is already an operator of the channel";
 }
 
-const char *Channel::UnknownModeException::what() const throw()
+const char	*Channel::UserNotOperatorException::what(void) const throw()
+{
+	return "User is not an operator of the channel";
+}
+
+const char	*Channel::UserNotMemberException::what(void) const throw()
+
+{
+	return "User is not a member of the channel";
+}
+
+const char	*Channel::UnknownModeException::what(void) const throw()
 {
 	return "Unknown channel mode";
 }

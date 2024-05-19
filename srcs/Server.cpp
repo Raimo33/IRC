@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:17:39 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:28:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,14 +146,14 @@ const Client &Server::getClient(const int socket) const
 
 void Server::addClient(Client *client)
 {
-	if (find(_clients.begin(), _clients.end(), client) != _clients.end())
+	if (_clients.at(client->getSocket()))
 		throw ClientAlreadyExistsException();
 	_clients[client->getSocket()] = client;
 }
 
 void Server::removeClient(const Client &client)
 {
-	if (_clients.find(client.getSocket()) == _clients.end())
+	if (!_clients.at(client.getSocket()))
 		throw ClientNotFoundException();
 	_clients.erase(client.getSocket());
 }
@@ -232,7 +232,14 @@ void	Server::addPollfd(const pollfd pollfd)
 
 void	Server::removePollfd(const pollfd pollfd)
 {
-	remove(_pollfds.begin(), _pollfds.end(), pollfd);
+	for (size_t i = 0; i < _pollfds.size(); i++)
+	{
+		if (_pollfds[i].fd == pollfd.fd)
+		{
+			_pollfds.erase(_pollfds.begin() + i);
+			break;
+		}
+	}
 }
 
 void Server::removePollfd(const int socket)

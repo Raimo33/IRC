@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:18:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:23:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 # include <fcntl.h>
 # include <stdexcept>
 # include <sstream>
+# include <algorithm>
 
 # include "EventHandler.hpp"
 # include "SystemCalls.hpp"
