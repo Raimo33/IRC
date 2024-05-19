@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 09:51:26 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 10:02:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,6 @@ class Channel
 		friend class 							ChannelOperator;
 
 	private:
-
 		void									promoteOperator(const string &username);
 		void									demoteOperator(const string &username);
 

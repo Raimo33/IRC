@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 09:41:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 10:06:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,9 @@ class ChannelOperator : public User
 
 		class	UserNotInChannelException;
 		class	OperatorNotInChannelException;
+	
+	private:
+		void	checkPrivilege(const Channel &channel) const;
 };
 
 class ChannelOperator::UserNotInChannelException : public exception
