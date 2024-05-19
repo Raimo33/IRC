@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:09:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:53:25 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ uint16_t	Server::getPort(void) const
 	return _port;
 }
 
-size_t	Server::getPwdHash(void) const
+const string	&Server::getPwdHash(void) const
 {
 	return _pwd_hash;
 }
@@ -192,6 +192,9 @@ const Channel	&Server::getChannel(const string &name) const
 
 void	Server::addChannel(Channel *channel)
 {
+	//TODO mettere un limite di canali per server
+	if (_channels.find(channel->getName()) != _channels.end())
+		throw ChannelAlreadyExistsException();
 	_channels[channel->getName()] = channel;
 }
 

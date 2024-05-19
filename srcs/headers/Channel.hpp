@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:59:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:49:25 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ class User;
 
 class Channel
 {
-	public: 
+	public:
 		explicit Channel(const string &name, ChannelOperator &op); //on creation there must be at least one operator
 		Channel(const string &name, const string &key, ChannelOperator &op);
 		Channel(const Channel &copy);
@@ -64,7 +64,7 @@ class Channel
 		const map<string, User *>				&getMembers(void) const;
 		void									setMembers(const map<string, User *> &new_members);
 		const User								&getMember(const string &username) const;
-		void									addMember(User *user);
+		void									addMember(User &user);
 		void									removeMember(const User &user);
 		const map<string, User *>				&getPendingInvitations(void) const;
 		void									setPendingInvitations(const map<string, User *> &new_invitations);
@@ -78,7 +78,8 @@ class Channel
 			
 		class       							InvalidNameException; //constructor
 		class									InvalidTopicException; //setTopic
-		class									InvalidKeyException; //setKey
+		class									InvalidKeyException; //setKey, User::joinChannel
+		class									ChannelFullException; //addMember
 		class									UserAlreadyMemberException; //addMember
 		class									UserAlreadyOperatorException; //promoteOperator
 		class									UserNotOperatorException; //removeOperator, demoteOperator
@@ -92,7 +93,7 @@ class Channel
 		void									demoteOperator(const string &username);
 
 		string									_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
-		string									_key;
+		string									_key; //la chiave del canale non viene hashata, si conserva quella raw
 		string									_topic;
 		uint32_t								_member_limit;
 		map<string, ChannelOperator *>			_operators; // {username, operator}
@@ -114,6 +115,12 @@ class Channel::InvalidTopicException: public exception
 };
 
 class Channel::InvalidKeyException: public exception
+{
+	public:
+		virtual const char *what(void) const throw();
+};
+
+class Channel::ChannelFullException: public exception
 {
 	public:
 		virtual const char *what(void) const throw();

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:19:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:54:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,9 +218,9 @@ void EventHandler::executeCommandJoin(const vector<string> &params)
 			ChannelOperator op(*_client);
 
 			if (i < keys.size())
-				_server->addChannel(Channel(channels[i], keys[i], op));
+				_server->addChannel(new Channel(channels[i], keys[i], op));
 			else
-				_server->addChannel(Channel(channels[i], op));
+				_server->addChannel(new Channel(channels[i], op));
 		}
 	};
 }
@@ -229,7 +229,10 @@ void EventHandler::executeCommandPass(const vector<string> &params)
 {
 	if (_client->getIsConnected())
 		throw Client::AlreadyConnectedException();
-	if (Hasher::hash(params[0]) != _server->getPwdHash())
+
+	MD5 hasher(params[0]);
+
+	if (hasher.hexdigest() != _server->getPwdHash())
 		throw Client::InvalidPasswordException();
 	_client->setIsConnected(true);
 }
@@ -255,7 +258,7 @@ void EventHandler::executeCommandUser(const vector<string> &params)
 void	EventHandler::sendBufferedString(const User &receiver, const string &string) const
 {
 	const char		*raw_msg = string.c_str();
-	int				socket = _server->getClient(receiver).getSocket();
+	int				socket = _server->getClient(receiver.getUsername()).getSocket();
 	const size_t	total_len = strlen(raw_msg);
 	size_t			chars_sent = 0;
 
@@ -273,13 +276,13 @@ const map<string, e_cmd_type>	&EventHandler::initCommandMap(void) const
 
 	if (!commands.empty()) //se il map e' gia' stato inizializzato
 		return commands;
-	commands["PRIVMSG"] = CMD_PRIVMSG;
-	commands["JOIN"] = CMD_JOIN;
-	commands["MODE"] = CMD_MODE;
-	commands["PASS"] = CMD_PASS;
-	commands["NICK"] = CMD_NICK;
-	commands["USER"] = CMD_USER;
-	commands["QUIT"] = CMD_QUIT;
+	commands["PRIVMSG"] = PRIVMSG;
+	commands["JOIN"] = JOIN;
+	commands["MODE"] = MODE;
+	commands["PASS"] = PASS;
+	commands["NICK"] = NICK;
+	commands["USER"] = USER;
+	commands["QUIT"] = QUIT;
 	return commands;
 }
 

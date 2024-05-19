@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 14:23:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:47:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,16 @@ void	User::addChannel(const Channel &channel)
 	_channels[channel.getName()] = &channel;
 }
 
-const string	User::getNickname(void) const
+void	User::removeChannel(const Channel &channel)
+{
+	map<string, const Channel *>::iterator it = _channels.find(channel.getName());
+
+	if (it == _channels.end())
+		throw UserNotInChannelException();
+	_channels.erase(it);
+}
+
+const string	&User::getNickname(void) const
 {
 	return _nickname;
 }
@@ -66,7 +75,7 @@ void	User::setNickname(const string &nickname)
 	_nickname = nickname;
 }
 
-const string	User::getUsername(void) const
+const string	&User::getUsername(void) const
 {
 	return _username;
 }
@@ -76,7 +85,7 @@ void	User::setUsername(const string &username)
 	_username = username;
 }
 
-const string	User::getPwdHash(void) const
+const string	&User::getPwdHash(void) const
 {
 	return _pwd_hash;
 }
@@ -101,6 +110,39 @@ void	User::setAuthenticated(bool is_authenticated)
 			throw AlreadyAuthenticatedException();
 	}
 	_is_authenticated = is_authenticated;
+}
+
+void	User::joinChannel(Channel &channel)
+{
+	if (!_is_authenticated)
+		throw NotAuthenticatedException();
+	try
+	{
+		channel.addMember(*this);
+		addChannel(channel);
+	}
+	catch (const TooManyChannelsException &e) //catcho il fallimento di addChannel
+	{
+		//annullo il successo di addMember
+		channel.removeMember(*this);
+	}
+}
+
+void	User::joinChannel(Channel &channel, const string &key)
+{
+	if (!_is_authenticated)
+		throw NotAuthenticatedException();
+	if (channel.getKey() != key)
+		throw Channel::InvalidKeyException();
+	joinChannel(channel);
+}
+
+void	User::leaveChannel(Channel &channel)
+{
+	if (!_is_authenticated)
+		throw NotAuthenticatedException();
+	channel.removeMember(*this);
+	removeChannel(channel);
 }
 
 const char *User::TooManyChannelsException::what() const throw()

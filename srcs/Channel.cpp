@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:18:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:42:08 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,11 +150,13 @@ const User &Channel::getMember(const string &username) const
 	return *(_members.at(username));
 }
 
-void Channel::addMember(User *user)
+void Channel::addMember(User &user)
 {
-	if (_members.find(user->getUsername()) != _members.end())
+	if (_members.find(user.getUsername()) != _members.end())
 		throw UserAlreadyMemberException();
-	_members[user->getUsername()] = user;
+	if (_members.size() >= _member_limit)
+		throw ChannelFullException();
+	_members[user.getUsername()] = &user;
 }
 
 void Channel::removeMember(const User &user)

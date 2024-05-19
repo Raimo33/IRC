@@ -6,11 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:10:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:53:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO logging di sistema per errori/eventi importanti (esempio: fallimento di un comando send)
+//TODO logging silenzioso per exceptions non fondamentali, esempioo: un utente prova a fare leaveChannel di un canale dove non e' presente.
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
@@ -50,7 +51,7 @@ class Server
 		~Server(void);
 
 		uint16_t						getPort(void) const;
-		size_t							getPwdHash(void) const;
+		const string					&getPwdHash(void) const;
 		const vector<Client *>			&getClients(void) const;
 		void							setClients(const vector<Client *> &clients);
 		const Client					&getClient(const string &username) const;
@@ -92,7 +93,7 @@ class Server
 
 	private:
 		const uint16_t					_port; //la porta va da 0 a 65535 (2 bytes)
-		const size_t					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
+		const string					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
 		vector<Client *>				_clients;
 		map<string, User *>				_users;
 		map<string, Channel *>			_channels;

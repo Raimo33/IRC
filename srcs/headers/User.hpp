@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:59:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:44:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class User
 		void								setChannels(const map<string, const Channel *> &channels);
 		const Channel						*getChannel(const string &channel_name) const;
 		void								addChannel(const Channel &channel);
+		void								removeChannel(const Channel &channel);
 		const string						&getNickname(void) const;
 		void								setNickname(const string &nickname);
 		const string						&getUsername(void) const;
@@ -43,6 +44,13 @@ class User
 		void								setPwdHash(const string &pwd_hash);
 		bool								getIsAuthenticated(void) const;
 		void								setAuthenticated(bool is_authenticated);
+
+		void								joinChannel(Channel &channel);
+		void								joinChannel(Channel &channel, const string &key);
+		void								leaveChannel(Channel &channel);
+		//void								sendMessage(const Channel &channel, const Message &message) const;
+		//void								sendMessage(const User &receiver, const PrivateMessage &message) const;
+
 
 		class								TooManyChannelsException; //joinChannel
 		class								AlreadyAuthenticatedException; //setAuthenticated

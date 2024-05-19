@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:15:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:57:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ class EventHandler
 		void							setServer(Server *server);
 
 		void 							processInput(string raw_input);
+
+		//TODO mettere deliverMessage direttamente dentro User::sendMessage che chiamera Channel::receiveMessage
 		void							deliverMessage(const User &receiver, const PrivateMessage &message) const;
 		void							deliverMessage(const Channel &receiver, const Message &message) const;
 
