@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:29:29 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 15:59:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,49 +104,49 @@ class Channel
 class Channel::InvalidNameException: public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Channel::InvalidTopicException: public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Channel::InvalidKeyException: public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Channel::UserAlreadyMemberException: public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Channel::UserAlreadyOperatorException: public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Channel::UserNotOperatorException: public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Channel::UserNotMemberException: public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Channel::UnknownModeException: public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 #endif

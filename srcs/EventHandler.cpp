@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:49:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:15:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,11 @@ EventHandler::EventHandler(void) :
 	_commands(initCommandMap()),
 	_client(NULL) {}
 
+EventHandler::EventHandler(const EventHandler &copy) :
+	_commands(copy._commands),
+	_client(copy._client),
+	_server(copy._server) {}
+
 EventHandler::~EventHandler(void) {}
 
 const map<string, e_cmd_type>	&EventHandler::getCommands(void) const
@@ -39,6 +44,16 @@ const Client	*EventHandler::getClient(void) const
 void	EventHandler::setClient(Client *client)
 {
 	_client = client;
+}
+
+const Server	*EventHandler::getServer(void) const
+{
+	return _server;
+}
+
+void	EventHandler::setServer(Server *server)
+{
+	_server = server;
 }
 
 //JOIN #channel1,#channel2,#channel3 key1,key2,key3
@@ -141,7 +156,7 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	return input;
 }
 
-void EventHandler::executeCommandPrivmsg(const vector<const string> &params)
+void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 {
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{
@@ -176,13 +191,13 @@ void EventHandler::executeCommandPrivmsg(const vector<const string> &params)
 	}
 }
 
-void EventHandler::executeCommandMode(const vector<const string> &params)
+void EventHandler::executeCommandMode(const vector<string> &params)
 {
 	//TODO
 	(void)params;
 }
 
-void EventHandler::executeCommandJoin(const vector<const string> &params)
+void EventHandler::executeCommandJoin(const vector<string> &params)
 {
 	//JOIN <channel1,channel2,channel3> <key1,key2,key3>
 	vector<string> channels = split(params[0], ','); //se non e' in cpp98 mettiamolo in utils
@@ -210,7 +225,7 @@ void EventHandler::executeCommandJoin(const vector<const string> &params)
 	};
 }
 
-void EventHandler::executeCommandPass(const vector<const string> &params)
+void EventHandler::executeCommandPass(const vector<string> &params)
 {
 	if (_client->getIsConnected())
 		throw Client::AlreadyConnectedException();
@@ -219,19 +234,19 @@ void EventHandler::executeCommandPass(const vector<const string> &params)
 	_client->setIsConnected(true);
 }
 
-void EventHandler::executeCommandNick(const vector<const string> &params)
+void EventHandler::executeCommandNick(const vector<string> &params)
 {
 	//TODO se non e' un nickname gia' in uso
 	_client->setNickname(params[0]);
 }
 
-void EventHandler::executeCommandQuit(const vector<const string> &params)
+void EventHandler::executeCommandQuit(const vector<string> &params)
 {
 	(void)params;
 	_server->removeClient(*_client);
 }
 
-void EventHandler::executeCommandUser(const vector<const string> &params)
+void EventHandler::executeCommandUser(const vector<string> &params)
 {
 	_client->setUsername(params[0]);
 	_client->authenticate();

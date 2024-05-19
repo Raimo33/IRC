@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:58:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:09:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -245,6 +245,16 @@ const string	&Server::getUserPassword(const string &username) const
 			return it->second->getPwdHash();
 	}
 	throw UserNotFoundException();
+}
+
+EventHandler	&Server::getEventHandler(void)
+{
+	return _event_handler;
+}
+
+void	Server::setEventHandler(const EventHandler &event_handler)
+{
+	_event_handler = event_handler;
 }
 
 void Server::handleClient(Client *client, size_t *i)

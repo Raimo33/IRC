@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:58:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:10:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,8 +72,7 @@ class Server
 		void							removePollfd(const pollfd pollfd);
 		void							removePollfd(const int socket);
 		int								getSocket(void) const;
-		EventHandler					&getEventHandler(void);
-		void							setEventHandler(const EventHandler &event_handler);
+		//setEventHandler e getEventHandler non servono perche' EventHandler e' un singleton
 
 		const string					&getUserPassword(const string &username) const;
 		void							handleClient(Client *client, size_t *i);
@@ -105,49 +104,49 @@ class Server
 class Server::ChannelAlreadyExistsException : public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Server::ChannelNotFoundException : public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Server::UserAlreadyExistsException : public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Server::UserNotFoundException : public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Server::InvalidPasswordException : public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Server::ClientNotFoundException : public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Server::ClientAlreadyExistsException : public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 class Server::HandshakeFailedException : public exception
 {
 	public:
-		virtual const char *what() const throw();
+		virtual const char *what(void) const throw();
 };
 
 #endif
