@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:39:00 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:40:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,7 +239,6 @@ void EventHandler::executeCommandPass(const vector<string> &params)
 
 void EventHandler::executeCommandNick(const vector<string> &params)
 {
-	//TODO se non e' un nickname gia' in uso
 	for (map<string, User *>::const_iterator it = _server->getUsers().begin(); it != _server->getUsers().end(); ++it)
 	{
 		if (it->second->getNickname() == params[0])
