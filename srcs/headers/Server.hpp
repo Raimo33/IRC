@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:53:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:18:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,9 @@ class Server
 
 		uint16_t						getPort(void) const;
 		const string					&getPwdHash(void) const;
-		const vector<Client *>			&getClients(void) const;
-		void							setClients(const vector<Client *> &clients);
+		const map<int, Client *>		&getClients(void) const;
+		void							setClients(const map<int, Client *> &clients);
+		const Client					&getClient(const int socket) const;
 		const Client					&getClient(const string &username) const;
 		void							addClient(Client *client);
 		void							removeClient(const Client &client);
@@ -94,7 +95,7 @@ class Server
 	private:
 		const uint16_t					_port; //la porta va da 0 a 65535 (2 bytes)
 		const string					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
-		vector<Client *>				_clients;
+		map<int, Client *>				_clients; //{socket, Client *}
 		map<string, User *>				_users;
 		map<string, Channel *>			_channels;
 		vector<pollfd>					_pollfds;

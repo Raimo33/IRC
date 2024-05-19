@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:53:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 17:17:39 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 Server::Server(const uint16_t port_no, const string &password) :
 	_port(port_no),
-	_pwd_hash(Hasher::hash(password)),
+	_pwd_hash(MD5(password).hexdigest()),
 	_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
 	_event_handler(EventHandler())
 {
@@ -65,16 +65,17 @@ void	Server::run(void)
 					struct sockaddr_in	client_addr;
 					socklen_t			client_addr_len;
 					int 				client_socket;
+					
 
 					// TCP connection
 					client_addr_len = sizeof(client_addr);
 					client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
 					configureNonBlocking(client_socket);
 
-					client = new Client(client_socket);
-					client->setServer(this);
-					client->setIpAddr(string(inet_ntoa(client_addr.sin_addr)));
-					client->setPort(ntohs(client_addr.sin_port));
+					const string client_ip_addr = string(inet_ntoa(client_addr.sin_addr));
+					uint16_t client_port = ntohs(client_addr.sin_port);
+
+					client = new Client(this, client_socket, client_ip_addr, client_port);
 					addClient(client);
 					cout << "TCP Connection request from " << client->getIpAddr() << endl;
 					handshake(client_socket); // SSL handshake
@@ -116,34 +117,45 @@ const string	&Server::getPwdHash(void) const
 	return _pwd_hash;
 }
 
-const vector<Client *>	&Server::getClients(void) const
+const map<int, Client *>	&Server::getClients(void) const
 {
 	return _clients;
 }
 
-void	Server::setClients(const vector<Client *> &clients)
+void	Server::setClients(const map<int, Client *> &clients)
 {
 	_clients = clients;
 }
 
 const Client &Server::getClient(const string &username) const
 {
-	for (size_t i = 0; i < _clients.size(); i++)
+	for (map<int, Client *>::const_iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (_clients[i]->getUsername() == username)
-			return *(_clients[i]);
+		if (it->second->getUsername() == username)
+			return *(it->second);
 	}
 	throw ClientNotFoundException();
 }
 
+const Client &Server::getClient(const int socket) const
+{
+	if (_clients.find(socket) == _clients.end())
+		throw ClientNotFoundException();
+	return *(_clients.at(socket));
+}
+
 void Server::addClient(Client *client)
 {
-	_clients.push_back(client);
+	if (find(_clients.begin(), _clients.end(), client) != _clients.end())
+		throw ClientAlreadyExistsException();
+	_clients[client->getSocket()] = client;
 }
 
 void Server::removeClient(const Client &client)
 {
-	_clients.erase(remove(_clients.begin(), _clients.end(), client), _clients.end());
+	if (_clients.find(client.getSocket()) == _clients.end())
+		throw ClientNotFoundException();
+	_clients.erase(client.getSocket());
 }
 
 const map<string, User *>	&Server::getUsers(void) const
@@ -248,16 +260,6 @@ const string	&Server::getUserPassword(const string &username) const
 			return it->second->getPwdHash();
 	}
 	throw UserNotFoundException();
-}
-
-EventHandler	&Server::getEventHandler(void)
-{
-	return _event_handler;
-}
-
-void	Server::setEventHandler(const EventHandler &event_handler)
-{
-	_event_handler = event_handler;
 }
 
 void Server::handleClient(Client *client, size_t *i)
