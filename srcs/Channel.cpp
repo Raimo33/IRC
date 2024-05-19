@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:29:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:18:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@ Channel::Channel(const string &name, ChannelOperator &op) :
 {
 	if (!is_valid_channel_name(name))
 		throw InvalidNameException();
-	_operators[op.getNickname()] = &op;
-	_members[op.getNickname()] = &op;
+	_operators[op.getUsername()] = &op;
+	_members[op.getUsername()] = &op;
 	for (int i = 0; i < N_MODES; i++)
 		_modes[i] = false;
 }
@@ -35,8 +35,8 @@ Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
 {
 	if (!is_valid_channel_name(name))
 		throw InvalidNameException();
-	_operators[op.getNickname()] = &op;
-	_members[op.getNickname()] = &op;
+	_operators[op.getUsername()] = &op;
+	_members[op.getUsername()] = &op;
 	for (int i = 0; i < N_MODES; i++)
 		_modes[i] = false;
 	_modes[MODE_K] = true;
@@ -120,17 +120,17 @@ const User &Channel::getOperator(const string &username) const
 
 User &Channel::addOperator(ChannelOperator *op)
 {
-	if (_operators.find(op->getNickname()) != _operators.end())
+	if (_operators.find(op->getUsername()) != _operators.end())
 		throw UserAlreadyOperatorException();
-	_operators[op->getNickname()] = op;
+	_operators[op->getUsername()] = op;
 	return *op;
 }
 
 void Channel::removeOperator(const ChannelOperator &op)
 {
-	if (_operators.find(op.getNickname()) == _operators.end())
+	if (_operators.find(op.getUsername()) == _operators.end())
 		throw UserNotMemberException();
-	_operators.erase(op.getNickname());
+	_operators.erase(op.getUsername());
 }
 
 const map<string, User *> &Channel::getMembers(void) const
@@ -152,16 +152,16 @@ const User &Channel::getMember(const string &username) const
 
 void Channel::addMember(User *user)
 {
-	if (_members.find(user->getNickname()) != _members.end())
+	if (_members.find(user->getUsername()) != _members.end())
 		throw UserAlreadyMemberException();
-	_members[user->getNickname()] = user;
+	_members[user->getUsername()] = user;
 }
 
 void Channel::removeMember(const User &user)
 {
-	if (_members.find(user.getNickname()) == _members.end())
+	if (_members.find(user.getUsername()) == _members.end())
 		throw UserNotMemberException();
-	_members.erase(user.getNickname());
+	_members.erase(user.getUsername());
 }
 
 const map<string, User *> &Channel::getPendingInvitations(void) const
@@ -183,16 +183,16 @@ const User &Channel::getPendingInvitation(const string &username) const
 
 void Channel::addPendingInvitation(User *user)
 {
-	if (_pending_invitations.find(user->getNickname()) != _pending_invitations.end())
+	if (_pending_invitations.find(user->getUsername()) != _pending_invitations.end())
 		throw UserAlreadyMemberException();
-	_pending_invitations[user->getNickname()] = user;
+	_pending_invitations[user->getUsername()] = user;
 }
 
 void Channel::removePendingInvitation(const User &user)
 {
-	if (_pending_invitations.find(user.getNickname()) == _pending_invitations.end())
+	if (_pending_invitations.find(user.getUsername()) == _pending_invitations.end())
 		throw UserNotMemberException();
-	_pending_invitations.erase(user.getNickname());
+	_pending_invitations.erase(user.getUsername());
 }
 
 const bool *Channel::getModes(void) const

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:15:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/19 16:19:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void	EventHandler::deliverMessage(const Channel &channel, const Message &msg) co
 
 void	EventHandler::deliverMessage(const User &receiver, const PrivateMessage &msg) const
 {
-	if (receiver.getNickname() == _client->getNickname())
+	if (receiver.getUsername() == _client->getUsername())
 		throw CantSendMessageToYourselfException();
 	sendBufferedString(receiver, msg.getContent());
 }
