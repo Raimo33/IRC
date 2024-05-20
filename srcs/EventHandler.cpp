@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:53:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 15:01:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	return input;
 }
 
-void EventHandler::executeCommandPrivmsg(const vector<string> &params) //TODO deve chiamare client::sendMessage
+void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 {
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{

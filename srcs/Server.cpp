@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:57:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 15:11:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void	Server::run(void)
 					struct sockaddr_in	client_addr;
 					socklen_t			client_addr_len;
 					int 				client_socket;
-					
 
 					// TCP connection
 					client_addr_len = sizeof(client_addr);
@@ -102,8 +101,7 @@ void	Server::run(void)
 							break;
 						}
 					}
-					if (client)
-						handleClient(client, &i);
+					handleClient(client, &i);
 				}
 			}
 		}
@@ -234,9 +232,12 @@ int	Server::getSocket(void) const
 	return _socket;
 }
 
-void Server::handleClient(Client *client, size_t *i) //TODO refactor
+void Server::handleClient(Client *client, size_t *i)
 {
 	char buffer[BUFFER_SIZE];
+
+	if (!client)
+		throw ClientNotFoundException();
 
 	int bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
 	if (bytes_read > 0)
