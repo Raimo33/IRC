@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 15:11:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:00:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "headers/SystemCalls.hpp"
 #include "headers/EventHandler.hpp"
 #include "headers/Hasher.hpp"
+#include "headers/ReplyCodes.hpp"
 
 Server::Server(const uint16_t port_no, const string &password) :
 	_port(port_no),
@@ -93,11 +94,12 @@ void	Server::run(void)
 				{
 					//client already exists
 					Client *client = NULL;
-					for (size_t j = 0; j < _clients.size(); j++)
+
+					for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
 					{
-						if (_clients[j]->getSocket() == _pollfds[i].fd)
+						if (it->second->getSocket() == _pollfds[i].fd)
 						{
-							client = _clients[j];
+							client = it->second;
 							break;
 						}
 					}
@@ -118,45 +120,35 @@ const string	&Server::getPwdHash(void) const
 	return _pwd_hash;
 }
 
-const map<int, Client *>	&Server::getClients(void) const
+const map<string, Client *>	&Server::getClients(void) const
 {
 	return _clients;
 }
 
-void	Server::setClients(const map<int, Client *> &clients)
+void	Server::setClients(const map<string, Client *> &clients)
 {
 	_clients = clients;
 }
 
 const Client &Server::getClient(const string &username) const
 {
-	for (map<int, Client *>::const_iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->second->getUsername() == username)
-			return *(it->second);
-	}
-	throw ClientNotFoundException();
-}
-
-const Client &Server::getClient(const int socket) const
-{
-	if (_clients.find(socket) == _clients.end())
+	if (!_clients.at(username))
 		throw ClientNotFoundException();
-	return *(_clients.at(socket));
+	return *(_clients.at(username));
 }
 
 void Server::addClient(Client *client)
 {
-	if (_clients.at(client->getSocket()))
+	if (_clients.at(client->getUsername()))
 		throw ClientAlreadyExistsException();
-	_clients[client->getSocket()] = client;
+	_clients[client->getUsername()] = client;
 }
 
 void Server::removeClient(const Client &client)
 {
-	if (!_clients.at(client.getSocket()))
+	if (!_clients.at(client.getUsername()))
 		throw ClientNotFoundException();
-	_clients.erase(client.getSocket());
+	_clients.erase(client.getUsername());
 }
 
 const map<string, Channel *>	&Server::getChannels(void) const
@@ -287,32 +279,48 @@ void Server::configureNonBlocking(const int socket) const
 		throw runtime_error(strerror(errno));
 }
 
-const char *Server::ChannelAlreadyExistsException::what() const throw()
+map<uint16_t, string> Server::initReplyCodes(void)
+{
+	map<uint16_t, string>	m;
+	
+	//https://github.com/williamkapke/irc-replies/blob/master/replies.json
+
+    m[ERR_NONICKNAMEGIVEN] = "No nickname given";
+	m[ERR_ERRONEUSNICKNAME] = "Erroneous nickname";
+	m[ERR_NICKNAMEINUSE] = "Nickname is already in use";
+
+    // Add other reply codes as needed
+    return m;
+}
+
+const map<string, uint16_t>	Server::reply_codes = initReplyCodes();
+
+const char *Server::ChannelAlreadyExistsException::what(void) const throw()
 {
 	return "Channel already exists";
 }
 
-const char *Server::ChannelNotFoundException::what() const throw()
+const char *Server::ChannelNotFoundException::what(void) const throw()
 {
 	return "Channel not found";
 }
 
-const char *Server::InvalidPasswordException::what() const throw()
+const char *Server::InvalidPasswordException::what(void) const throw()
 {
 	return "Invalid password";
 }
 
-const char *Server::ClientNotFoundException::what() const throw()
+const char *Server::ClientNotFoundException::what(void) const throw()
 {
 	return "Client not found";
 }
 
-const char *Server::ClientAlreadyExistsException::what() const throw()
+const char *Server::ClientAlreadyExistsException::what(void) const throw()
 {
 	return "Client already exists";
 }
 
-const char *Server::HandshakeFailedException::what() const throw()
+const char *Server::HandshakeFailedException::what(void) const throw()
 {
 	return "Handshake failed";
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 15:01:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:08:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,9 @@
 #include "headers/ChannelOperator.hpp"
 #include "headers/Hasher.hpp"
 #include "headers/Client.hpp"
+#include "headers/utils.hpp"
+#include "headers/ReplyCodes.hpp"
+#include "headers/Standards.hpp"
 
 static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
@@ -233,10 +236,21 @@ void EventHandler::executeCommandPass(const vector<string> &params)
 
 void EventHandler::executeCommandNick(const vector<string> &params)
 {
-	//TODO check se esiste gia
-	_client->setNickname(params[0]);
-	if (!_client->getUsername().empty())
-		_client->setAuthenticated(true);
+	try
+	{
+		checkNicknameValidity(params[0]);
+		_client->setNickname(params[0]);
+		if (!_client->getUsername().empty())
+			_client->setAuthenticated(true);
+	}
+	catch (Client::ErroneusNicknameException &e)
+	{
+		_client->receiveNumericReply(ERR_ERRONEUSNICKNAME, vector<string>(1, params[0]));
+	}
+	catch (Client::NicknameInUseException &e)
+	{
+		_client->receiveNumericReply(ERR_NICKNAMEINUSE, vector<string>(1, params[0]));
+	}
 }
 
 void EventHandler::executeCommandQuit(const vector<string> &params)
@@ -247,7 +261,6 @@ void EventHandler::executeCommandQuit(const vector<string> &params)
 
 void EventHandler::executeCommandUser(const vector<string> &params)
 {
-	//TODO check se esiste gia
 	_client->setUsername(params[0]);
 	if (!_client->getNickname().empty())
 		_client->setAuthenticated(true);
@@ -282,6 +295,21 @@ void	EventHandler::sendBufferedString(const Client &client, const string &string
 		send(socket, raw_msg + chars_sent, len, 0); //TODO gestire errori, provare a inviare di nuovo (mettere in un file di log)
 		chars_sent += len;
 	}
+}
+
+void	EventHandler::checkNicknameValidity(const string &nickname) const
+{
+	try
+	{
+		_server->getClient(nickname);
+		throw Client::NicknameInUseException();
+	}
+	catch (Server::ClientNotFoundException &e)
+	{
+		(void)e;
+	}
+	if (!is_valid_nickname(nickname))
+		throw Client::ErroneusNicknameException();
 }
 
 static void checkConnection(const Client *client)

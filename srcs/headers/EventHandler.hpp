@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:34:13 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:02:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@
 
 # include "Client.hpp"
 # include "utils.hpp"
-
-# define MAX_INPUT_LENGTH 512
 
 using namespace std;
 
@@ -74,6 +72,7 @@ class EventHandler
 		void							executeCommandQuit(const vector<string> &params);
 		void							executeCommandUser(const vector<string> &params);
 		const map<string, e_cmd_type>	&initCommandMap(void) const;
+		void							checkNicknameValidity(const string &nickname) const;
 
 
 		const map<string, e_cmd_type>	_commands; //TODO spostare fuori (pseudo globale) altrimenti viene creato per ogni server

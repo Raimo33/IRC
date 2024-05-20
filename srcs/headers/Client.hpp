@@ -6,18 +6,17 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:56:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:12:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
+# include <vector>
 # include <map>
 # include <string>
 # include <stdint.h>
-
-# define MAX_CHANNELS_PER_USER 10
 
 using namespace std;
 
@@ -55,16 +54,18 @@ class Client
 		void								leaveChannel(Channel &channel);
 		void								sendMessage(const Channel &channel, const Message &msg) const; //chiama channel.receiveMessage
 		void								sendMessage(const Client &receiver, const PrivateMessage &msg) const;
+		void								receiveNumericReply(uint16_t code, const vector<string> &params, const string &msg = "") const;
 
 		class								TooManyChannelsException; //joinChannel
 		class								AlreadyConnectedException; //setIsConnected
 		class								NotConnectedException; //joinChannel
 		class								AlreadyAuthenticatedException; //setAuthenticated
 		class								NotAuthenticatedException; //joinChannel
-		class								NicknameAlreadyInUseException; //setNickname
+		class								NicknameInUseException; //setNickname
+		class								ErroneusNicknameException; //
 		class								UserNotInChannelException; //getChannel, Client::sendMessage
 		class								CantSendMessageToYourselfException; //sendMessage
-
+		
 	protected:
 
 		map<string, const Channel *>		_channels; // {channel_name, channel}
@@ -111,7 +112,13 @@ class Client::NotAuthenticatedException : public exception
 		virtual const char	*what(void) const throw();
 };
 
-class Client::NicknameAlreadyInUseException : public exception
+class Client::NicknameInUseException : public exception
+{
+	public:
+		virtual const char	*what(void) const throw();
+};
+
+class Client::ErroneusNicknameException : public exception
 {
 	public:
 		virtual const char	*what(void) const throw();

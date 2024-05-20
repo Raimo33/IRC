@@ -1,28 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.hpp                                          :+:      :+:    :+:   */
+/*   Standards.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/14 11:46:06 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:03:33 by craimond         ###   ########.fr       */
+/*   Created: 2024/05/20 15:30:30 by craimond          #+#    #+#             */
+/*   Updated: 2024/05/20 17:03:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef UTILS_HPP
-# define UTILS_HPP
+#ifndef STANDARDS_HPP
+# define STANDARDS_HPP
 
-# include <string>
-# include <vector>
-# include <sstream>
-
-using namespace std;
-
-bool								is_channel_prefix(const char c);
-bool								is_valid_channel_name(const string &name);
-bool								is_valid_nickname(const string &name);
-vector<string>						split(const string &s, char delim);
-size_t								min(size_t a, size_t b);
+# define SERVER_NAME "IRCServer"
+# define MAX_CHANNELS_PER_USER 10
+# define MAX_NICKNAME_LEN 9
+# define MAX_INPUT_LENGTH 512
+# define BUFFER_SIZE 1024
+# define MAX_SERVER_PASSWORD_LEN 64
 
 #endif

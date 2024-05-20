@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:59:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:06:03 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "headers/PrivateMessage.hpp"
 #include "headers/Server.hpp"
 #include "headers/utils.hpp"
+#include "headers/Standards.hpp"
 
 Client::Client(Server *server, const int socket, const string &ip_addr, const uint16_t port) :
 	_channels(),
@@ -197,6 +198,24 @@ void	Client::sendMessage(const Client &receiver, const PrivateMessage &msg) cons
 	EventHandler::sendBufferedString(receiver, msg.getContent());
 }
 
+void	Client::receiveNumericReply(uint16_t code, const vector<string> &params, const string &msg) const
+{
+	ostringstream oss;
+
+	oss << ":" SERVER_NAME << " " << code << " " << _nickname;
+	for (size_t i = 0; i < params.size(); i++)
+		oss << " " << params[i];
+	if (!msg.empty())
+		oss << " :" << msg;
+	else
+	{
+		if (Server::reply_codes.find(code) == Server::reply_codes.end())
+			//TODO fatal internal error (unknown code)
+		oss << " :" << Server::reply_codes.at(code);	
+	}
+	EventHandler::sendBufferedString(*this, oss.str());
+}
+
 const char	*Client::TooManyChannelsException::what(void) const throw()
 {
 	return "User are already in the maximum number of channels allowed";
@@ -222,9 +241,14 @@ const char	*Client::NotAuthenticatedException::what(void) const throw()
 	return "User are not authenticated";
 }
 
-const char	*Client::NicknameAlreadyInUseException::what(void) const throw()
+const char	*Client::NicknameInUseException::what(void) const throw()
 {
 	return "User nickname is already in use";
+}
+
+const char	*Client::ErroneusNicknameException::what(void) const throw()
+{
+	return "User nickname is invalid";
 }
 
 const char	*Client::UserNotInChannelException::what(void) const throw()
