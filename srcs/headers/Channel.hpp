@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:45:01 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:40:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,17 +58,17 @@ class Channel
 		void									setMemberLimit(const uint32_t new_limit);
 		const map<string, ChannelOperator *>	&getOperators(void) const;
 		void									setOperators(const map<string, ChannelOperator *> &new_operators);
-		const Client							&getOperator(const string &username) const;
+		const Client							&getOperator(const string &nickname) const;
 		Client									&addOperator(ChannelOperator *op);
 		void									removeOperator(const ChannelOperator &op);
 		const map<string, Client *>				&getMembers(void) const;
 		void									setMembers(const map<string, Client *> &new_members);
-		const Client							&getMember(const string &username) const;
+		const Client							&getMember(const string &nickname) const;
 		void									addMember(Client &user);
 		void									removeMember(const Client &user);
 		const map<string, Client *>				&getPendingInvitations(void) const;
 		void									setPendingInvitations(const map<string, Client *> &new_invitations);
-		const Client							&getPendingInvitation(const string &username) const;
+		const Client							&getPendingInvitation(const string &nickname) const;
 		void									addPendingInvitation(Client *user);
 		void									removePendingInvitation(const Client &user);
 		const bool								*getModes(void) const;
@@ -91,16 +91,16 @@ class Channel
 		friend class 							ChannelOperator;
 
 	private:
-		void									promoteOperator(const string &username);
-		void									demoteOperator(const string &username);
+		void									promoteOperator(const string &nickname);
+		void									demoteOperator(const string &nickname);
 
 		string									_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
 		string									_key; //la chiave del canale non viene hashata, si conserva quella raw
 		string									_topic;
 		uint32_t								_member_limit;
-		map<string, ChannelOperator *>			_operators; // {username, operator}
-		map<string, Client *>					_members; // {username, user}
-		map<string, Client *>					_pending_invitations; // {username, user} (il channel operator puo fare /invite)
+		map<string, ChannelOperator *>			_operators; // {nickname, operator}
+		map<string, Client *>					_members; // {nickname, user}
+		map<string, Client *>					_pending_invitations; // {nickname, user} (il channel operator puo fare /invite)
 		bool									_modes[N_MODES];
 };
 

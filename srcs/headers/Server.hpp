@@ -6,14 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:13:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:48:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO logging di sistema per errori/eventi importanti (esempio: fallimento di un comando send)
 //TODO logging silenzioso per exceptions non fondamentali, esempioo: un utente prova a fare leaveChannel di un canale dove non e' presente.
-//TODO utilizzare find al posto di at OVUNQUE nelle mappe
-//TODO usare il nickname come chiave univoca per ogni mappa invece che l'username
+//TODO mettere i nomi delle eccezioni come i nomi degli errori ufficiali
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
@@ -54,7 +53,7 @@ class Server
 		const map<string, Client *>			&getClients(void) const;
 		void								setClients(const map<string, Client *> &clients);
 		const Client						&getClient(const int socket) const;
-		const Client						&getClient(const string &username) const;
+		const Client						&getClient(const string &nickname) const;
 		void								addClient(Client *client);
 		void								removeClient(const Client &client);
 		const map<string, Channel *>		&getChannels(void) const;

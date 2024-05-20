@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:06:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:59:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,7 +184,7 @@ void	Client::leaveChannel(Channel &channel)
 
 void	Client::sendMessage(const Channel &channel, const Message &msg) const
 {
-	if (!_channels.at(channel.getName()))
+	if (_channels.find(channel.getName()) == _channels.end())
 		throw UserNotInChannelException();
 	if (channel.getMembers().size() == 1)
 		throw CantSendMessageToYourselfException();
@@ -246,7 +246,7 @@ const char	*Client::NicknameInUseException::what(void) const throw()
 	return "User nickname is already in use";
 }
 
-const char	*Client::ErroneusNicknameException::what(void) const throw()
+const char	*Client::ErroneousNicknameException::what(void) const throw()
 {
 	return "User nickname is invalid";
 }

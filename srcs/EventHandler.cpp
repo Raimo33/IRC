@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:08:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 18:07:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,10 +125,7 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il prefix
 	command = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il comando come stringa
 
-	map<string, e_cmd_type>::const_iterator it;
-
-	it = _commands.find(command);
-	if (it == _commands.end())
+	if (_commands.find(command) == _commands.end()) //se il comando non esiste
 		throw CommandNotFoundException();
 	input.command = _commands.at(command); //associo il comando all'enum
 
@@ -243,9 +240,9 @@ void EventHandler::executeCommandNick(const vector<string> &params)
 		if (!_client->getUsername().empty())
 			_client->setAuthenticated(true);
 	}
-	catch (Client::ErroneusNicknameException &e)
+	catch (Client::ErroneousNicknameException &e)
 	{
-		_client->receiveNumericReply(ERR_ERRONEUSNICKNAME, vector<string>(1, params[0]));
+		_client->receiveNumericReply(ERR_ERRONEOUSNICKNAME, vector<string>(1, params[0]));
 	}
 	catch (Client::NicknameInUseException &e)
 	{
@@ -309,7 +306,7 @@ void	EventHandler::checkNicknameValidity(const string &nickname) const
 		(void)e;
 	}
 	if (!is_valid_nickname(nickname))
-		throw Client::ErroneusNicknameException();
+		throw Client::ErroneousNicknameException();
 }
 
 static void checkConnection(const Client *client)

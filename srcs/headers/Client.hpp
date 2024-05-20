@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:12:24 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:59:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Message;
 class PrivateMessage;
 class Server;
 class Channel;
+
 class Client
 {
 	public:
@@ -52,7 +53,7 @@ class Client
 		void								joinChannel(Channel &channel);
 		void								joinChannel(Channel &channel, const string &key);
 		void								leaveChannel(Channel &channel);
-		void								sendMessage(const Channel &channel, const Message &msg) const; //chiama channel.receiveMessage
+		void								sendMessage(const Channel &channel, const Message &msg) const;
 		void								sendMessage(const Client &receiver, const PrivateMessage &msg) const;
 		void								receiveNumericReply(uint16_t code, const vector<string> &params, const string &msg = "") const;
 
@@ -62,7 +63,7 @@ class Client
 		class								AlreadyAuthenticatedException; //setAuthenticated
 		class								NotAuthenticatedException; //joinChannel
 		class								NicknameInUseException; //setNickname
-		class								ErroneusNicknameException; //
+		class								ErroneousNicknameException; //
 		class								UserNotInChannelException; //getChannel, Client::sendMessage
 		class								CantSendMessageToYourselfException; //sendMessage
 		
@@ -118,7 +119,7 @@ class Client::NicknameInUseException : public exception
 		virtual const char	*what(void) const throw();
 };
 
-class Client::ErroneusNicknameException : public exception
+class Client::ErroneousNicknameException : public exception
 {
 	public:
 		virtual const char	*what(void) const throw();

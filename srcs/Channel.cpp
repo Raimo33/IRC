@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:36:38 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:40:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,11 +113,11 @@ void Channel::setOperators(const map<string, ChannelOperator *> &new_operators)
 	_operators = new_operators;
 }
 
-const Client &Channel::getOperator(const string &username) const
+const Client &Channel::getOperator(const string &nickname) const
 {
-	if (_operators.find(username) == _operators.end())
+	if (_operators.find(nickname) == _operators.end())
 		throw UserNotMemberException();
-	return *(_operators.at(username));
+	return *(_operators.at(nickname));
 }
 
 Client &Channel::addOperator(ChannelOperator *op)
@@ -145,11 +145,11 @@ void Channel::setMembers(const map<string, Client *> &new_members)
 	_members = new_members;
 }
 
-const Client &Channel::getMember(const string &username) const
+const Client &Channel::getMember(const string &nickname) const
 {
-	if (_members.find(username) == _members.end())
+	if (_members.find(nickname) == _members.end())
 		throw UserNotMemberException();
-	return *(_members.at(username));
+	return *(_members.at(nickname));
 }
 
 void Channel::addMember(Client &user)
@@ -178,11 +178,11 @@ void Channel::setPendingInvitations(const map<string, Client *> &new_invitations
 	_pending_invitations = new_invitations;
 }
 
-const Client &Channel::getPendingInvitation(const string &username) const
+const Client &Channel::getPendingInvitation(const string &nickname) const
 {
-	if (_pending_invitations.find(username) == _pending_invitations.end())
+	if (_pending_invitations.find(nickname) == _pending_invitations.end())
 		throw UserNotMemberException();
-	return *(_pending_invitations.at(username));
+	return *(_pending_invitations.at(nickname));
 }
 
 void Channel::addPendingInvitation(Client *user)
@@ -220,21 +220,21 @@ void Channel::setMode(const t_channel_modes &mode, const bool value)
 	_modes[mode] = value;
 }
 
-void Channel::promoteOperator(const string &username)
+void Channel::promoteOperator(const string &nickname)
 {
-	if (_operators.find(username) != _operators.end())
+	if (_operators.find(nickname) != _operators.end())
 		throw UserAlreadyOperatorException();
-	if (_members.find(username) == _members.end())
+	if (_members.find(nickname) == _members.end())
 		throw UserNotMemberException();
-	_operators[username] = new ChannelOperator(getMember(username));
+	_operators[nickname] = new ChannelOperator(getMember(nickname));
 }
 
-void Channel::demoteOperator(const string &username)
+void Channel::demoteOperator(const string &nickname)
 {
-	if (_operators.find(username) == _operators.end())
+	if (_operators.find(nickname) == _operators.end())
 		throw UserNotOperatorException();
-	delete _operators[username];
-	_operators.erase(username);
+	delete _operators[nickname];
+	_operators.erase(nickname);
 }
 
 void	Channel::receiveMessage(const Message &msg) const
