@@ -6,15 +6,17 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:32:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:36:38 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Channel.hpp"
 
-#include "headers/User.hpp"
+#include "headers/Client.hpp"
 #include "headers/ChannelOperator.hpp"
 #include "headers/utils.hpp"
+#include "headers/Message.hpp"
+#include "headers/EventHandler.hpp"
 
 Channel::Channel(const string &name, ChannelOperator &op) :
 	_name(name),
@@ -111,14 +113,14 @@ void Channel::setOperators(const map<string, ChannelOperator *> &new_operators)
 	_operators = new_operators;
 }
 
-const User &Channel::getOperator(const string &username) const
+const Client &Channel::getOperator(const string &username) const
 {
 	if (_operators.find(username) == _operators.end())
 		throw UserNotMemberException();
 	return *(_operators.at(username));
 }
 
-User &Channel::addOperator(ChannelOperator *op)
+Client &Channel::addOperator(ChannelOperator *op)
 {
 	if (_operators.find(op->getUsername()) != _operators.end())
 		throw UserAlreadyOperatorException();
@@ -133,24 +135,24 @@ void Channel::removeOperator(const ChannelOperator &op)
 	_operators.erase(op.getUsername());
 }
 
-const map<string, User *> &Channel::getMembers(void) const
+const map<string, Client *> &Channel::getMembers(void) const
 {
 	return _members;
 }
 
-void Channel::setMembers(const map<string, User *> &new_members)
+void Channel::setMembers(const map<string, Client *> &new_members)
 {
 	_members = new_members;
 }
 
-const User &Channel::getMember(const string &username) const
+const Client &Channel::getMember(const string &username) const
 {
 	if (_members.find(username) == _members.end())
 		throw UserNotMemberException();
 	return *(_members.at(username));
 }
 
-void Channel::addMember(User &user)
+void Channel::addMember(Client &user)
 {
 	if (_members.find(user.getUsername()) != _members.end())
 		throw UserAlreadyMemberException();
@@ -159,38 +161,38 @@ void Channel::addMember(User &user)
 	_members[user.getUsername()] = &user;
 }
 
-void Channel::removeMember(const User &user)
+void Channel::removeMember(const Client &user)
 {
 	if (_members.find(user.getUsername()) == _members.end())
 		throw UserNotMemberException();
 	_members.erase(user.getUsername());
 }
 
-const map<string, User *> &Channel::getPendingInvitations(void) const
+const map<string, Client *> &Channel::getPendingInvitations(void) const
 {
 	return _pending_invitations;
 }
 
-void Channel::setPendingInvitations(const map<string, User *> &new_invitations)
+void Channel::setPendingInvitations(const map<string, Client *> &new_invitations)
 {
 	_pending_invitations = new_invitations;
 }
 
-const User &Channel::getPendingInvitation(const string &username) const
+const Client &Channel::getPendingInvitation(const string &username) const
 {
 	if (_pending_invitations.find(username) == _pending_invitations.end())
 		throw UserNotMemberException();
 	return *(_pending_invitations.at(username));
 }
 
-void Channel::addPendingInvitation(User *user)
+void Channel::addPendingInvitation(Client *user)
 {
 	if (_pending_invitations.find(user->getUsername()) != _pending_invitations.end())
 		throw UserAlreadyMemberException();
 	_pending_invitations[user->getUsername()] = user;
 }
 
-void Channel::removePendingInvitation(const User &user)
+void Channel::removePendingInvitation(const Client &user)
 {
 	if (_pending_invitations.find(user.getUsername()) == _pending_invitations.end())
 		throw UserNotMemberException();
@@ -235,6 +237,12 @@ void Channel::demoteOperator(const string &username)
 	_operators.erase(username);
 }
 
+void	Channel::receiveMessage(const Message &msg) const
+{
+	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
+		EventHandler::sendBufferedString(*receiver->second, msg.getContent());
+}
+
 const char	*Channel::InvalidNameException::what(void) const throw()
 {
 	return "Invalid channel name";
@@ -257,23 +265,23 @@ const char	*Channel::ChannelFullException::what(void) const throw()
 
 const char	*Channel::UserAlreadyMemberException::what(void) const throw()
 {
-	return "User is already a member of the channel";
+	return "Client is already a member of the channel";
 }
 
 const char	*Channel::UserAlreadyOperatorException::what(void) const throw()
 {
-	return "User is already an operator of the channel";
+	return "Client is already an operator of the channel";
 }
 
 const char	*Channel::UserNotOperatorException::what(void) const throw()
 {
-	return "User is not an operator of the channel";
+	return "Client is not an operator of the channel";
 }
 
 const char	*Channel::UserNotMemberException::what(void) const throw()
 
 {
-	return "User is not a member of the channel";
+	return "Client is not a member of the channel";
 }
 
 const char	*Channel::UnknownModeException::what(void) const throw()

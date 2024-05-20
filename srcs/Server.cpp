@@ -6,15 +6,18 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:43:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:00:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Server.hpp"
 #include "headers/SystemCalls.hpp"
 #include "headers/Client.hpp"
+#include "headers/Channel.hpp"
 #include "headers/SystemCalls.hpp"
 #include "headers/EventHandler.hpp"
+#include "headers/Hasher.hpp"
+#include "headers/ReplyCodes.hpp"
 
 Server::Server(const uint16_t port_no, const string &password) :
 	_port(port_no),
@@ -42,7 +45,6 @@ Server::Server(const Server &copy) :
 	_port(copy._port),
 	_pwd_hash(copy._pwd_hash),
 	_clients(copy._clients),
-	_users(copy._users),
 	_channels(copy._channels),
 	_pollfds(copy._pollfds),
 	_socket(copy._socket),
@@ -59,13 +61,13 @@ void	Server::run(void)
 		{
 			if (_pollfds[i].revents & POLLIN)
 			{
+				//new connection
 				if (_pollfds[i].fd == _socket)
 				{
 					Client				*client;
 					struct sockaddr_in	client_addr;
 					socklen_t			client_addr_len;
 					int 				client_socket;
-					
 
 					// TCP connection
 					client_addr_len = sizeof(client_addr);
@@ -90,17 +92,18 @@ void	Server::run(void)
 				}
 				else
 				{
+					//client already exists
 					Client *client = NULL;
-					for (size_t j = 0; j < _clients.size(); j++)
+
+					for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
 					{
-						if (_clients[j]->getSocket() == _pollfds[i].fd)
+						if (it->second->getSocket() == _pollfds[i].fd)
 						{
-							client = _clients[j];
+							client = it->second;
 							break;
 						}
 					}
-					if (client)
-						handleClient(client, &i);
+					handleClient(client, &i);
 				}
 			}
 		}
@@ -117,72 +120,35 @@ const string	&Server::getPwdHash(void) const
 	return _pwd_hash;
 }
 
-const map<int, Client *>	&Server::getClients(void) const
+const map<string, Client *>	&Server::getClients(void) const
 {
 	return _clients;
 }
 
-void	Server::setClients(const map<int, Client *> &clients)
+void	Server::setClients(const map<string, Client *> &clients)
 {
 	_clients = clients;
 }
 
 const Client &Server::getClient(const string &username) const
 {
-	for (map<int, Client *>::const_iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->second->getUsername() == username)
-			return *(it->second);
-	}
-	throw ClientNotFoundException();
-}
-
-const Client &Server::getClient(const int socket) const
-{
-	if (_clients.find(socket) == _clients.end())
+	if (!_clients.at(username))
 		throw ClientNotFoundException();
-	return *(_clients.at(socket));
+	return *(_clients.at(username));
 }
 
 void Server::addClient(Client *client)
 {
-	if (_clients.at(client->getSocket()))
+	if (_clients.at(client->getUsername()))
 		throw ClientAlreadyExistsException();
-	_clients[client->getSocket()] = client;
+	_clients[client->getUsername()] = client;
 }
 
 void Server::removeClient(const Client &client)
 {
-	if (!_clients.at(client.getSocket()))
+	if (!_clients.at(client.getUsername()))
 		throw ClientNotFoundException();
-	_clients.erase(client.getSocket());
-}
-
-const map<string, User *>	&Server::getUsers(void) const
-{
-	return _users;
-}
-
-void	Server::setUsers(const map<string, User *> &users)
-{
-	_users = users;
-}
-
-const User &Server::getUser(const string &username) const
-{
-	if (_users.find(username) == _users.end())
-		throw UserNotFoundException();
-	return *(_users.at(username));
-}
-
-void Server::addUser(User *user)
-{
-	_users[user->getUsername()] = user;
-}
-
-void Server::removeUser(const User &user)
-{
-	_users.erase(user.getUsername());
+	_clients.erase(client.getUsername());
 }
 
 const map<string, Channel *>	&Server::getChannels(void) const
@@ -258,19 +224,12 @@ int	Server::getSocket(void) const
 	return _socket;
 }
 
-const string	&Server::getUserPassword(const string &username) const
-{
-	for (map<string, User *>::const_iterator it = _users.begin(); it != _users.end(); it++)
-	{
-		if (it->first == username)
-			return it->second->getPwdHash();
-	}
-	throw UserNotFoundException();
-}
-
 void Server::handleClient(Client *client, size_t *i)
 {
 	char buffer[BUFFER_SIZE];
+
+	if (!client)
+		throw ClientNotFoundException();
 
 	int bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
 	if (bytes_read > 0)
@@ -320,42 +279,48 @@ void Server::configureNonBlocking(const int socket) const
 		throw runtime_error(strerror(errno));
 }
 
-const char *Server::ChannelAlreadyExistsException::what() const throw()
+map<uint16_t, string> Server::initReplyCodes(void)
+{
+	map<uint16_t, string>	m;
+	
+	//https://github.com/williamkapke/irc-replies/blob/master/replies.json
+
+    m[ERR_NONICKNAMEGIVEN] = "No nickname given";
+	m[ERR_ERRONEUSNICKNAME] = "Erroneous nickname";
+	m[ERR_NICKNAMEINUSE] = "Nickname is already in use";
+
+    // Add other reply codes as needed
+    return m;
+}
+
+const map<string, uint16_t>	Server::reply_codes = initReplyCodes();
+
+const char *Server::ChannelAlreadyExistsException::what(void) const throw()
 {
 	return "Channel already exists";
 }
 
-const char *Server::ChannelNotFoundException::what() const throw()
+const char *Server::ChannelNotFoundException::what(void) const throw()
 {
 	return "Channel not found";
 }
 
-const char *Server::UserAlreadyExistsException::what() const throw()
-{
-	return "User already exists";
-}
-
-const char *Server::UserNotFoundException::what() const throw()
-{
-	return "User not found";
-}
-
-const char *Server::InvalidPasswordException::what() const throw()
+const char *Server::InvalidPasswordException::what(void) const throw()
 {
 	return "Invalid password";
 }
 
-const char *Server::ClientNotFoundException::what() const throw()
+const char *Server::ClientNotFoundException::what(void) const throw()
 {
 	return "Client not found";
 }
 
-const char *Server::ClientAlreadyExistsException::what() const throw()
+const char *Server::ClientAlreadyExistsException::what(void) const throw()
 {
 	return "Client already exists";
 }
 
-const char *Server::HandshakeFailedException::what() const throw()
+const char *Server::HandshakeFailedException::what(void) const throw()
 {
 	return "Handshake failed";
 }

@@ -1,28 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Message.cpp                                        :+:      :+:    :+:   */
+/*   ReplyCodes.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/02 12:59:00 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:03:04 by craimond         ###   ########.fr       */
+/*   Created: 2024/05/20 15:57:53 by craimond          #+#    #+#             */
+/*   Updated: 2024/05/20 16:13:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/Message.hpp"
-	
-Message::Message(const string &content, const Client &sender, const Channel &channel) :
-	IMessage(content, sender),
-	_channel(&channel) {}
+#ifndef REPLYCODES_HPP
+# define REPLYCODES_HPP
 
-Message::Message(const Message &copy) :
-	IMessage(copy),
-	_channel(copy._channel) {}
+# define ERR_NONICKNAMEGIVEN 431
+# define ERR_ERRONEUSNICKNAME 432
+# define ERR_NICKNAMEINUSE 433
 
-Message::~Message(void) {}
+# include <map>
+# include <string>
+# include <cstdint>
 
-const Channel *Message::getChannel(void) const
-{
-	return _channel;
-}
+using namespace std;
+
+#endif

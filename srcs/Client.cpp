@@ -5,51 +5,128 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/02 12:42:23 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:30:26 by craimond         ###   ########.fr       */
+/*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
+/*   Updated: 2024/05/20 17:06:03 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Client.hpp"
-
-# include "headers/User.hpp"
-# include "headers/Server.hpp"
-# include "headers/EventHandler.hpp"
-# include "headers/SystemCalls.hpp"
+#include "headers/Channel.hpp"
+#include "headers/Message.hpp"
+#include "headers/PrivateMessage.hpp"
+#include "headers/Server.hpp"
+#include "headers/utils.hpp"
+#include "headers/Standards.hpp"
 
 Client::Client(Server *server, const int socket, const string &ip_addr, const uint16_t port) :
-	User(),
-	_is_connected(false),
+	_channels(),
+	_nickname(),
+	_username(),
+	_is_authenticated(false),
 	_port(port),
 	_ip_addr(ip_addr),
 	_socket(socket),
 	_server(server) {}
 
 Client::Client(const Client &copy) :
-	User(copy),
-	_is_connected(copy._is_connected),
+	_channels(copy._channels),
+	_nickname(copy._nickname),
+	_username(copy._username),
+	_is_authenticated(copy._is_authenticated),
 	_port(copy._port),
 	_ip_addr(copy._ip_addr),
 	_socket(copy._socket),
 	_server(copy._server) {}
 
-Client::~Client() {}
+Client::~Client(void) {}
+
+const map<string, const Channel *>	&Client::getChannels(void) const
+{
+	return _channels;
+}
+
+void	Client::setChannels(const map<string, const Channel *> &channels)
+{
+	_channels = channels;
+}
+
+const Channel	*Client::getChannel(const string &channel_name) const
+{
+	map<string, const Channel *>::const_iterator it = _channels.find(channel_name);
+
+	if (it == _channels.end())
+		throw UserNotInChannelException();
+	return it->second;
+}
+
+void	Client::addChannel(const Channel &channel)
+{
+	if (_channels.size() >= MAX_CHANNELS_PER_USER)
+		throw TooManyChannelsException();
+	_channels[channel.getName()] = &channel;
+}
+
+void	Client::removeChannel(const Channel &channel)
+{
+	map<string, const Channel *>::iterator it = _channels.find(channel.getName());
+
+	if (it == _channels.end())
+		throw UserNotInChannelException();
+	_channels.erase(it);
+}
+
+const string	&Client::getNickname(void) const
+{
+	return _nickname;
+}
+
+void	Client::setNickname(const string &nickname)
+{
+	_nickname = nickname;
+}
+
+const string	&Client::getUsername(void) const
+{
+	return _username;
+}
+
+void	Client::setUsername(const string &username)
+{
+	_username = username;
+}
 
 bool	Client::getIsConnected(void) const
 {
 	return _is_connected;
 }
 
-void	Client::setIsConnected(const bool is_connected)
+void	Client::setIsConnected(bool is_connected)
 {
 	if (_is_connected == is_connected)
 	{
 		if (is_connected)
 			throw AlreadyConnectedException();
 		else
-			throw AlreadyDisconnectedException();
+			throw AlreadyConnectedException();
 	}
 	_is_connected = is_connected;
+}
+
+bool	Client::getIsAuthenticated(void) const
+{
+	return _is_authenticated;
+}
+
+void	Client::setAuthenticated(bool is_authenticated)
+{
+	if (_is_authenticated == is_authenticated)
+	{
+		if (is_authenticated)
+			throw AlreadyAuthenticatedException();
+		else
+			throw AlreadyAuthenticatedException();
+	}
+	_is_authenticated = is_authenticated;
 }
 
 uint16_t	Client::getPort(void) const
@@ -72,71 +149,115 @@ Server	*Client::getServer(void) const
 	return _server;
 }
 
-void	Client::authenticate(void)
+void	Client::joinChannel(Channel &channel)
 {
-	char	buffer[1024];
-	MD5		hasher;
-	uint32_t len;
-
-	send_p(_socket, "Password: ", 10, 0);
-    len = recv_p(_socket, buffer, sizeof(buffer), 0);
-	hasher.update(buffer, len);
-	_pwd_hash = hasher.hexdigest();
+	if (!_is_authenticated)
+		throw NotAuthenticatedException();
 	try
 	{
-		const User user = _server->getUser(_username);
-
-		if (user.getPwdHash() == _pwd_hash)
-		{
-			_is_authenticated = true;
-			_server->addUser(this);
-		}
-		else
-		{
-			send_p(_socket, "Invalid credentials\n", 20, 0);
-			_is_authenticated = false;
-		}
+		channel.addMember(*this);
+		addChannel(channel);
 	}
-	catch(const Server::UserNotFoundException &e)
+	catch (const TooManyChannelsException &e) //catcho il fallimento di addChannel
 	{
-		send_p(_socket, "User not found: signing up\n", 28, 0);
-		send_p(_socket, "Password: ", 10, 0);
-    	len = recv_p(_socket, buffer, sizeof(buffer), 0);
-		hasher.update(buffer, len);
-		_pwd_hash = hasher.hexdigest();
-		send_p(_socket, "Repeat password: ", 17, 0);
-		len = recv_p(_socket, buffer, sizeof(buffer), 0);
-		hasher.update(buffer, len);
-		if (_pwd_hash == hasher.hexdigest())
-		{
-			_is_authenticated = true;
-			_server->addUser(this);
-		}
-		else
-		{
-			send_p(_socket, "Passwords don't match\n", 22, 0);
-			_is_authenticated = false;
-		}
+		//annullo il successo di addMember
+		channel.removeMember(*this);
 	}
 }
 
-const char *Client::NotConnectedException::what(void) const throw()
+void	Client::joinChannel(Channel &channel, const string &key)
 {
-	return "Client is not connected";
+	if (!_is_authenticated)
+		throw NotAuthenticatedException();
+	if (channel.getKey() != key)
+		throw Channel::InvalidKeyException();
+	joinChannel(channel);
 }
 
-const char *Client::AlreadyConnectedException::what(void) const throw()
+void	Client::leaveChannel(Channel &channel)
 {
-	return "Client is already connected";
+	if (!_is_authenticated)
+		throw NotAuthenticatedException();
+	channel.removeMember(*this);
+	removeChannel(channel);
 }
 
-const char *Client::AlreadyDisconnectedException::what(void) const throw()
+void	Client::sendMessage(const Channel &channel, const Message &msg) const
 {
-	return "Client is already disconnected";
+	if (!_channels.at(channel.getName()))
+		throw UserNotInChannelException();
+	if (channel.getMembers().size() == 1)
+		throw CantSendMessageToYourselfException();
+	channel.receiveMessage(msg);
 }
 
-const char *Client::InvalidPasswordException::what(void) const throw()
+void	Client::sendMessage(const Client &receiver, const PrivateMessage &msg) const
 {
-	return "Invalid password";
+	if (receiver.getUsername() == _username)
+		throw CantSendMessageToYourselfException();
+	EventHandler::sendBufferedString(receiver, msg.getContent());
+}
+
+void	Client::receiveNumericReply(uint16_t code, const vector<string> &params, const string &msg) const
+{
+	ostringstream oss;
+
+	oss << ":" SERVER_NAME << " " << code << " " << _nickname;
+	for (size_t i = 0; i < params.size(); i++)
+		oss << " " << params[i];
+	if (!msg.empty())
+		oss << " :" << msg;
+	else
+	{
+		if (Server::reply_codes.find(code) == Server::reply_codes.end())
+			//TODO fatal internal error (unknown code)
+		oss << " :" << Server::reply_codes.at(code);	
+	}
+	EventHandler::sendBufferedString(*this, oss.str());
+}
+
+const char	*Client::TooManyChannelsException::what(void) const throw()
+{
+	return "User are already in the maximum number of channels allowed";
+}
+
+const char	*Client::AlreadyConnectedException::what(void) const throw()
+{
+	return "User are already connected";
+}
+
+const char	*Client::NotConnectedException::what(void) const throw()
+{
+	return "User are not connected";
+}
+
+const char	*Client::AlreadyAuthenticatedException::what(void) const throw()
+{
+	return "User are already authenticated";
+}
+
+const char	*Client::NotAuthenticatedException::what(void) const throw()
+{
+	return "User are not authenticated";
+}
+
+const char	*Client::NicknameInUseException::what(void) const throw()
+{
+	return "User nickname is already in use";
+}
+
+const char	*Client::ErroneusNicknameException::what(void) const throw()
+{
+	return "User nickname is invalid";
+}
+
+const char	*Client::UserNotInChannelException::what(void) const throw()
+{
+	return "User is not in the channel";
+}
+
+const char	*Client::CantSendMessageToYourselfException::what(void) const throw()
+{
+	return "User can't send a message to himself";
 }
 

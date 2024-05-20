@@ -6,12 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:43:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:13:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO logging di sistema per errori/eventi importanti (esempio: fallimento di un comando send)
 //TODO logging silenzioso per exceptions non fondamentali, esempioo: un utente prova a fare leaveChannel di un canale dove non e' presente.
+//TODO utilizzare find al posto di at OVUNQUE nelle mappe
+//TODO usare il nickname come chiave univoca per ogni mappa invece che l'username
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
@@ -34,15 +36,11 @@
 # include "EventHandler.hpp"
 # include "SystemCalls.hpp"
 
-# define BUFFER_SIZE 1024
-# define MAX_PASSWORD_LEN 64
-
 using namespace std;
 
 class User;
-class Client;
 class Channel;
-class EventHandler;
+class Client;
 
 class Server
 {
@@ -51,57 +49,52 @@ class Server
 		Server(const Server &copy);
 		~Server(void);
 
-		uint16_t						getPort(void) const;
-		const string					&getPwdHash(void) const;
-		const map<int, Client *>		&getClients(void) const;
-		void							setClients(const map<int, Client *> &clients);
-		const Client					&getClient(const int socket) const;
-		const Client					&getClient(const string &username) const;
-		void							addClient(Client *client);
-		void							removeClient(const Client &client);
-		const map<string, User *>		&getUsers(void) const;
-		void							setUsers(const map<string, User *> &users);
-		const User						&getUser(const string &username) const;
-		void							addUser(User *user);
-		void							removeUser(const User &user);
-		const map<string, Channel *>	&getChannels(void) const;
-		void							setChannels(const map<string, Channel *> &channels);
-		const Channel					&getChannel(const string &name) const;
-		void							addChannel(Channel *channel);
-		void							removeChannel(const Channel &channel);
-		const vector<pollfd>			&getPollfds(void);
-		void							setPollfds(const vector<pollfd> &pollfds);
-		void							addPollfd(const pollfd pollfd);
-		void							removePollfd(const pollfd pollfd);
-		void							removePollfd(const int socket);
-		int								getSocket(void) const;
+		uint16_t							getPort(void) const;
+		const string						&getPwdHash(void) const;
+		const map<string, Client *>			&getClients(void) const;
+		void								setClients(const map<string, Client *> &clients);
+		const Client						&getClient(const int socket) const;
+		const Client						&getClient(const string &username) const;
+		void								addClient(Client *client);
+		void								removeClient(const Client &client);
+		const map<string, Channel *>		&getChannels(void) const;
+		void								setChannels(const map<string, Channel *> &channels);
+		const Channel						&getChannel(const string &name) const;
+		void								addChannel(Channel *channel);
+		void								removeChannel(const Channel &channel);
+		const vector<pollfd>				&getPollfds(void);
+		void								setPollfds(const vector<pollfd> &pollfds);
+		void								addPollfd(const pollfd pollfd);
+		void								removePollfd(const pollfd pollfd);
+		void								removePollfd(const int socket);
+		int									getSocket(void) const;
 		//setEventHandler e getEventHandler non servono perche' EventHandler e' un singleton
 
-		const string					&getUserPassword(const string &username) const;
-		void							handleClient(Client *client, size_t *i);
-		void							disconnectClient(Client *client);
-		void							handshake(const int client_socket) const;
-		void							configureNonBlocking(const int client_socket) const;
-		void							run(void);
+		void								handleClient(Client *client, size_t *i);
+		void								disconnectClient(Client *client);
+		void								handshake(const int client_socket) const;
+		void								configureNonBlocking(const int client_socket) const;
+		void								run(void);
 
-		class							ChannelAlreadyExistsException; //addChannel
-		class							ChannelNotFoundException; //getChannel, User::joinChannel
-		class							UserAlreadyExistsException; //addUser
-		class							UserNotFoundException; //getUserPassword, getUser
-		class 							InvalidPasswordException; //constructor
-		class							ClientNotFoundException; //removeClient, getClient
-		class							ClientAlreadyExistsException; //addClient
-		class 							HandshakeFailedException; //handshake
+		static const map<uint16_t, string>	reply_codes;
+
+		class								ChannelAlreadyExistsException; //addChannel
+		class								ChannelNotFoundException; //getChannel, Client::joinChannel
+		class 								InvalidPasswordException; //constructor
+		class								ClientNotFoundException; //removeClient, getClient
+		class								ClientAlreadyExistsException; //addClient
+		class 								HandshakeFailedException; //handshake
+
 
 	private:
-		const uint16_t					_port; //la porta va da 0 a 65535 (2 bytes)
-		const string					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
-		map<int, Client *>				_clients; //{socket, Client *}
-		map<string, User *>				_users; // {username, User *}
-		map<string, Channel *>			_channels; // {channel_name, Channel *}
-		vector<pollfd>					_pollfds;
-		const int						_socket;
-		EventHandler					_event_handler;
+	
+		const uint16_t						_port; //la porta va da 0 a 65535 (2 bytes)
+		const string						_pwd_hash; //la password che serve a qualsiasi Client per accedere a questo server
+		map<string, Client *>				_clients; //{nickname, Client *}
+		map<string, Channel *>				_channels; // {channel_name, Channel *}
+		vector<pollfd>						_pollfds; //TODO usare map invece che vector, mapparli con il socket
+		const int							_socket;
+		EventHandler						_event_handler;
 };
 
 class Server::ChannelAlreadyExistsException : public exception
@@ -111,18 +104,6 @@ class Server::ChannelAlreadyExistsException : public exception
 };
 
 class Server::ChannelNotFoundException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Server::UserAlreadyExistsException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Server::UserNotFoundException : public exception
 {
 	public:
 		virtual const char *what(void) const throw();

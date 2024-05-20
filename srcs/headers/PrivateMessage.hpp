@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:03:42 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:23:39 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:57:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,20 +15,20 @@
 
 #include "IMessage.hpp"
 
-class User;
+class Client;
 class Channel;
 
 class PrivateMessage: public IMessage
 {
 	public:
-		explicit PrivateMessage(const string &content, const User &sender, const User &receiver);
+		explicit PrivateMessage(const string &content, const Client &sender, const Client &receiver);
 		PrivateMessage(const PrivateMessage &copy);
 		~PrivateMessage(void);
 
-		const User	*getReceiver(void) const;
+		const Client	*getReceiver(void) const;
 
 	private:
-		const User	*_receiver;
+		const Client	*_receiver;
 };
 
 #endif

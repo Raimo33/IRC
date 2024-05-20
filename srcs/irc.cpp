@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   irc.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 15:49:45 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/20 17:04:25 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,5 +46,6 @@ static void	check_args(const int argc, const char **argv)
 static void	get_args(uint16_t *port_nbr, string *password, const char **argv)
 {
 	*port_nbr = atoi(argv[1]);
+	//TODO controllare lunghezza password (MAX_SERVER_PASSWORD_LEN)
 	*password = argv[2];
 }
