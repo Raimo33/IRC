@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:58:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:41:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	return input;
 }
 
-void EventHandler::executeCommandPrivmsg(const vector<string> &params)
+void EventHandler::executeCommandPrivmsg(const vector<string> &params) //TODO deve chiamare client::sendMessage
 {
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{
@@ -178,7 +178,7 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 			receiver = channel.getMembers().begin()->second;
 			if (receiver->getNickname() == _client->getNickname())
 				receiver = channel.getMembers().rbegin()->second;
-			PrivateMessage *msg = new PrivateMessage(params[2], *_client, *receiver);
+			PrivateMessage *msg = new PrivateMessage(params[1], *_client, *receiver);
 			deliverMessage(*receiver, *msg);
 			return ;
 		}
@@ -242,12 +242,10 @@ void EventHandler::executeCommandPass(const vector<string> &params)
 
 void EventHandler::executeCommandNick(const vector<string> &params)
 {
-	for (map<string, User *>::const_iterator it = _server->getUsers().begin(); it != _server->getUsers().end(); ++it)
-	{
-		if (it->second->getNickname() == params[0])
-			throw User::NicknameAlreadyInUseException();
-	}
+	//TODO check se esiste gia
 	_client->setNickname(params[0]);
+	if (_client->getUsername())
+		_client->setAuthenticated(true);
 }
 
 void EventHandler::executeCommandQuit(const vector<string> &params)
@@ -258,8 +256,10 @@ void EventHandler::executeCommandQuit(const vector<string> &params)
 
 void EventHandler::executeCommandUser(const vector<string> &params)
 {
+	//TODO check se esiste gia
 	_client->setUsername(params[0]);
-	_client->authenticate();
+	if (_client->getUsername())
+		_client->setAuthenticated(true);
 }
 
 void	EventHandler::sendBufferedString(const User &receiver, const string &string) const
@@ -303,6 +303,11 @@ static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
 		throw User::NotAuthenticatedException();
+}
+
+const char	*EventHandler::InputTooLongException::what(void) const throw()
+{
+	return "Input too long";
 }
 
 const char	*EventHandler::CommandNotFoundException::what(void) const throw()

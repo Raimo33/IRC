@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 10:06:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 11:39:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ void ChannelOperator::channelTopicSet(Channel &channel, const string &new_topic)
 	channel.setTopic(new_topic);
 }
 
+//MODE #channel +n params
 void ChannelOperator::channelModeChange(Channel &channel, const t_channel_modes &mode, const bool status) const
 {
 	//TODO implementare

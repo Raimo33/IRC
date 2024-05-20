@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:58:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 11:44:03 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ class EventHandler
 	private:
 
 		s_input							parseInput(string &raw_input) const;
-		void							executeCommandPrivmsg(const vector<string> &params);
+		void							executeCommandPrivmsg(const vector<string> &params); //chiama sendMessage di User
 		void							executeCommandMode(const vector<string> &params);
 		void							executeCommandJoin(const vector<string> &params);
 		void							executeCommandPass(const vector<string> &params);

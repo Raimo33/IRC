@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:43:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:24:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,11 +59,6 @@ class Server
 		const Client					&getClient(const string &username) const;
 		void							addClient(Client *client);
 		void							removeClient(const Client &client);
-		const map<string, User *>		&getUsers(void) const;
-		void							setUsers(const map<string, User *> &users);
-		const User						&getUser(const string &username) const;
-		void							addUser(User *user);
-		void							removeUser(const User &user);
 		const map<string, Channel *>	&getChannels(void) const;
 		void							setChannels(const map<string, Channel *> &channels);
 		const Channel					&getChannel(const string &name) const;
@@ -77,7 +72,6 @@ class Server
 		int								getSocket(void) const;
 		//setEventHandler e getEventHandler non servono perche' EventHandler e' un singleton
 
-		const string					&getUserPassword(const string &username) const;
 		void							handleClient(Client *client, size_t *i);
 		void							disconnectClient(Client *client);
 		void							handshake(const int client_socket) const;
@@ -86,8 +80,6 @@ class Server
 
 		class							ChannelAlreadyExistsException; //addChannel
 		class							ChannelNotFoundException; //getChannel, User::joinChannel
-		class							UserAlreadyExistsException; //addUser
-		class							UserNotFoundException; //getUserPassword, getUser
 		class 							InvalidPasswordException; //constructor
 		class							ClientNotFoundException; //removeClient, getClient
 		class							ClientAlreadyExistsException; //addClient
@@ -97,9 +89,8 @@ class Server
 		const uint16_t					_port; //la porta va da 0 a 65535 (2 bytes)
 		const string					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
 		map<int, Client *>				_clients; //{socket, Client *}
-		map<string, User *>				_users; // {username, User *}
 		map<string, Channel *>			_channels; // {channel_name, Channel *}
-		vector<pollfd>					_pollfds;
+		vector<pollfd>					_pollfds; //TODO usare map invece che vector, mapparli con il socket
 		const int						_socket;
 		EventHandler					_event_handler;
 };
@@ -111,18 +102,6 @@ class Server::ChannelAlreadyExistsException : public exception
 };
 
 class Server::ChannelNotFoundException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Server::UserAlreadyExistsException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Server::UserNotFoundException : public exception
 {
 	public:
 		virtual const char *what(void) const throw();

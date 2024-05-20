@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:40:00 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:35:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,26 @@ void	User::setAuthenticated(bool is_authenticated)
 	_is_authenticated = is_authenticated;
 }
 
+uint16_t	User::getPort(void) const
+{
+	return _port;
+}
+
+const string	&User::getIpAddr(void) const
+{
+	return _ip_addr;
+}
+
+int	User::getSocket(void) const
+{
+	return _socket;
+}
+
+Server	*User::getServer(void) const
+{
+	return _server;
+}
+
 void	User::joinChannel(Channel &channel)
 {
 	if (!_is_authenticated)
@@ -143,6 +163,18 @@ void	User::leaveChannel(Channel &channel)
 		throw NotAuthenticatedException();
 	channel.removeMember(*this);
 	removeChannel(channel);
+}
+
+void	User::sendMessage(const Channel &channel, const Message &message) const
+{
+	if (!_channels.at(channel.getName()))
+		throw UserNotInChannelException();
+	channel.receiveMessage(message);
+}
+
+void	User::sendMessage(const User &receiver, const PrivateMessage &message) const
+{
+	//TODO sendMessage
 }
 
 const char	*User::TooManyChannelsException::what() const throw()

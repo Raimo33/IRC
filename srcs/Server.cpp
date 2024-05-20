@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 17:43:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:26:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ Server::Server(const Server &copy) :
 	_port(copy._port),
 	_pwd_hash(copy._pwd_hash),
 	_clients(copy._clients),
-	_users(copy._users),
 	_channels(copy._channels),
 	_pollfds(copy._pollfds),
 	_socket(copy._socket),
@@ -59,6 +58,7 @@ void	Server::run(void)
 		{
 			if (_pollfds[i].revents & POLLIN)
 			{
+				//new connection
 				if (_pollfds[i].fd == _socket)
 				{
 					Client				*client;
@@ -90,6 +90,7 @@ void	Server::run(void)
 				}
 				else
 				{
+					//client already exists
 					Client *client = NULL;
 					for (size_t j = 0; j < _clients.size(); j++)
 					{
@@ -156,33 +157,6 @@ void Server::removeClient(const Client &client)
 	if (!_clients.at(client.getSocket()))
 		throw ClientNotFoundException();
 	_clients.erase(client.getSocket());
-}
-
-const map<string, User *>	&Server::getUsers(void) const
-{
-	return _users;
-}
-
-void	Server::setUsers(const map<string, User *> &users)
-{
-	_users = users;
-}
-
-const User &Server::getUser(const string &username) const
-{
-	if (_users.find(username) == _users.end())
-		throw UserNotFoundException();
-	return *(_users.at(username));
-}
-
-void Server::addUser(User *user)
-{
-	_users[user->getUsername()] = user;
-}
-
-void Server::removeUser(const User &user)
-{
-	_users.erase(user.getUsername());
 }
 
 const map<string, Channel *>	&Server::getChannels(void) const
@@ -258,17 +232,7 @@ int	Server::getSocket(void) const
 	return _socket;
 }
 
-const string	&Server::getUserPassword(const string &username) const
-{
-	for (map<string, User *>::const_iterator it = _users.begin(); it != _users.end(); it++)
-	{
-		if (it->first == username)
-			return it->second->getPwdHash();
-	}
-	throw UserNotFoundException();
-}
-
-void Server::handleClient(Client *client, size_t *i)
+void Server::handleClient(Client *client, size_t *i) //TODO refactor
 {
 	char buffer[BUFFER_SIZE];
 
@@ -328,16 +292,6 @@ const char *Server::ChannelAlreadyExistsException::what() const throw()
 const char *Server::ChannelNotFoundException::what() const throw()
 {
 	return "Channel not found";
-}
-
-const char *Server::UserAlreadyExistsException::what() const throw()
-{
-	return "User already exists";
-}
-
-const char *Server::UserNotFoundException::what() const throw()
-{
-	return "User not found";
 }
 
 const char *Server::InvalidPasswordException::what() const throw()

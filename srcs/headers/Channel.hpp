@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 16:49:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 11:42:30 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,9 @@ class Channel
 		void									setModes(const bool new_modes[N_MODES]);
 		bool									getMode(const t_channel_modes &mode) const;
 		void									setMode(const t_channel_modes &mode, const bool value);
-			
+
+		void									receiveMessage(const User &sender, const string &message) const;
+		
 		class       							InvalidNameException; //constructor
 		class									InvalidTopicException; //setTopic
 		class									InvalidKeyException; //setKey, User::joinChannel
