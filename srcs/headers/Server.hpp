@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 12:24:56 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:45:01 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,8 @@
 using namespace std;
 
 class User;
-class Client;
 class Channel;
-class EventHandler;
+class Client;
 
 class Server
 {
@@ -79,7 +78,7 @@ class Server
 		void							run(void);
 
 		class							ChannelAlreadyExistsException; //addChannel
-		class							ChannelNotFoundException; //getChannel, User::joinChannel
+		class							ChannelNotFoundException; //getChannel, Client::joinChannel
 		class 							InvalidPasswordException; //constructor
 		class							ClientNotFoundException; //removeClient, getClient
 		class							ClientAlreadyExistsException; //addClient
@@ -87,7 +86,7 @@ class Server
 
 	private:
 		const uint16_t					_port; //la porta va da 0 a 65535 (2 bytes)
-		const string					_pwd_hash; //la password che serve a qualsiasi user per accedere a questo server
+		const string					_pwd_hash; //la password che serve a qualsiasi Client per accedere a questo server
 		map<int, Client *>				_clients; //{socket, Client *}
 		map<string, Channel *>			_channels; // {channel_name, Channel *}
 		vector<pollfd>					_pollfds; //TODO usare map invece che vector, mapparli con il socket

@@ -6,13 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:59:00 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:27:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:03:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Message.hpp"
 	
-Message::Message(const string &content, const User &sender, const Channel &channel) :
+Message::Message(const string &content, const Client &sender, const Channel &channel) :
 	IMessage(content, sender),
 	_channel(&channel) {}
 

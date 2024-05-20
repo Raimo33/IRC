@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 17:16:12 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 15:24:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:56:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,23 +17,23 @@
 
 using namespace std;
 
-class User;
+class Client;
 
 class IMessage
 {
 	public:
-		explicit IMessage(const string &content, const User &sender);
+		explicit IMessage(const string &content, const Client &sender);
 		IMessage(const IMessage &copy);
 		virtual ~IMessage(void) = 0;
 
 		const string	&getContent(void) const;
 		time_t 			getTimestamp(void) const;
-		const User		&getSender(void) const;
+		const Client	&getSender(void) const;
 
 	protected:
 		const string	_content;
 		const time_t	_timestamp;
-		const User		*_sender;
+		const Client	*_sender;
 };
 
 #endif

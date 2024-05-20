@@ -6,15 +6,17 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 12:26:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:57:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/Server.hpp"
 #include "headers/SystemCalls.hpp"
 #include "headers/Client.hpp"
+#include "headers/Channel.hpp"
 #include "headers/SystemCalls.hpp"
 #include "headers/EventHandler.hpp"
+#include "headers/Hasher.hpp"
 
 Server::Server(const uint16_t port_no, const string &password) :
 	_port(port_no),

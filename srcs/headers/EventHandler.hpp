@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 11:44:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:34:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,7 @@ class EventHandler
 
 		void 							processInput(string raw_input);
 
-		void							deliverMessage(const User &receiver, const PrivateMessage &message) const;
-		void							deliverMessage(const Channel &receiver, const Message &message) const;
+		static void						sendBufferedString(const Client &receiver, const string &string);
 
 		class							InputTooLongException; //parseInput
 		class							CommandNotFoundException; //processInput, parseInput
@@ -74,8 +73,8 @@ class EventHandler
 		void							executeCommandNick(const vector<string> &params);
 		void							executeCommandQuit(const vector<string> &params);
 		void							executeCommandUser(const vector<string> &params);
-		void							sendBufferedString(const User &receiver, const string &string) const;
 		const map<string, e_cmd_type>	&initCommandMap(void) const;
+
 
 		const map<string, e_cmd_type>	_commands; //TODO spostare fuori (pseudo globale) altrimenti viene creato per ogni server
 		Client							*_client;

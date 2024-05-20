@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 12:41:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:53:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include "headers/Message.hpp"
 #include "headers/Channel.hpp"
 #include "headers/ChannelOperator.hpp"
+#include "headers/Hasher.hpp"
+#include "headers/Client.hpp"
 
 static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
@@ -88,7 +90,7 @@ void	EventHandler::processInput(string raw_input)
 			checkConnection(_client);
 			executeCommandNick(input.params);
 			break;
-		//USER <username>
+		//Client <username>
 		case USER:
 			checkConnection(_client);
 			executeCommandUser(input.params);
@@ -100,21 +102,6 @@ void	EventHandler::processInput(string raw_input)
 		default:
 			throw CommandNotFoundException();
 	}
-}
-
-void	EventHandler::deliverMessage(const Channel &channel, const Message &msg) const
-{
-    std::map<std::string, User*> users = channel.getMembers();
-
-    for (std::map<std::string, User*>::const_iterator it = users.begin(); it != users.end(); ++it)
-        sendBufferedString(*it->second, msg.getContent());
-}
-
-void	EventHandler::deliverMessage(const User &receiver, const PrivateMessage &msg) const
-{
-	if (receiver.getUsername() == _client->getUsername())
-		throw CantSendMessageToYourselfException();
-	sendBufferedString(receiver, msg.getContent());
 }
 
 //input: ":<prefix> <command> <params> <crlf>"
@@ -169,28 +156,32 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params) //TODO de
 		int		n_members = channel.getMembers().size();
 
 		if (n_members == 1)
-			throw CantSendMessageToYourselfException();
+			throw Client::CantSendMessageToYourselfException();
 		if (n_members == 2)
 		{
 			//promuovo il messaggio a private message
-			User	*receiver;
+			Client	*receiver;
 
 			receiver = channel.getMembers().begin()->second;
-			if (receiver->getNickname() == _client->getNickname())
+			if (receiver->getUsername() == _client->getUsername())
 				receiver = channel.getMembers().rbegin()->second;
 			PrivateMessage *msg = new PrivateMessage(params[1], *_client, *receiver);
-			deliverMessage(*receiver, *msg);
+			_client->sendMessage(*receiver, *msg);
+			delete msg;
 			return ;
 		}
 		Message *msg = new Message(params[1], *_client, channel);
-		deliverMessage(channel, *msg);
+		_client->sendMessage(channel, *msg);
+		delete msg;
 	}
 	else
 	{
 		//private msg PRIVMSG <nickname> :<message>
-		User receiver = _server->getUser(params[0]);
+		Client receiver = _server->getClient(params[0]);
+
 		PrivateMessage *msg = new PrivateMessage(params[1], *_client, receiver);
-		deliverMessage(receiver, *msg);
+		_client->sendMessage(receiver, *msg);
+		delete msg;
 	}
 }
 
@@ -236,7 +227,7 @@ void EventHandler::executeCommandPass(const vector<string> &params)
 	MD5 hasher(params[0]);
 
 	if (hasher.hexdigest() != _server->getPwdHash())
-		throw Client::InvalidPasswordException();
+		throw Server::InvalidPasswordException();
 	_client->setIsConnected(true);
 }
 
@@ -244,7 +235,7 @@ void EventHandler::executeCommandNick(const vector<string> &params)
 {
 	//TODO check se esiste gia
 	_client->setNickname(params[0]);
-	if (_client->getUsername())
+	if (!_client->getUsername().empty())
 		_client->setAuthenticated(true);
 }
 
@@ -258,23 +249,8 @@ void EventHandler::executeCommandUser(const vector<string> &params)
 {
 	//TODO check se esiste gia
 	_client->setUsername(params[0]);
-	if (_client->getUsername())
+	if (!_client->getNickname().empty())
 		_client->setAuthenticated(true);
-}
-
-void	EventHandler::sendBufferedString(const User &receiver, const string &string) const
-{
-	const char		*raw_msg = string.c_str();
-	int				socket = _server->getClient(receiver.getUsername()).getSocket();
-	const size_t	total_len = strlen(raw_msg);
-	size_t			chars_sent = 0;
-
-	while (chars_sent < total_len)
-	{
-		size_t len = min(total_len - chars_sent, BUFFER_SIZE - 1);
-		send(socket, raw_msg + chars_sent, len, 0); //TODO gestire errori, provare a inviare di nuovo (mettere in un file di log)
-		chars_sent += len;
-	}
 }
 
 const map<string, e_cmd_type>	&EventHandler::initCommandMap(void) const
@@ -293,6 +269,21 @@ const map<string, e_cmd_type>	&EventHandler::initCommandMap(void) const
 	return commands;
 }
 
+void	EventHandler::sendBufferedString(const Client &client, const string &string)
+{
+	const char		*raw_msg = string.c_str();
+	int				socket = client.getSocket();
+	const size_t	total_len = strlen(raw_msg);
+	size_t			chars_sent = 0;
+
+	while (chars_sent < total_len)
+	{
+		size_t len = min(total_len - chars_sent, BUFFER_SIZE - 1);
+		send(socket, raw_msg + chars_sent, len, 0); //TODO gestire errori, provare a inviare di nuovo (mettere in un file di log)
+		chars_sent += len;
+	}
+}
+
 static void checkConnection(const Client *client)
 {
 	if (!client->getIsConnected())
@@ -302,7 +293,7 @@ static void checkConnection(const Client *client)
 static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
-		throw User::NotAuthenticatedException();
+		throw Client::NotAuthenticatedException();
 }
 
 const char	*EventHandler::InputTooLongException::what(void) const throw()

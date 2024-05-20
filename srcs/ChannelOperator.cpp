@@ -6,21 +6,21 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 11:39:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:37:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/ChannelOperator.hpp"
 
-ChannelOperator::ChannelOperator(const User &user) : User(user) {}
+ChannelOperator::ChannelOperator(const Client &user) : Client(user) {}
 
-ChannelOperator::ChannelOperator(const ChannelOperator &copy) : User(copy) {}
+ChannelOperator::ChannelOperator(const ChannelOperator &copy) : Client(copy) {}
 
 ChannelOperator::~ChannelOperator() {}
 
-void ChannelOperator::channelKick(const User &user, Channel &channel) const
+void ChannelOperator::channelKick(const Client &user, Channel &channel) const
 {
-	map<string, User *>				members = channel.getMembers();
+	map<string, Client *>				members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
 
 	checkPrivilege(channel);
@@ -29,9 +29,9 @@ void ChannelOperator::channelKick(const User &user, Channel &channel) const
 	channel.removeMember(user);
 }
 
-void ChannelOperator::channelInvite(User &user, Channel &channel) const
+void ChannelOperator::channelInvite(Client &user, Channel &channel) const
 {
-	map<string, User *>				members = channel.getMembers();
+	map<string, Client *>				members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
 
 	checkPrivilege(channel);
@@ -42,7 +42,7 @@ void ChannelOperator::channelInvite(User &user, Channel &channel) const
 
 void ChannelOperator::channelTopicSet(Channel &channel, const string &new_topic) const
 {
-	map<string, User *>				members = channel.getMembers();
+	map<string, Client *>				members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
 
 	checkPrivilege(channel);
@@ -60,7 +60,7 @@ void ChannelOperator::channelModeChange(Channel &channel, const t_channel_modes 
 
 void ChannelOperator::checkPrivilege(const Channel &channel) const
 {
-	map<string, User *>				members = channel.getMembers();
+	map<string, Client *>			members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
 
 	if (members.find(_username) == members.end())
@@ -71,7 +71,7 @@ void ChannelOperator::checkPrivilege(const Channel &channel) const
 
 const char *ChannelOperator::UserNotInChannelException::what() const throw()
 {
-	return "User is not in the channel";
+	return "Client is not in the channel";
 }
 
 const char *ChannelOperator::OperatorNotInChannelException::what() const throw()

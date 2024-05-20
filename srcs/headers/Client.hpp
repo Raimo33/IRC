@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 12:42:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/20 14:56:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 # include <map>
 # include <string>
-# include "Channel.hpp"
+# include <stdint.h>
 
 # define MAX_CHANNELS_PER_USER 10
 
@@ -23,6 +23,8 @@ using namespace std;
 
 class Message;
 class PrivateMessage;
+class Server;
+class Channel;
 class Client
 {
 	public:
@@ -51,19 +53,19 @@ class Client
 		void								joinChannel(Channel &channel);
 		void								joinChannel(Channel &channel, const string &key);
 		void								leaveChannel(Channel &channel);
-		void								sendMessage(const Channel &channel, const Message &message) const; //chiama channel.receiveMessage
-		void								sendMessage(const User &receiver, const PrivateMessage &message) const;
+		void								sendMessage(const Channel &channel, const Message &msg) const; //chiama channel.receiveMessage
+		void								sendMessage(const Client &receiver, const PrivateMessage &msg) const;
 
 		class								TooManyChannelsException; //joinChannel
 		class								AlreadyConnectedException; //setIsConnected
-		class								AlreadyDisconnectedException; //setIsConnected
+		class								NotConnectedException; //joinChannel
 		class								AlreadyAuthenticatedException; //setAuthenticated
-		class								AlreadyDisauthenticatedException; //setAuthenticated
-		class								NicknameAlreadyInUseException; //setNickname
 		class								NotAuthenticatedException; //joinChannel
+		class								NicknameAlreadyInUseException; //setNickname
 		class								UserNotInChannelException; //getChannel, Client::sendMessage
+		class								CantSendMessageToYourselfException; //sendMessage
 
-	private:
+	protected:
 
 		map<string, const Channel *>		_channels; // {channel_name, channel}
 		string								_nickname;
@@ -79,37 +81,49 @@ class Client
 		
 };
 
-class Client::TooManyChannelsException: public exception
+class Client::TooManyChannelsException : public exception
 {
 	public:
 		virtual const char	*what(void) const throw();
 };
 
-class Client::AlreadyAuthenticatedException: public exception
+class Client::AlreadyConnectedException : public exception
 {
 	public:
 		virtual const char	*what(void) const throw();
 };
 
-class Client::NicknameAlreadyInUseException: public exception
+class Client::NotConnectedException : public exception
 {
 	public:
 		virtual const char	*what(void) const throw();
 };
 
-class Client::NotAuthenticatedException: public exception
+class Client::AlreadyAuthenticatedException : public exception
 {
 	public:
 		virtual const char	*what(void) const throw();
 };
 
-class Client::UserNotInChannelException: public exception
+class Client::NotAuthenticatedException : public exception
 {
 	public:
 		virtual const char	*what(void) const throw();
 };
 
-class Client::AlreadyDisauthenticatedException: public exception
+class Client::NicknameAlreadyInUseException : public exception
+{
+	public:
+		virtual const char	*what(void) const throw();
+};
+
+class Client::UserNotInChannelException : public exception
+{
+	public:
+		virtual const char	*what(void) const throw();
+};
+
+class Client::CantSendMessageToYourselfException : public exception
 {
 	public:
 		virtual const char	*what(void) const throw();
