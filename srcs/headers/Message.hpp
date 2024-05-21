@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:57:26 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:03:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 16:25:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,7 @@
 # include "IMessage.hpp"
 
 using namespace std;
-
-class User;
-class Channel;
+using namespace irc;
 
 //quando si crea l'oggetto messaggio bisogna controllare se _channel.size() e' uguale a 2
 //e in quel caso si promuove (col costruttore copy) a private message

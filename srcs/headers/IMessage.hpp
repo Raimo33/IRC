@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 17:16:12 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:56:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 16:25:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,10 @@
 
 #include <string>
 
+# include "irc.hpp"
+
 using namespace std;
-
-class Client;
-
+using namespace irc;
 class IMessage
 {
 	public:

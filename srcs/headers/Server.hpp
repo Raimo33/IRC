@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 14:38:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 16:30:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,13 @@
 # include <sstream>
 # include <algorithm>
 
+# include "irc.hpp"
 # include "EventHandler.hpp"
 # include "SystemCalls.hpp"
 # include "Standards.hpp"
 
 using namespace std;
-
-class User;
-class Channel;
-class Client;
+using namespace irc;
 
 class Server
 {
@@ -78,17 +76,8 @@ class Server
 
 		static const map<uint16_t, string>	reply_codes;
 
-		class								FatalErrorException; //run
-		class								ChannelAlreadyExistsException; //addChannel
-		class								ChannelNotFoundException; //getChannel, Client::joinChannel
-		class 								InvalidPasswordException; //constructor
-		class								ClientNotFoundException; //removeClient, getClient
-		class								ClientAlreadyExistsException; //addClient
-		class 								HandshakeFailedException; //handshake
-
-
 	private:
-		const map<uint16_t, string>			initReplyCodes(void) const;
+		static const map<uint16_t, string>	initReplyCodes(void);
 
 		const uint16_t						_port; //la porta va da 0 a 65535 (2 bytes)
 		const string						_pwd_hash; //la password che serve a qualsiasi Client per accedere a questo server
@@ -97,49 +86,6 @@ class Server
 		vector<pollfd>						_pollfds; //TODO usare map invece che vector, mapparli con il socket
 		const int							_socket;
 		EventHandler						_event_handler;
-};
-
-class Server::FatalErrorException : public runtime_error
-{
-	public:
-		explicit FatalErrorException(const string &msg);
-		virtual const char *what(void) const throw();
-};
-
-class Server::ChannelAlreadyExistsException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Server::ChannelNotFoundException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Server::InvalidPasswordException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Server::ClientNotFoundException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Server::ClientAlreadyExistsException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Server::HandshakeFailedException : public exception
-{
-	public:
-		virtual const char *what(void) const throw();
 };
 
 #endif

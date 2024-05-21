@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 14:43:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 16:21:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ Server::Server(const uint16_t port_no, const string &password) :
 	bind_p(_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
 	listen_p(_socket, 5);
 	cout << "Server waiting for connections on port: " << _port << endl;
+	//TODO printare l'IP del server
 	server_poll_fd.fd = _socket;
 	server_poll_fd.events = POLLIN;
 	_pollfds.push_back(server_poll_fd);
@@ -230,23 +231,27 @@ void Server::handleClient(Client *client, size_t *i)
 	if (!client)
 		throw ClientNotFoundException();
 
-	int bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
-	if (bytes_read > 0)
+	try
 	{
-		buffer[bytes_read - 1] = '\0';
-		_event_handler.setClient(client);
-		_event_handler.processInput(buffer); // se tutto va bene esegue il comando
-		_event_handler.setClient(NULL);
+		int bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
+		if (bytes_read > 0)
+		{
+			buffer[bytes_read - 1] = '\0';
+			_event_handler.setClient(client);
+			_event_handler.processInput(buffer); // se tutto va bene esegue il comando
+			_event_handler.setClient(NULL);
+		}
+		else if (bytes_read <= 0)
+		{
+			// Connection closed
+			removeClient(*client);
+			(*i)--;
+			// Error
+			if (bytes_read < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
+				throw SystemErrorException(strerror(errno));
+		}
 	}
-	else if (bytes_read <= 0)
-	{
-		// Connection closed
-		removeClient(*client);
-		(*i)--;
-		// Error
-		if (bytes_read < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
-			throw SystemErrorException(strerror(errno));
-	}
+	catch (m)
 }
 
 void Server::disconnectClient(Client *client)
@@ -272,7 +277,7 @@ void Server::configureNonBlocking(const int socket) const
 		throw runtime_error(strerror(errno));
 }
 
-const map<uint16_t, string> Server::initReplyCodes(void) const
+const map<uint16_t, string> Server::initReplyCodes(void)
 {
 	map<uint16_t, string>	m;
 	//https://github.com/williamkapke/irc-replies/blob/master/replies.json
@@ -464,43 +469,4 @@ const map<uint16_t, string> Server::initReplyCodes(void) const
     return m;
 }
 
-const map<string, uint16_t>	Server::reply_codes = initReplyCodes();
-
-Server::FatalErrorException::FatalErrorException(const string &msg) : runtime_error(msg) {}
-
-const char *Server::FatalErrorException::what(void) const throw()
-{
-	return runtime_error::what();
-}
-
-const char *Server::ChannelAlreadyExistsException::what(void) const throw()
-{
-	return "Channel already exists";
-}
-
-const char *Server::ChannelNotFoundException::what(void) const throw()
-{
-	return "Channel not found";
-}
-
-const char *Server::InvalidPasswordException::what(void) const throw()
-{
-	return "Invalid password";
-}
-
-const char *Server::ClientNotFoundException::what(void) const throw()
-{
-	return "Client not found";
-}
-
-const char *Server::ClientAlreadyExistsException::what(void) const throw()
-{
-	return "Client already exists";
-}
-
-const char *Server::HandshakeFailedException::what(void) const throw()
-{
-	return "Handshake failed";
-}
-
-
+const map<uint16_t, string>	Server::reply_codes = initReplyCodes();

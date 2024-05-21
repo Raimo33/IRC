@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:40:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 15:52:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,12 @@
 #include "headers/utils.hpp"
 #include "headers/Message.hpp"
 #include "headers/EventHandler.hpp"
+#include "headers/Standards.hpp"
+#include "headers/IRC_Exceptions.hpp"
 
 Channel::Channel(const string &name, ChannelOperator &op) :
 	_name(name),
-	_member_limit(DEFAULT_MEMBER_LIMIT)
+	_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT)
 {
 	if (!is_valid_channel_name(name))
 		throw InvalidNameException();
@@ -33,7 +35,7 @@ Channel::Channel(const string &name, ChannelOperator &op) :
 Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
 	_name(name),
 	_key(key),
-	_member_limit(DEFAULT_MEMBER_LIMIT)
+	_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT)
 {
 	if (!is_valid_channel_name(name))
 		throw InvalidNameException();
@@ -76,7 +78,7 @@ const string &Channel::getKey(void) const
 
 void Channel::setKey(const string &new_key)
 {
-	if (new_key.empty() || new_key.length() > MAX_KEY_LEN)
+	if (new_key.empty() || new_key.length() > MAX_CHANNEL_KEY_LEN)
 		throw InvalidKeyException();
 	_key = new_key;
 }
@@ -88,7 +90,7 @@ const string &Channel::getTopic(void) const
 
 void Channel::setTopic(const string &new_topic)
 {
-	if (new_topic.length() > MAX_TOPIC_LEN)
+	if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
 		throw InvalidTopicException();
 	_topic = new_topic;
 }
@@ -241,51 +243,5 @@ void	Channel::receiveMessage(const Message &msg) const
 {
 	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
 		EventHandler::sendBufferedString(*receiver->second, msg.getContent());
-}
-
-const char	*Channel::InvalidNameException::what(void) const throw()
-{
-	return "Invalid channel name";
-}
-
-const char	*Channel::InvalidTopicException::what(void) const throw()
-{
-	return "Invalid channel topic";
-}
-
-const char	*Channel::InvalidKeyException::what(void) const throw()
-{
-	return "Invalid channel key";
-}
-
-const char	*Channel::ChannelFullException::what(void) const throw()
-{
-	return "Channel is full";
-}
-
-const char	*Channel::UserAlreadyMemberException::what(void) const throw()
-{
-	return "Client is already a member of the channel";
-}
-
-const char	*Channel::UserAlreadyOperatorException::what(void) const throw()
-{
-	return "Client is already an operator of the channel";
-}
-
-const char	*Channel::UserNotOperatorException::what(void) const throw()
-{
-	return "Client is not an operator of the channel";
-}
-
-const char	*Channel::UserNotMemberException::what(void) const throw()
-
-{
-	return "Client is not a member of the channel";
-}
-
-const char	*Channel::UnknownModeException::what(void) const throw()
-{
-	return "Unknown channel mode";
 }
 

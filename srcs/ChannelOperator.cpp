@@ -6,11 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:37:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 15:52:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/ChannelOperator.hpp"
+#include "headers/IRC_Exceptions.hpp"
 
 ChannelOperator::ChannelOperator(const Client &user) : Client(user) {}
 
@@ -25,7 +26,7 @@ void ChannelOperator::channelKick(const Client &user, Channel &channel) const
 
 	checkPrivilege(channel);
 	if (members.find(user.getUsername()) == members.end())
-		throw UserNotInChannelException();
+		throw Client::UserNotInChannelException();
 	channel.removeMember(user);
 }
 

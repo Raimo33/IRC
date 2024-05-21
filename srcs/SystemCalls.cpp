@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 14:59:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 15:33:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,3 @@ ssize_t	recv_p(int sockfd, void *buf, size_t len, int flags)
 		throw SystemErrorException(strerror(errno));
 	return (ret);
 }
-
-SystemErrorException::SystemErrorException(const string &msg) : runtime_error(msg) {}
-

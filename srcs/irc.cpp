@@ -6,15 +6,18 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 14:11:42 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 16:17:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/Server.hpp"
-
 #include <iostream>
 
-static void	check_args(const int argc, const char **argv);
+#include "headers/Server.hpp"
+#include "headers/irc.hpp"
+
+using namespace std;
+using namespace IRC;
+
 static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv);
 
 int main(const int argc, const char **argv)
@@ -30,30 +33,41 @@ int main(const int argc, const char **argv)
 
 		server.run();
 	}
-	catch (const Server::FatalErrorException &e)
+	catch (const InvalidArgumentException &e)
 	{
-		cerr << e.what() << endl;
+		cerr << "Invalid argument: \n" << e.what() << endl;
+		return (EXIT_FAILURE);
+	}
+	catch (const FatalErrorException &e)
+	{
+		cerr << "Fatal error: \n" << e.what() << endl;
+		return (EXIT_FAILURE);
+	}
+	catch (const exception &e)
+	{
+		cerr << "An error occurred: \n" << e.what() << endl;
 		return (EXIT_FAILURE);
 	}
 }
 
 static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv)
 {
+	if (argc != 3)
+		throw invalid_argument("Usage: ./irc <port> <password>");
+
 	istringstream	iss(argv[1]);
 
-	if (argc != 3)
-		throw Server::FatalErrorException("Usage: ./irc <port> <password>");
 	if (!(iss >> *port_nbr))
-		throw Server::FatalErrorException("Invalid port number");
+		throw invalid_argument("Invalid port number");
 	iss.clear();
 	iss.str(argv[2]);
 	if (!(iss >> *password))
-		throw Server::FatalErrorException("Invalid password");
+		throw invalid_argument("Invalid password");
 	if (password->length() > MAX_SERVER_PASSWORD_LEN)
 	{
 		ostringstream oss;
 
 		oss << "Password too long (max " << MAX_SERVER_PASSWORD_LEN << " characters)";
-		throw Server::FatalErrorException(oss.str());
+		throw invalid_argument(oss.str());
 	}
 }

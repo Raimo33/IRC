@@ -6,27 +6,26 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:40:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 16:25:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CHANNEL_HPP
 # define CHANNEL_HPP
 
-# define N_MODES 5
-# define MAX_CHANNEL_NAME_LEN 200
-# define MAX_TOPIC_LEN 390
-# define MAX_KEY_LEN 50
-# define DEFAULT_MEMBER_LIMIT 50
-
 # include <map>
+
+# include "irc.hpp"
 # include <string>
 # include <vector>
 # include <algorithm>
 # include <stdint.h>
 # include <stdexcept>
 
+# include "Standards.hpp"
+
 using namespace std;
+using namespace irc;
 
 typedef enum e_channel_modes
 {
@@ -37,9 +36,6 @@ typedef enum e_channel_modes
 	MODE_L = 4
 }	t_channel_modes;
 
-class ChannelOperator;
-class Client;
-class Message;
 class Channel
 {
 	public:
@@ -78,16 +74,6 @@ class Channel
 
 		void									receiveMessage(const Message &msg) const;
 		
-		class       							InvalidNameException; //constructor
-		class									InvalidTopicException; //setTopic
-		class									InvalidKeyException; //setKey, Client::joinChannel
-		class									ChannelFullException; //addMember
-		class									UserAlreadyMemberException; //addMember
-		class									UserAlreadyOperatorException; //promoteOperator
-		class									UserNotOperatorException; //removeOperator, demoteOperator
-		class									UserNotMemberException; //removeMember
-		class									UnknownModeException; //setMode
-		
 		friend class 							ChannelOperator;
 
 	private:
@@ -102,60 +88,6 @@ class Channel
 		map<string, Client *>					_members; // {nickname, user}
 		map<string, Client *>					_pending_invitations; // {nickname, user} (il channel operator puo fare /invite)
 		bool									_modes[N_MODES];
-};
-
-class Channel::InvalidNameException: public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Channel::InvalidTopicException: public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Channel::InvalidKeyException: public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Channel::ChannelFullException: public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Channel::UserAlreadyMemberException: public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Channel::UserAlreadyOperatorException: public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Channel::UserNotOperatorException: public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Channel::UserNotMemberException: public exception
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class Channel::UnknownModeException: public exception
-{
-	public:
-		virtual const char *what(void) const throw();
 };
 
 #endif

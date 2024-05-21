@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 14:39:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 15:52:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "headers/Server.hpp"
 #include "headers/utils.hpp"
 #include "headers/Standards.hpp"
+#include "headers/IRC_Exceptions.hpp"
 
 Client::Client(Server *server, const int socket, const string &ip_addr, const uint16_t port) :
 	_channels(),
@@ -215,49 +216,3 @@ void	Client::receiveNumericReply(uint16_t code, const vector<string> &params, co
 	}
 	EventHandler::sendBufferedString(*this, oss.str());
 }
-
-const char	*Client::TooManyChannelsException::what(void) const throw()
-{
-	return "User are already in the maximum number of channels allowed";
-}
-
-const char	*Client::AlreadyConnectedException::what(void) const throw()
-{
-	return "User are already connected";
-}
-
-const char	*Client::NotConnectedException::what(void) const throw()
-{
-	return "User are not connected";
-}
-
-const char	*Client::AlreadyAuthenticatedException::what(void) const throw()
-{
-	return "User are already authenticated";
-}
-
-const char	*Client::NotAuthenticatedException::what(void) const throw()
-{
-	return "User are not authenticated";
-}
-
-const char	*Client::NicknameInUseException::what(void) const throw()
-{
-	return "User nickname is already in use";
-}
-
-const char	*Client::ErroneousNicknameException::what(void) const throw()
-{
-	return "User nickname is invalid";
-}
-
-const char	*Client::UserNotInChannelException::what(void) const throw()
-{
-	return "User is not in the channel";
-}
-
-const char	*Client::CantSendMessageToYourselfException::what(void) const throw()
-{
-	return "User can't send a message to himself";
-}
-

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:59:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 16:25:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,10 @@
 # include <string>
 # include <stdint.h>
 
-using namespace std;
+# include "irc.hpp"
 
-class Message;
-class PrivateMessage;
-class Server;
-class Channel;
+using namespace std;
+using namespace irc;
 
 class Client
 {
@@ -81,60 +79,6 @@ class Client
 		const int							_socket;
 		Server								*_server;
 		
-};
-
-class Client::TooManyChannelsException : public exception
-{
-	public:
-		virtual const char	*what(void) const throw();
-};
-
-class Client::AlreadyConnectedException : public exception
-{
-	public:
-		virtual const char	*what(void) const throw();
-};
-
-class Client::NotConnectedException : public exception
-{
-	public:
-		virtual const char	*what(void) const throw();
-};
-
-class Client::AlreadyAuthenticatedException : public exception
-{
-	public:
-		virtual const char	*what(void) const throw();
-};
-
-class Client::NotAuthenticatedException : public exception
-{
-	public:
-		virtual const char	*what(void) const throw();
-};
-
-class Client::NicknameInUseException : public exception
-{
-	public:
-		virtual const char	*what(void) const throw();
-};
-
-class Client::ErroneousNicknameException : public exception
-{
-	public:
-		virtual const char	*what(void) const throw();
-};
-
-class Client::UserNotInChannelException : public exception
-{
-	public:
-		virtual const char	*what(void) const throw();
-};
-
-class Client::CantSendMessageToYourselfException : public exception
-{
-	public:
-		virtual const char	*what(void) const throw();
 };
 
 #endif

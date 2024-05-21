@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 18:07:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 15:52:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include "headers/utils.hpp"
 #include "headers/ReplyCodes.hpp"
 #include "headers/Standards.hpp"
+#include "headers/IRC_Exceptions.hpp"
 
 static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
@@ -103,7 +104,7 @@ void	EventHandler::processInput(string raw_input)
 			executeCommandQuit(input.params);
 			break;
 		default:
-			throw CommandNotFoundException();
+			throw UnkownCommandExcetption();
 	}
 }
 
@@ -113,20 +114,21 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	s_input	input;
 	string	command;
 
-	if (raw_input.length() > MAX_INPUT_LENGTH)
-		throw InputTooLongException();
+	raw_input = raw_input.substr(0, MAX_INPUT_LENGTH - 1); //limito la lunghezza dell'input (per evitare buffer overflow
 
 	if (raw_input.size() >= 2 && raw_input.substr(raw_input.size() - 2) == "\r\n")
-        raw_input = raw_input.substr(0, raw_input.size() - 2);
+		raw_input = raw_input.substr(0, raw_input.size() - 2);
 
 	input.prefix = "";
 	if (raw_input[0] == ':')
+	{
 		input.prefix = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il prefix
-	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il prefix
-	command = raw_input.substr(1, raw_input.find(' ') - 1); //prendo il comando come stringa
+		raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il prefix
+	}
+	command = raw_input.substr(0, raw_input.find(' ') - 1); //prendo il comando come stringa
 
 	if (_commands.find(command) == _commands.end()) //se il comando non esiste
-		throw CommandNotFoundException();
+		throw UnkownCommandExcetption();
 	input.command = _commands.at(command); //associo il comando all'enum
 
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il comando
@@ -319,19 +321,4 @@ static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
 		throw Client::NotAuthenticatedException();
-}
-
-const char	*EventHandler::InputTooLongException::what(void) const throw()
-{
-	return "Input too long";
-}
-
-const char	*EventHandler::CommandNotFoundException::what(void) const throw()
-{
-	return "Command not found";
-}
-
-const char	*EventHandler::CantSendMessageToYourselfException::what(void) const throw()
-{
-	return "You can't send a message to yourself";
 }

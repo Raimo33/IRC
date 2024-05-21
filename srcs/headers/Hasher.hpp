@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Hasher.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:55:59 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/18 15:45:59 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/21 16:23:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include <cstring>
 #include <string>
 #include <iostream>
+
+# include "irc.hpp"
 
 using namespace std;
 

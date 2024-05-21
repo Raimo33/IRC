@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:02:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 16:26:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,11 @@
 # include <string>
 # include <vector>
 
-# include "Client.hpp"
+# include "irc.hpp"
 # include "utils.hpp"
 
 using namespace std;
+using namespace irc;
 
 enum e_cmd_type
 {
@@ -57,10 +58,6 @@ class EventHandler
 
 		static void						sendBufferedString(const Client &receiver, const string &string);
 
-		class							InputTooLongException; //parseInput
-		class							CommandNotFoundException; //processInput, parseInput
-		class							CantSendMessageToYourselfException; //deliverMessage
-
 	private:
 
 		s_input							parseInput(string &raw_input) const;
@@ -78,24 +75,6 @@ class EventHandler
 		const map<string, e_cmd_type>	_commands; //TODO spostare fuori (pseudo globale) altrimenti viene creato per ogni server
 		Client							*_client;
 		Server							*_server;
-};
-
-class EventHandler::InputTooLongException : public exception
-{
-	public:
-		const char	*what(void) const throw();
-};
-
-class EventHandler::CommandNotFoundException : public exception
-{
-	public:
-		const char	*what(void) const throw();
-};
-
-class EventHandler::CantSendMessageToYourselfException : public exception
-{
-	public:
-		const char	*what(void) const throw();
 };
 
 #endif
