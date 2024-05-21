@@ -6,20 +6,22 @@
 #    By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/26 15:33:59 by craimond          #+#    #+#              #
-#    Updated: 2024/05/21 16:15:52 by craimond         ###   ########.fr        #
+#    Updated: 2024/05/21 19:46:23 by craimond         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ircserv
 
-SRCS = $(addprefix srcs/, irc.cpp Channel.cpp ChannelOperator.cpp Client.cpp EventHandler.cpp IMessage.cpp Message.cpp PrivateMessage.cpp Server.cpp utils.cpp SystemCalls.cpp Hasher.cpp Exceptions.cpp)
+SRCS = $(addprefix srcs/, 			Channel.cpp ChannelOperator.cpp Client.cpp EventHandler.cpp IMessage.cpp Message.cpp PrivateMessage.cpp Server.cpp utils.cpp SystemCalls.cpp Hasher.cpp Exceptions.cpp irc.cpp)
+HDRS = $(addprefix srcs/headers/,	Channel.hpp ChannelOperator.hpp Client.hpp EventHandler.hpp IMessage.hpp Message.hpp PrivateMessage.hpp Server.hpp utils.hpp SystemCalls.hpp Hasher.hpp Exceptions.hpp irc.hpp)
 OBJS = $(SRCS:.cpp=.o)
-HDRS = $(addprefix srcs/headers/, Channel.hpp ChannelOperator.hpp Client.hpp EventHandler.hpp IMessage.hpp Message.hpp PrivateMessage.hpp Server.hpp utils.hpp SystemCalls.hpp Hasher.hpp Exceptions.hpp, irc.hpp)
+INCLUDES = srcs/headers
+
 LEAK_REPORT = leaks.log
 
 CC = c++
 VERSION = 98
-CFLAGS = -Wall -Wextra -Werror -std=c++$(VERSION)
+CFLAGS = -Wall -Wextra -Werror -std=c++$(VERSION) -I$(INCLUDES)
 VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
 
 RM = rm -rf

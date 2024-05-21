@@ -6,23 +6,27 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 16:21:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/Server.hpp"
-#include "headers/SystemCalls.hpp"
-#include "headers/Client.hpp"
-#include "headers/Channel.hpp"
-#include "headers/SystemCalls.hpp"
-#include "headers/EventHandler.hpp"
-#include "headers/Hasher.hpp"
-#include "headers/ReplyCodes.hpp"
-#include "headers/Standards.hpp"
+#include "irc/Server.hpp"
+#include "irc/SystemCalls.hpp"
+#include "irc/Client.hpp"
+#include "irc/Channel.hpp"
+#include "irc/SystemCalls.hpp"
+#include "irc/EventHandler.hpp"
+#include "irc/Hasher.hpp"
+#include "irc/ReplyCodes.hpp"
+#include "irc/Standards.hpp"
+#include "irc/Exceptions.hpp"
+
+using namespace std;
+using namespace irc;
 
 Server::Server(const uint16_t port_no, const string &password) :
 	_port(port_no),
-	_pwd_hash(MD5(password).hexdigest()),
+	_pwd_hash(Hasher(password).hexdigest()),
 	_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
 	_event_handler(EventHandler())
 {
@@ -251,7 +255,20 @@ void Server::handleClient(Client *client, size_t *i)
 				throw SystemErrorException(strerror(errno));
 		}
 	}
-	catch (m)
+	catch (const FatalErrorException &e)
+	{
+		throw;
+	}
+	catch (const IRCException &e)
+	{
+		//TODO send error message to client
+		cerr << e.what() << endl;
+	}
+	catch (const exception &e)
+	{
+		//TODO send error message to client
+		cerr << e.what() << endl;
+	}
 }
 
 void Server::disconnectClient(Client *client)

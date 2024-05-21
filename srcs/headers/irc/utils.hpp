@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:46:06 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:03:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 18:30:39 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,10 @@
 # include <vector>
 # include <sstream>
 
-using namespace std;
-
-bool								is_channel_prefix(const char c);
-bool								is_valid_channel_name(const string &name);
-bool								is_valid_nickname(const string &name);
-vector<string>						split(const string &s, char delim);
-size_t								min(size_t a, size_t b);
+bool						is_channel_prefix(const char c);
+bool						is_valid_channel_name(const std::string &name);
+bool						is_valid_nickname(const std::string &name);
+std::vector<std::string>	split(const std::string &s, char delim);
+size_t						min(size_t a, size_t b);
 
 #endif

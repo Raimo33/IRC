@@ -6,11 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 16:09:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/Exceptions.hpp"
+#include "irc/Exceptions.hpp"
+
+using namespace std;
+using namespace irc;
 
 SystemErrorException::SystemErrorException(const string &msg) : runtime_error(msg) {}
 
@@ -28,138 +31,133 @@ const char *FatalErrorException::what(void) const throw()
 
 InvalidArgumentException::InvalidArgumentException(const string &msg) : invalid_argument(msg) {}
 
+const char *AlreadyAuthenticatedException::what(void) const throw()
+{
+    return "User is already authenticated";
+}
+
+const char *AlreadyConnectedException::what(void) const throw()
+{
+    return "User is already connected";
+}
+
+const char *CantSendMessageToYourselfException::what(void) const throw()
+{
+    return "You can't send a message to yourself";
+}
+
+const char *ChannelAlreadyExistsException::what(void) const throw()
+{
+    return "Channel already exists";
+}
+
+const char *ChannelFullException::what(void) const throw()
+{
+    return "Channel is full";
+}
+
+const char *ChannelNotFoundException::what(void) const throw()
+{
+    return "Channel not found";
+}
+
+const char *ClientAlreadyExistsException::what(void) const throw()
+{
+    return "Client already exists";
+}
+
+const char *ClientNotFoundException::what(void) const throw()
+{
+    return "Client not found";
+}
+
+const char *ErroneousNicknameException::what(void) const throw()
+{
+    return "User nickname is invalid";
+}
+
+const char *HandshakeFailedException::what(void) const throw()
+{
+    return "Handshake failed";
+}
+
 const char *InvalidArgumentException::what(void) const throw()
 {
-	return invalid_argument::what();
+    return std::invalid_argument::what();
 }
 
-const char *Server::ChannelAlreadyExistsException::what(void) const throw()
+const char *InvalidKeyException::what(void) const throw()
 {
-	return "Channel already exists";
+    return "Invalid channel key";
 }
 
-const char *Server::ChannelNotFoundException::what(void) const throw()
+const char *InvalidNameException::what(void) const throw()
 {
-	return "Channel not found";
+    return "Invalid channel name";
 }
 
-const char *Server::InvalidPasswordException::what(void) const throw()
+const char *InvalidPasswordException::what(void) const throw()
 {
-	return "Invalid password";
+    return "Invalid password";
 }
 
-const char *Server::ClientNotFoundException::what(void) const throw()
+const char *InvalidTopicException::what(void) const throw()
 {
-	return "Client not found";
+    return "Invalid channel topic";
 }
 
-const char *Server::ClientAlreadyExistsException::what(void) const throw()
+const char *NicknameInUseException::what(void) const throw()
 {
-	return "Client already exists";
+    return "User nickname is already in use";
 }
 
-const char *Server::HandshakeFailedException::what(void) const throw()
+const char *NotAuthenticatedException::what(void) const throw()
 {
-	return "Handshake failed";
+    return "User is not authenticated";
 }
 
-const char	*EventHandler::UnkownCommandExcetption::what(void) const throw()
+const char *NotConnectedException::what(void) const throw()
 {
-	return "Command not found";
+    return "User is not connected";
 }
 
-const char	*EventHandler::CantSendMessageToYourselfException::what(void) const throw()
+const char *OperatorNotInChannelException::what(void) const throw()
 {
-	return "You can't send a message to yourself";
+    return "Operator is not in the channel";
 }
 
-const char	*Channel::InvalidNameException::what(void) const throw()
+const char *TooManyChannelsException::what(void) const throw()
 {
-	return "Invalid channel name";
+    return "User is already in the maximum number of channels allowed";
 }
 
-const char	*Channel::InvalidTopicException::what(void) const throw()
+const char *UnknownModeException::what(void) const throw()
 {
-	return "Invalid channel topic";
+    return "Unknown channel mode";
 }
 
-const char	*Channel::InvalidKeyException::what(void) const throw()
+const char *UnknownCommandException::what(void) const throw()
 {
-	return "Invalid channel key";
+    return "Command not found";
 }
 
-const char	*Channel::ChannelFullException::what(void) const throw()
+const char *UserAlreadyMemberException::what(void) const throw()
 {
-	return "Channel is full";
+    return "Client is already a member of the channel";
 }
 
-const char	*Channel::UserAlreadyMemberException::what(void) const throw()
+const char *UserAlreadyOperatorException::what(void) const throw()
 {
-	return "Client is already a member of the channel";
+    return "Client is already an operator of the channel";
 }
 
-const char	*Channel::UserAlreadyOperatorException::what(void) const throw()
+const char *UserNotMemberException::what(void) const throw()
 {
-	return "Client is already an operator of the channel";
+    return "Client is not a member of the channel";
 }
 
-const char	*Channel::UserNotOperatorException::what(void) const throw()
+const char *UserNotOperatorException::what(void) const throw()
 {
-	return "Client is not an operator of the channel";
+    return "Client is not an operator of the channel";
 }
 
-const char	*Channel::UserNotMemberException::what(void) const throw()
-
-{
-	return "Client is not a member of the channel";
-}
-
-const char	*Channel::UnknownModeException::what(void) const throw()
-{
-	return "Unknown channel mode";
-}
-
-const char	*Client::TooManyChannelsException::what(void) const throw()
-{
-	return "User are already in the maximum number of channels allowed";
-}
-
-const char	*Client::AlreadyConnectedException::what(void) const throw()
-{
-	return "User are already connected";
-}
-
-const char	*Client::NotConnectedException::what(void) const throw()
-{
-	return "User are not connected";
-}
-
-const char	*Client::AlreadyAuthenticatedException::what(void) const throw()
-{
-	return "User are already authenticated";
-}
-
-const char	*Client::NotAuthenticatedException::what(void) const throw()
-{
-	return "User are not authenticated";
-}
-
-const char	*Client::NicknameInUseException::what(void) const throw()
-{
-	return "User nickname is already in use";
-}
-
-const char	*Client::ErroneousNicknameException::what(void) const throw()
-{
-	return "User nickname is invalid";
-}
-
-const char	*Client::UserNotInChannelException::what(void) const throw()
-{
-	return "User is not in the channel";
-}
-
-const char	*Client::CantSendMessageToYourselfException::what(void) const throw()
-{
-	return "User can't send a message to himself";
-}

@@ -6,11 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 18:09:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 14:56:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/IMessage.hpp"
+#include "irc/IMessage.hpp"
+
+using namespace std;
+using namespace irc;
 
 IMessage::IMessage(const string &content, const Client &sender) :
 	_content(content),

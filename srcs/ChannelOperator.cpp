@@ -6,12 +6,15 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 15:52:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/ChannelOperator.hpp"
-#include "headers/IRC_Exceptions.hpp"
+#include "irc/ChannelOperator.hpp"
+#include "irc/Exceptions.hpp"
+
+using namespace std;
+using namespace irc;
 
 ChannelOperator::ChannelOperator(const Client &user) : Client(user) {}
 
@@ -26,7 +29,7 @@ void ChannelOperator::channelKick(const Client &user, Channel &channel) const
 
 	checkPrivilege(channel);
 	if (members.find(user.getUsername()) == members.end())
-		throw Client::UserNotInChannelException();
+		throw UserNotMemberException();
 	channel.removeMember(user);
 }
 
@@ -37,7 +40,7 @@ void ChannelOperator::channelInvite(Client &user, Channel &channel) const
 
 	checkPrivilege(channel);
 	if (members.find(user.getUsername()) != members.end())
-		throw Channel::UserAlreadyMemberException();
+		throw UserAlreadyMemberException();
 	channel.addPendingInvitation(&user);
 }
 
@@ -67,15 +70,5 @@ void ChannelOperator::checkPrivilege(const Channel &channel) const
 	if (members.find(_username) == members.end())
 		throw OperatorNotInChannelException();
 	if (operators.find(_username) == operators.end())
-		throw Channel::UserNotOperatorException();
-}
-
-const char *ChannelOperator::UserNotInChannelException::what() const throw()
-{
-	return "Client is not in the channel";
-}
-
-const char *ChannelOperator::OperatorNotInChannelException::what() const throw()
-{
-	return "Operator is not in the channel";
+		throw UserNotOperatorException();
 }

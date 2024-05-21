@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:57:26 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 16:25:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:42:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,24 +18,27 @@
 
 # include "IMessage.hpp"
 
-using namespace std;
-using namespace irc;
-
 //quando si crea l'oggetto messaggio bisogna controllare se _channel.size() e' uguale a 2
 //e in quel caso si promuove (col costruttore copy) a private message
-class Message : public IMessage
+
+namespace irc
 {
-	public:
-		//un messaggio in un canale di 2 persone deve passare come private message
-		explicit Message(const string &content, const Client &sender, const Channel &channel);
-		Message(const Message &copy);
-		~Message(void);
+	class Channel;
 
-		const Channel	*getChannel(void) const;
+	class Message : public IMessage
+	{
+		public:
+			//un messaggio in un canale di 2 persone deve passare come private message
+			explicit Message(const std::string &content, const Client &sender, const Channel &channel);
+			Message(const Message &copy);
+			~Message(void);
 
-	private:
-		const Channel	*_channel;
-};
+			const Channel	*getChannel(void) const;
+
+		private:
+			const Channel	*_channel;
+	};
+}
 
 //ad ogni messaggio corrisponde una risposta numerica (vedi RFC)
 //https://datatracker.ietf.org/doc/html/rfc1459#section-6.1

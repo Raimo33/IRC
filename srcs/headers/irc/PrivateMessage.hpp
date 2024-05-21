@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:03:42 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 16:24:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:42:45 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,21 +14,23 @@
 # define PRIVATEMESSAGE_HPP
 
 # include "IMessage.hpp"
-# include "irc.hpp"
 
-using namespace irc;
-
-class PrivateMessage: public IMessage
+namespace irc
 {
-	public:
-		explicit PrivateMessage(const string &content, const Client &sender, const Client &receiver);
-		PrivateMessage(const PrivateMessage &copy);
-		~PrivateMessage(void);
+	class Client;
 
-		const Client	*getReceiver(void) const;
+	class PrivateMessage: public IMessage
+	{
+		public:
+			explicit PrivateMessage(const std::string &content, const Client &sender, const Client &receiver);
+			PrivateMessage(const PrivateMessage &copy);
+			~PrivateMessage(void);
 
-	private:
-		const Client	*_receiver;
-};
+			const Client	*getReceiver(void) const;
+
+		private:
+			const Client	*_receiver;
+	};
+}
 
 #endif

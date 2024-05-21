@@ -6,17 +6,16 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 16:17:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
-#include "headers/Server.hpp"
-#include "headers/irc.hpp"
+#include "irc/irc.hpp"
 
 using namespace std;
-using namespace IRC;
+using namespace irc;
 
 static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv);
 

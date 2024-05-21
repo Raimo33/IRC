@@ -6,22 +6,25 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 15:52:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/EventHandler.hpp"
-#include "headers/Server.hpp"
-#include "headers/PrivateMessage.hpp"
-#include "headers/Message.hpp"
-#include "headers/Channel.hpp"
-#include "headers/ChannelOperator.hpp"
-#include "headers/Hasher.hpp"
-#include "headers/Client.hpp"
-#include "headers/utils.hpp"
-#include "headers/ReplyCodes.hpp"
-#include "headers/Standards.hpp"
-#include "headers/IRC_Exceptions.hpp"
+#include "irc/EventHandler.hpp"
+#include "irc/Server.hpp"
+#include "irc/PrivateMessage.hpp"
+#include "irc/Message.hpp"
+#include "irc/Channel.hpp"
+#include "irc/ChannelOperator.hpp"
+#include "irc/Hasher.hpp"
+#include "irc/Client.hpp"
+#include "irc/utils.hpp"
+#include "irc/ReplyCodes.hpp"
+#include "irc/Standards.hpp"
+#include "irc/Exceptions.hpp"
+
+using namespace std;
+using namespace irc;
 
 static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
@@ -104,7 +107,7 @@ void	EventHandler::processInput(string raw_input)
 			executeCommandQuit(input.params);
 			break;
 		default:
-			throw UnkownCommandExcetption();
+			throw UnknownCommandException();
 	}
 }
 
@@ -128,7 +131,7 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	command = raw_input.substr(0, raw_input.find(' ') - 1); //prendo il comando come stringa
 
 	if (_commands.find(command) == _commands.end()) //se il comando non esiste
-		throw UnkownCommandExcetption();
+		throw UnknownCommandException();
 	input.command = _commands.at(command); //associo il comando all'enum
 
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il comando
@@ -158,7 +161,7 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 		int		n_members = channel.getMembers().size();
 
 		if (n_members == 1)
-			throw Client::CantSendMessageToYourselfException();
+			throw CantSendMessageToYourselfException();
 		if (n_members == 2)
 		{
 			//promuovo il messaggio a private message
@@ -209,7 +212,7 @@ void EventHandler::executeCommandJoin(const vector<string> &params)
 			else
 				_client->joinChannel(channel);
 		}
-		catch (Server::ChannelNotFoundException &e)
+		catch (ChannelNotFoundException &e)
 		{
 			ChannelOperator op(*_client);
 
@@ -224,12 +227,12 @@ void EventHandler::executeCommandJoin(const vector<string> &params)
 void EventHandler::executeCommandPass(const vector<string> &params)
 {
 	if (_client->getIsConnected())
-		throw Client::AlreadyConnectedException();
+		throw AlreadyConnectedException();
 
-	MD5 hasher(params[0]);
+	Hasher hasher(params[0]);
 
 	if (hasher.hexdigest() != _server->getPwdHash())
-		throw Server::InvalidPasswordException();
+		throw InvalidPasswordException();
 	_client->setIsConnected(true);
 }
 
@@ -242,11 +245,11 @@ void EventHandler::executeCommandNick(const vector<string> &params)
 		if (!_client->getUsername().empty())
 			_client->setAuthenticated(true);
 	}
-	catch (Client::ErroneousNicknameException &e)
+	catch (ErroneousNicknameException &e)
 	{
 		_client->receiveNumericReply(ERR_ERRONEOUSNICKNAME, vector<string>(1, params[0]));
 	}
-	catch (Client::NicknameInUseException &e)
+	catch (NicknameInUseException &e)
 	{
 		_client->receiveNumericReply(ERR_NICKNAMEINUSE, vector<string>(1, params[0]));
 	}
@@ -301,24 +304,24 @@ void	EventHandler::checkNicknameValidity(const string &nickname) const
 	try
 	{
 		_server->getClient(nickname);
-		throw Client::NicknameInUseException();
+		throw NicknameInUseException();
 	}
-	catch (Server::ClientNotFoundException &e)
+	catch (ClientNotFoundException &e)
 	{
 		(void)e;
 	}
 	if (!is_valid_nickname(nickname))
-		throw Client::ErroneousNicknameException();
+		throw ErroneousNicknameException();
 }
 
 static void checkConnection(const Client *client)
 {
 	if (!client->getIsConnected())
-		throw Client::NotConnectedException();
+		throw NotConnectedException();
 }
 
 static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
-		throw Client::NotAuthenticatedException();
+		throw NotAuthenticatedException();
 }

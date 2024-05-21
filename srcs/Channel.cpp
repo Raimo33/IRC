@@ -6,19 +6,21 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 15:52:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:42:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/Channel.hpp"
+#include "irc/Channel.hpp"
+#include "irc/Client.hpp"
+#include "irc/ChannelOperator.hpp"
+#include "irc/utils.hpp"
+#include "irc/Message.hpp"
+#include "irc/EventHandler.hpp"
+#include "irc/Standards.hpp"
+#include "irc/Exceptions.hpp"
 
-#include "headers/Client.hpp"
-#include "headers/ChannelOperator.hpp"
-#include "headers/utils.hpp"
-#include "headers/Message.hpp"
-#include "headers/EventHandler.hpp"
-#include "headers/Standards.hpp"
-#include "headers/IRC_Exceptions.hpp"
+using namespace std;
+using namespace irc;
 
 Channel::Channel(const string &name, ChannelOperator &op) :
 	_name(name),

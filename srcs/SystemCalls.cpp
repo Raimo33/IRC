@@ -6,11 +6,16 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 15:33:28 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/SystemCalls.hpp"
+#include "irc/Standards.hpp"
+#include "irc/Exceptions.hpp"
+#include "irc/SystemCalls.hpp"
+
+using namespace std;
+using namespace irc;
 
 int	bind_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {

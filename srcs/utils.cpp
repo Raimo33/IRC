@@ -6,12 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 15:44:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/utils.hpp"
-#include "headers/Standards.hpp"
+#include "irc/utils.hpp"
+#include "irc/Standards.hpp"
+
+using namespace std;
 
 bool	is_channel_prefix(const char c)
 {

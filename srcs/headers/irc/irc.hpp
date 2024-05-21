@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:00:53 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 16:21:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:17:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,37 +26,39 @@ namespace irc
 	class IMessage;
 	class Message;
 	class PrivateMessage;
-	class MD5;
+	class Hasher;
 
 	class IRCException;
 	class SystemErrorException;
 	class FatalErrorException;
-	class InvalidArgumentException;
+
+	class AlreadyAuthenticatedException;
+	class AlreadyConnectedException;
+	class CantSendMessageToYourselfException;
 	class ChannelAlreadyExistsException;
-	class ChannelNotFoundException;
-	class InvalidPasswordException;
-	class ClientNotFoundException;
-	class ClientAlreadyExistsException;
-	class HandshakeFailedException;
-	class UnkownCommandExcetption;
-	class InvalidNameException;
-	class InvalidTopicException;
-	class InvalidKeyException;
 	class ChannelFullException;
+	class ChannelNotFoundException;
+	class ClientAlreadyExistsException;
+	class ClientNotFoundException;
+	class ErroneousNicknameException;
+	class InvalidArgumentException;
+	class InvalidKeyException;
+	class InvalidNameException;
+	class InvalidPasswordException;
+	class InvalidTopicException;
+	class NicknameInUseException;
+	class NotAuthenticatedException;
+	class NotConnectedException;
+	class OperatorNotInChannelException;
+	class TooManyChannelsException;
+	class UnknownCommandException;
+	class UnknownModeException;
 	class UserAlreadyMemberException;
 	class UserAlreadyOperatorException;
-	class UserNotOperatorException;
 	class UserNotMemberException;
-	class UnknownModeException;
-	class TooManyChannelsException;
-	class AlreadyConnectedException;
-	class NotConnectedException;
-	class AlreadyAuthenticatedException;
-	class NotAuthenticatedException;
-	class NicknameInUseException;
-	class ErroneousNicknameException;
-	class UserNotInChannelException;
-	class CantSendMessageToYourselfException;
+	class UserNotOperatorException;
 }
+
+//TODO valutare se includere tutti gli headers csi che quando uno include irc.hpp include tutto
 
 #endif

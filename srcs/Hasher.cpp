@@ -6,25 +6,29 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:57:54 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/19 14:30:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/Hasher.hpp"
+#include "irc/irc.hpp"
+#include "irc/Hasher.hpp"
 
-MD5::MD5(void)
+using namespace std;
+using namespace irc;
+
+Hasher::Hasher(void)
 {
 	init();
 }
 
-MD5::MD5(const string &text)
+Hasher::Hasher(const string &text)
 {
 	init();
 	update(text.c_str(), text.length());
 	finalize();
 }
 
-void MD5::init(void)
+void Hasher::init(void)
 {
 	finalized = false;
 	count[0] = 0;
@@ -35,7 +39,7 @@ void MD5::init(void)
 	state[3] = 0x10325476;
 }
 
-void MD5::update(const unsigned char *input, size_type length)
+void Hasher::update(const unsigned char *input, size_type length)
 {
     size_type index = count[0] / 8 % blocksize;
     if ((count[0] += (length << 3)) < (length << 3))
@@ -57,12 +61,12 @@ void MD5::update(const unsigned char *input, size_type length)
     memcpy(&buffer[index], &input[i], length - i);
 }
 
-void MD5::update(const char *input, size_type length)
+void Hasher::update(const char *input, size_type length)
 {
 	update((const unsigned char *)input, length);
 }
 
-MD5& MD5::finalize(void)
+Hasher& Hasher::finalize(void)
 {
     static unsigned char bits[8];
     encode(bits, count, 8);
@@ -80,7 +84,7 @@ MD5& MD5::finalize(void)
     return *this;
 }
 
-string MD5::hexdigest(void) const
+string Hasher::hexdigest(void) const
 {
     if (!finalized)
         return "";
@@ -95,7 +99,7 @@ string MD5::hexdigest(void) const
     return string(buf);
 }
 
-void MD5::transform(const uint1 block[blocksize])
+void Hasher::transform(const uint1 block[blocksize])
 {
     uint4 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
     decode(x, block, blocksize);
@@ -176,7 +180,7 @@ void MD5::transform(const uint1 block[blocksize])
     memset(x, 0, sizeof x);
 }
 
-void MD5::encode(uint1 *output, const uint4 *input, size_type len)
+void Hasher::encode(uint1 *output, const uint4 *input, size_type len)
 {
     for (size_type i = 0, j = 0; j < len; ++i, j += 4)
 	{
@@ -187,7 +191,7 @@ void MD5::encode(uint1 *output, const uint4 *input, size_type len)
     }
 }
 
-void MD5::decode(uint4 *output, const uint1 *input, size_type len)
+void Hasher::decode(uint4 *output, const uint1 *input, size_type len)
 {
     for (size_type i = 0, j = 0; j < len; ++i, j += 4)
 	{
@@ -196,47 +200,47 @@ void MD5::decode(uint4 *output, const uint1 *input, size_type len)
     }
 }
 
-inline MD5::uint4 MD5::F(uint4 x, uint4 y, uint4 z)
+inline Hasher::uint4 Hasher::F(uint4 x, uint4 y, uint4 z)
 {
     return (x & y) | (~x & z);
 }
 
-inline MD5::uint4 MD5::G(uint4 x, uint4 y, uint4 z)
+inline Hasher::uint4 Hasher::G(uint4 x, uint4 y, uint4 z)
 {
     return (x & z) | (y & ~z);
 }
 
-inline MD5::uint4 MD5::H(uint4 x, uint4 y, uint4 z)
+inline Hasher::uint4 Hasher::H(uint4 x, uint4 y, uint4 z)
 {
     return x ^ y ^ z;
 }
 
-inline MD5::uint4 MD5::I(uint4 x, uint4 y, uint4 z)
+inline Hasher::uint4 Hasher::I(uint4 x, uint4 y, uint4 z)
 {
     return y ^ (x | ~z);
 }
 
-inline MD5::uint4 MD5::rotate_left(uint4 x, int n)
+inline Hasher::uint4 Hasher::rotate_left(uint4 x, int n)
 {
     return (x << n) | (x >> (32 - n));
 }
 
-inline void MD5::FF(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+inline void Hasher::FF(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
 {
     a = rotate_left(a + F(b, c, d) + x + ac, s) + b;
 }
 
-inline void MD5::GG(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+inline void Hasher::GG(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
 {
     a = rotate_left(a + G(b, c, d) + x + ac, s) + b;
 }
 
-inline void MD5::HH(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+inline void Hasher::HH(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
 {
     a = rotate_left(a + H(b, c, d) + x + ac, s) + b;
 }
 
-inline void MD5::II(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+inline void Hasher::II(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
 {
     a = rotate_left(a + I(b, c, d) + x + ac, s) + b;
 }

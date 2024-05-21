@@ -6,18 +6,21 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 15:52:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "headers/Client.hpp"
-#include "headers/Channel.hpp"
-#include "headers/Message.hpp"
-#include "headers/PrivateMessage.hpp"
-#include "headers/Server.hpp"
-#include "headers/utils.hpp"
-#include "headers/Standards.hpp"
-#include "headers/IRC_Exceptions.hpp"
+#include "irc/Client.hpp"
+#include "irc/Channel.hpp"
+#include "irc/Message.hpp"
+#include "irc/PrivateMessage.hpp"
+#include "irc/Server.hpp"
+#include "irc/utils.hpp"
+#include "irc/Standards.hpp"
+#include "irc/Exceptions.hpp"
+
+using namespace std;
+using namespace irc;
 
 Client::Client(Server *server, const int socket, const string &ip_addr, const uint16_t port) :
 	_channels(),
@@ -56,7 +59,7 @@ const Channel	*Client::getChannel(const string &channel_name) const
 	map<string, const Channel *>::const_iterator it = _channels.find(channel_name);
 
 	if (it == _channels.end())
-		throw UserNotInChannelException();
+		throw UserNotMemberException();
 	return it->second;
 }
 
@@ -72,7 +75,7 @@ void	Client::removeChannel(const Channel &channel)
 	map<string, const Channel *>::iterator it = _channels.find(channel.getName());
 
 	if (it == _channels.end())
-		throw UserNotInChannelException();
+		throw UserNotMemberException();
 	_channels.erase(it);
 }
 
@@ -171,7 +174,7 @@ void	Client::joinChannel(Channel &channel, const string &key)
 	if (!_is_authenticated)
 		throw NotAuthenticatedException();
 	if (channel.getKey() != key)
-		throw Channel::InvalidKeyException();
+		throw InvalidKeyException();
 	joinChannel(channel);
 }
 
@@ -186,7 +189,7 @@ void	Client::leaveChannel(Channel &channel)
 void	Client::sendMessage(const Channel &channel, const Message &msg) const
 {
 	if (_channels.find(channel.getName()) == _channels.end())
-		throw UserNotInChannelException();
+		throw UserNotMemberException();
 	if (channel.getMembers().size() == 1)
 		throw CantSendMessageToYourselfException();
 	channel.receiveMessage(msg);
@@ -211,7 +214,7 @@ void	Client::receiveNumericReply(uint16_t code, const vector<string> &params, co
 	else
 	{
 		if (Server::reply_codes.find(code) == Server::reply_codes.end())
-			Server::FatalErrorException("Internal error: unknown reply code");
+			FatalErrorException("Internal error: unknown reply code");
 		oss << " :" << Server::reply_codes.at(code);	
 	}
 	EventHandler::sendBufferedString(*this, oss.str());

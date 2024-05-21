@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:47:21 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 15:32:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 18:22:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@
 # include <errno.h>
 # include <unistd.h>
 # include <poll.h>
-
-using namespace std;
 
 int	bind_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 int	listen_p(int sockfd, int backlog);
