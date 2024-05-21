@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:00:53 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:17:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 22:39:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,15 @@ namespace irc
 	class UserNotOperatorException;
 }
 
-//TODO valutare se includere tutti gli headers csi che quando uno include irc.hpp include tutto
+# include "irc/Server.hpp"
+# include "irc/Client.hpp"
+# include "irc/ChannelOperator.hpp"
+# include "irc/Channel.hpp"
+# include "irc/EventHandler.hpp"
+# include "irc/IMessage.hpp"
+# include "irc/Message.hpp"
+# include "irc/PrivateMessage.hpp"
+# include "irc/Hasher.hpp"
+# include "irc/Exceptions.hpp"
 
 #endif

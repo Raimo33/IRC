@@ -6,14 +6,14 @@
 #    By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/26 15:33:59 by craimond          #+#    #+#              #
-#    Updated: 2024/05/21 19:46:23 by craimond         ###   ########.fr        #
+#    Updated: 2024/05/21 22:30:45 by craimond         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ircserv
 
-SRCS = $(addprefix srcs/, 			Channel.cpp ChannelOperator.cpp Client.cpp EventHandler.cpp IMessage.cpp Message.cpp PrivateMessage.cpp Server.cpp utils.cpp SystemCalls.cpp Hasher.cpp Exceptions.cpp irc.cpp)
-HDRS = $(addprefix srcs/headers/,	Channel.hpp ChannelOperator.hpp Client.hpp EventHandler.hpp IMessage.hpp Message.hpp PrivateMessage.hpp Server.hpp utils.hpp SystemCalls.hpp Hasher.hpp Exceptions.hpp irc.hpp)
+SRCS = $(addprefix srcs/, 				Channel.cpp ChannelOperator.cpp Client.cpp EventHandler.cpp IMessage.cpp Message.cpp PrivateMessage.cpp Server.cpp utils.cpp SystemCalls.cpp Hasher.cpp Exceptions.cpp irc.cpp)
+HDRS = $(addprefix srcs/headers/irc/,	Channel.hpp ChannelOperator.hpp Client.hpp EventHandler.hpp IMessage.hpp Message.hpp PrivateMessage.hpp Server.hpp utils.hpp SystemCalls.hpp Hasher.hpp Exceptions.hpp irc.hpp)
 OBJS = $(SRCS:.cpp=.o)
 INCLUDES = srcs/headers
 

@@ -6,11 +6,10 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:57:54 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 22:36:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "irc/irc.hpp"
 #include "irc/Hasher.hpp"
 
 using namespace std;
