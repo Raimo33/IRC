@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 18:08:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 14:43:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,6 @@ void	Server::run(void)
 
 					client = new Client(this, client_socket, client_ip_addr, client_port);
 					addClient(client);
-					cout << "TCP Connection request from " << client->getIpAddr() << endl;
-					handshake(client_socket); // SSL handshake
 					client->setIsConnected(true);
 
 					pollfd client_poll_fd;
@@ -262,12 +260,6 @@ void Server::disconnectClient(Client *client)
 	delete client;
 }
 
-void	Server::handshake(const int client_socket) const
-{
-	//TODO: SSL handshake	
-	(void)client_socket;
-}
-
 void Server::configureNonBlocking(const int socket) const
 {
 	int flags;
@@ -280,7 +272,7 @@ void Server::configureNonBlocking(const int socket) const
 		throw runtime_error(strerror(errno));
 }
 
-map<uint16_t, string> Server::initReplyCodes(void)
+const map<uint16_t, string> Server::initReplyCodes(void) const
 {
 	map<uint16_t, string>	m;
 	//https://github.com/williamkapke/irc-replies/blob/master/replies.json
@@ -473,6 +465,13 @@ map<uint16_t, string> Server::initReplyCodes(void)
 }
 
 const map<string, uint16_t>	Server::reply_codes = initReplyCodes();
+
+Server::FatalErrorException::FatalErrorException(const string &msg) : runtime_error(msg) {}
+
+const char *Server::FatalErrorException::what(void) const throw()
+{
+	return runtime_error::what();
+}
 
 const char *Server::ChannelAlreadyExistsException::what(void) const throw()
 {

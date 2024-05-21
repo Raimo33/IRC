@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:59:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 14:39:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,7 +210,7 @@ void	Client::receiveNumericReply(uint16_t code, const vector<string> &params, co
 	else
 	{
 		if (Server::reply_codes.find(code) == Server::reply_codes.end())
-			//TODO fatal internal error (unknown code)
+			Server::FatalErrorException("Internal error: unknown reply code");
 		oss << " :" << Server::reply_codes.at(code);	
 	}
 	EventHandler::sendBufferedString(*this, oss.str());

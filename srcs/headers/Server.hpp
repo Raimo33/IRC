@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:48:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/21 14:38:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@
 
 # include "EventHandler.hpp"
 # include "SystemCalls.hpp"
+# include "Standards.hpp"
 
 using namespace std;
 
@@ -77,6 +78,7 @@ class Server
 
 		static const map<uint16_t, string>	reply_codes;
 
+		class								FatalErrorException; //run
 		class								ChannelAlreadyExistsException; //addChannel
 		class								ChannelNotFoundException; //getChannel, Client::joinChannel
 		class 								InvalidPasswordException; //constructor
@@ -86,7 +88,8 @@ class Server
 
 
 	private:
-	
+		const map<uint16_t, string>			initReplyCodes(void) const;
+
 		const uint16_t						_port; //la porta va da 0 a 65535 (2 bytes)
 		const string						_pwd_hash; //la password che serve a qualsiasi Client per accedere a questo server
 		map<string, Client *>				_clients; //{nickname, Client *}
@@ -94,6 +97,13 @@ class Server
 		vector<pollfd>						_pollfds; //TODO usare map invece che vector, mapparli con il socket
 		const int							_socket;
 		EventHandler						_event_handler;
+};
+
+class Server::FatalErrorException : public runtime_error
+{
+	public:
+		explicit FatalErrorException(const string &msg);
+		virtual const char *what(void) const throw();
 };
 
 class Server::ChannelAlreadyExistsException : public exception
