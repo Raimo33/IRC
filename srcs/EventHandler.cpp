@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 14:28:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 21:28:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ void	EventHandler::processInput(string raw_input)
 	s_input input = parseInput(raw_input);
 
     if (input.command < 0 || input.command >= N_COMMANDS)
-        throw UnknownCommandException();
+        throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, input.command);
 
     (this->*(_handlers[input.command]))(input.params);
 }
@@ -139,7 +139,7 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	command = raw_input.substr(0, raw_input.find(' ') - 1); //prendo il comando come stringa
 
 	if (_commands.find(command) == _commands.end()) //se il comando non esiste
-		throw UnknownCommandException();
+		throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, command);
 	input.command = _commands.at(command); //associo il comando all'enum
 
 	raw_input = raw_input.substr(raw_input.find(' ') + 1); //supero il comando
@@ -165,7 +165,7 @@ void EventHandler::handlePrivmsg(const vector<string> &params)
 	checkAuthentication(_client);
 
 	if (params.size() < 2)
-		throw NotEnoughParametersException();
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PRIVMSG"); //TODO aggiungere la reason (usage: PRIVMSG <receiver> <message>)
 
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{
@@ -206,6 +206,9 @@ void EventHandler::handleMode(const vector<string> &params)
 {
 	checkConnection(_client);
 	checkAuthentication(_client);
+
+	if (params.size() < 2)
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE"); //TODO aggiungere la reason (usage: MODE <channel> <mode>)
 	//TODO implementare
 	(void)params;
 }
@@ -215,7 +218,10 @@ void EventHandler::handleJoin(const vector<string> &params)
 {
 	checkConnection(_client);
 	checkAuthentication(_client);
-	vector<string> channels = split(params[0], ','); //se non e' in cpp98 mettiamolo in utils
+	if (params.size() < 1)
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN"); //TODO aggiungere la reason (usage: JOIN <channel> <key>)
+
+	vector<string> channels = split(params[0], ',');
 	vector<string> keys = split(params[1], ',');
 
 	for (size_t i = 0; i < channels.size(); i++)
@@ -228,14 +234,19 @@ void EventHandler::handleJoin(const vector<string> &params)
 			else
 				_client->joinChannel(channel);
 		}
-		catch (ChannelNotFoundException &e)
+		catch (ProtocolErrorException &e)
 		{
-			ChannelOperator op(*_client);
+			if (e.getCode() == ERR_NOSUCHCHANNEL)
+			{
+				ChannelOperator op(*_client);
 
-			if (i < keys.size())
-				_server->addChannel(new Channel(channels[i], keys[i], op));
+				if (i < keys.size())
+					_server->addChannel(new Channel(channels[i], keys[i], op));
+				else
+					_server->addChannel(new Channel(channels[i], op));
+			}
 			else
-				_server->addChannel(new Channel(channels[i], op));
+				throw e;
 		}
 	};
 }
@@ -243,33 +254,27 @@ void EventHandler::handleJoin(const vector<string> &params)
 void EventHandler::handlePass(const vector<string> &params)
 {
 	if (_client->getIsConnected())
-		throw AlreadyRegisteredException();
+		throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+
+	if (params.size() < 1)
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PASS"); //TODO aggiungere la reason (usage: PASS <password>)
 
 	Hasher hasher(params[0]);
 
 	if (hasher.hexdigest() != _server->getPwdHash())
-		throw InvalidPasswordException();
+		throw ProtocolErrorException(ERR_PASSWDMISMATCH);
 	_client->setIsConnected(true);
 }
 
 void EventHandler::handleNick(const vector<string> &params)
 {
 	checkConnection(_client);
-	try
-	{
-		checkNicknameValidity(params[0]);
-		_client->setNickname(params[0]);
-		if (!_client->getUsername().empty())
-			_client->setAuthenticated(true);
-	}
-	catch (ErroneousNicknameException &e)
-	{
-		_client->receiveNumericReply(ERR_ERRONEOUSNICKNAME, vector<string>(1, params[0]));
-	}
-	catch (NicknameInUseException &e)
-	{
-		_client->receiveNumericReply(ERR_NICKNAMEINUSE, vector<string>(1, params[0]));
-	}
+	if (params.size() < 1)
+		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN);
+	checkNicknameValidity(params[0]);
+	_client->setNickname(params[0]);
+	if (!_client->getUsername().empty())
+		_client->setAuthenticated(true);
 }
 
 void EventHandler::handleQuit(const vector<string> &params)
@@ -303,27 +308,20 @@ void	EventHandler::sendBufferedString(const Client &client, const string &string
 
 void	EventHandler::checkNicknameValidity(const string &nickname) const
 {
-	try
-	{
-		_server->getClient(nickname);
-		throw NicknameInUseException();
-	}
-	catch (ClientNotFoundException &e)
-	{
-		(void)e;
-	}
 	if (!is_valid_nickname(nickname))
-		throw ErroneousNicknameException();
+		throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname); //TODO aggiungere la reason (allowed characters: A-Z, a-z, 0-9, -, [, ], \, `, ^, {, }, MAX_NICKNAME_LEN)
+	if (_server->isClientConnected(nickname))
+		throw ProtocolErrorException(ERR_NICKNAMEINUSE, nickname);
 }
 
 static void checkConnection(const Client *client)
 {
 	if (!client->getIsConnected())
-		throw NotConnectedException();
+		throw ProtocolErrorException(ERR_NOTREGISTERED); //TODO aggiungere la reason (you are not connected, use PASS <password> first)
 }
 
 static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
-		throw NotAuthenticatedException();
+		throw ProtocolErrorException(ERR_NOTREGISTERED); //TODO aggiungere la reason (you are not registered, use NICK <nickname> and USER <username> first)
 }

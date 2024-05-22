@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 20:36:27 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 20:50:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,16 +67,17 @@ const Channel	*Client::getChannel(const string &channel_name) const
 void	Client::addChannel(const Channel &channel)
 {
 	if (_channels.size() >= MAX_CHANNELS_PER_USER)
-		throw TooManyChannelsException();
+		throw ProtocolErrorException(ERR_TOOMANYCHANNELS, channel.getName());
 	_channels[channel.getName()] = &channel;
 }
 
 void	Client::removeChannel(const Channel &channel)
 {
-	map<string, const Channel *>::iterator it = _channels.find(channel.getName());
+	const string &channel_name = channel.getName();
+	map<string, const Channel *>::iterator it = _channels.find(channel_name);
 
-	if (it == _channels.end())
-		throw UserNotMemberException();
+	if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _nickname, channel_name);
 	_channels.erase(it);
 }
 
@@ -157,42 +158,44 @@ Server	*Client::getServer(void) const
 void	Client::joinChannel(Channel &channel)
 {
 	if (!_is_authenticated)
-		throw NotAuthenticatedException();
+		throw ProtocolErrorException(ERR_NOTREGISTERED);
 	try
 	{
 		channel.addMember(*this);
 		addChannel(channel);
 	}
-	catch (const TooManyChannelsException &e) //catcho il fallimento di addChannel
+	catch (const ProtocolErrorException &e) //catcho il fallimento di addChannel
 	{
 		//annullo il successo di addMember
-		channel.removeMember(*this);
+		if (e.getCode() == ERR_TOOMANYCHANNELS)
+			channel.removeMember(*this);
+		throw e;
 	}
 }
 
 void	Client::joinChannel(Channel &channel, const string &key)
 {
 	if (!_is_authenticated)
-		throw NotAuthenticatedException();
+		throw ProtocolErrorException(ERR_NOTREGISTERED);
 	if (channel.getKey() != key)
-		throw InvalidKeyException();
+		throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
 	joinChannel(channel);
 }
 
 void	Client::leaveChannel(Channel &channel)
 {
 	if (!_is_authenticated)
-		throw NotAuthenticatedException();
+		throw ProtocolErrorException(ERR_NOTREGISTERED);
 	channel.removeMember(*this);
 	removeChannel(channel);
 }
 
 void	Client::sendMessage(const Channel &channel, const Message &msg) const
 {
-	if (_channels.find(channel.getName()) == _channels.end())
-		throw UserNotMemberException();
-	if (channel.getMembers().size() == 1)
-		throw NoRecipientException();
+	const string &channel_name = channel.getName();
+	
+	if (_channels.find(channel_name) == _channels.end())
+		throw ProtocolErrorException(ERR_NOTONCHANNEL, _nickname, channel_name);
 	channel.receiveMessage(msg);
 }
 
@@ -213,7 +216,7 @@ void	Client::receiveNumericReply(uint16_t code, const vector<string> &params, co
 	else
 	{
 		if (reply_codes.find(code) == reply_codes.end())
-			InternalErrorException("unknown reply code");
+			InternalErrorException("Client::receiveNumericReply: unknown reply code");
 		oss << " :" << reply_codes.at(code);	
 	}
 	EventHandler::sendBufferedString(*this, oss.str());

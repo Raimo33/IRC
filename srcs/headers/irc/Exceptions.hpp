@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 20:21:55 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 21:38:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include <exception>
 # include <stdexcept>
 # include <cstdarg>
+# include <vector>
+# include <stdint.h>
 
 namespace irc
 {

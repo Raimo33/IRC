@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 20:21:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 21:40:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,19 @@ ProtocolErrorException::ProtocolErrorException(const uint16_t code, ...) :
 	va_end(args);
 }
 
+ProtocolErrorException::~ProtocolErrorException(void) throw() {}
+
 const char *ProtocolErrorException::what(void) const throw()
 {
 	return "";
 }
 
+uint16_t ProtocolErrorException::getCode(void) const
+{
+	return _code;
+}
 
-
+const vector<string> &ProtocolErrorException::getParams(void) const
+{
+	return _params;
+}

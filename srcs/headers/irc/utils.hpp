@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:46:06 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 18:30:39 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 21:07:38 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include <string>
 # include <vector>
 # include <sstream>
+
+//TODO valutare se mettere in un namespace irc
 
 bool						is_channel_prefix(const char c);
 bool						is_valid_channel_name(const std::string &name);

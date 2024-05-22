@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 15:24:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 21:38:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,21 +141,21 @@ void	Server::setClients(const map<string, Client *> &clients)
 const Client &Server::getClient(const string &nickname) const
 {
 	if (_clients.find(nickname) == _clients.end())
-		throw ClientNotFoundException();
+		throw ProtocolErrorException(ERR_NOSUCHNICK, nickname);
 	return *(_clients.at(nickname));
 }
 
 void Server::addClient(Client *client)
 {
 	if (_clients.find(client->getUsername()) != _clients.end())
-		throw InternalErrorException("Client already exists");
+		throw InternalErrorException("Server::addClient: Client already exists");
 	_clients[client->getUsername()] = client;
 }
 
 void Server::removeClient(const Client &client)
 {
 	if (!_clients.at(client.getUsername()))
-		throw ClientNotFoundException();
+		throw InternalErrorException("Server::removeClient: Client not found");
 	_clients.erase(client.getUsername());
 }
 
@@ -172,14 +172,14 @@ void	Server::setChannels(const map<string, Channel *> &channels)
 const Channel	&Server::getChannel(const string &name) const
 {
 	if (_channels.find(name) == _channels.end())
-		throw ChannelNotFoundException();
+		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name);
 	return *(_channels.at(name));
 }
 
 void	Server::addChannel(Channel *channel)
 {
 	if (_channels.find(channel->getName()) != _channels.end())
-		throw InternalErrorException("Channel already exists");
+		throw InternalErrorException("Server::addChannel: Channel already exists");
 	_channels[channel->getName()] = channel;
 }
 
@@ -232,12 +232,17 @@ int	Server::getSocket(void) const
 	return _socket;
 }
 
+bool Server::isClientConnected(const string &nickname) const
+{
+	return _clients.find(nickname) != _clients.end();
+}
+
 void Server::handleClient(Client *client, size_t *i)
 {
 	char buffer[BUFFER_SIZE];
 
 	if (!client)
-		throw ClientNotFoundException();
+		throw InternalErrorException("Server::handleClient: Client not found");
 
 	try
 	{
@@ -265,7 +270,6 @@ void Server::handleClient(Client *client, size_t *i)
 	catch (const ProtocolErrorException &e)
 	{
 		client->receiveNumericReply(e.getCode(), e.getParams());
-		//TODO send error message to client
 		//logger.log("Error: " + string(e.what()));
 	}
 	catch (const exception &e)
@@ -291,7 +295,7 @@ void Server::configureNonBlocking(const int socket) const
 {
 	int flags;
 
-	flags = fcntl(socket, F_GETFL);
+	flags = fcntl(socket, F_GETFL); //TODO aggiungere fcntl a SystemCalls (probabilmente variadic function)
 	if (flags == -1)
 		throw runtime_error(strerror(errno));
 	fcntl(socket, F_SETFL, flags | O_NONBLOCK);

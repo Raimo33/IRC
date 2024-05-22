@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 20:31:59 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 20:40:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ Client &Channel::addOperator(ChannelOperator *op)
 	string nickname = op->getNickname();
 
 	if (_operators.find(nickname) != _operators.end())
-		throw ProtocolErrorException(ERR_USERONCHANNEL, client, nickname, _name); //TODO messaggio custom (nickname + is already an operator of + channel name)
+		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname, _name); //TODO messaggio custom (nickname + is already an operator of + channel name)
 	_operators[nickname] = op;
 	return *op;
 }
@@ -193,7 +193,7 @@ void Channel::setPendingInvitations(const map<string, Client *> &new_invitations
 const Client &Channel::getPendingInvitation(const string &nickname) const
 {
 	if (_pending_invitations.find(nickname) == _pending_invitations.end())
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, client, nickname, _name); //TODO custom message (nickname + was not invited to + channel name)
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname, _name); //TODO custom message (nickname + was not invited to + channel name)
 	return *(_pending_invitations.at(nickname));
 }
 
@@ -241,14 +241,14 @@ void Channel::promoteOperator(const string &nickname)
 	if (_operators.find(nickname) != _operators.end())
 		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname, _name); //TODO custom message (nickname + is already an operator of + channel name)
 	if (_members.find(nickname) == _members.end())
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, client, nickname, _name);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname, _name);
 	_operators[nickname] = new ChannelOperator(getMember(nickname));
 }
 
 void Channel::demoteOperator(const string &nickname)
 {
 	if (_operators.find(nickname) == _operators.end())
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, client, nickname, _name); //TODO custom message (nickname + is not an operator of + channel name)
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname, _name); //TODO custom message (nickname + is not an operator of + channel name)
 	delete _operators[nickname];
 	_operators.erase(nickname);
 }
