@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 22:35:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 14:07:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,19 +32,19 @@ int main(const int argc, const char **argv)
 
 		server.run();
 	}
-	catch (const InvalidArgumentException &e)
+	catch (const invalid_argument &e)
 	{
-		cerr << "Invalid argument: \n" << e.what() << endl;
+		//logger.log("Invalid argument: " + string(e.what()));
 		return (EXIT_FAILURE);
 	}
-	catch (const FatalErrorException &e)
+	catch (const InternalErrorException &e)
 	{
-		cerr << "Fatal error: \n" << e.what() << endl;
+		//logger.log("Internal error: " + string(e.what()));
 		return (EXIT_FAILURE);
 	}
 	catch (const exception &e)
 	{
-		cerr << "An error occurred: \n" << e.what() << endl;
+		//logger.log("Unknown error: " + string(e.what()));
 		return (EXIT_FAILURE);
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 18:45:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 15:19:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ namespace irc
 			void											leaveChannel(Channel &channel);
 			void											sendMessage(const Channel &channel, const Message &msg) const;
 			void											sendMessage(const Client &receiver, const PrivateMessage &msg) const;
-			void											receiveNumericReply(uint16_t code, const std::vector<std::string> &params, const std::string &msg = "") const;
+			void											receiveNumericReply(uint16_t code, const std::vector<std::string> &params, const std::string &msg = "") const; //per numeric reply normali
 			
 		protected:
 

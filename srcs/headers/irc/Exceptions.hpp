@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:39:19 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 15:23:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,41 +19,31 @@
 
 namespace irc
 {
-	class IRCException;
-	class SystemErrorException;
-	class FatalErrorException;
-	
-	class AlreadyAuthenticatedException;
-	class AlreadyConnectedException;
-	class CantSendMessageToYourselfException;
-	class ChannelAlreadyExistsException;
-	class ChannelFullException;
-	class ChannelNotFoundException;
-	class ClientAlreadyExistsException;
-	class ClientNotFoundException;
-	class ErroneousNicknameException;
-	class InvalidArgumentException;
-	class InvalidKeyException;
-	class InvalidNameException;
-	class InvalidPasswordException;
-	class InvalidTopicException;
-	class NicknameInUseException;
-	class NotAuthenticatedException;
-	class NotConnectedException;
-	class OperatorNotInChannelException;
-	class TooManyChannelsException;
-	class UnknownCommandException;
-	class UnknownModeException;
-	class UserAlreadyMemberException;
-	class UserAlreadyOperatorException;
-	class UserNotMemberException;
-	class UserNotOperatorException;
+	class SystemErrorException; //for system calls errors (unpredictable)
+	class InternalErrorException; //for internal programming errors such as setters
+	class ProtocolErrorException; //for IRC protocol errors
 }
 
-class irc::IRCException : public std::exception
+class irc::ProtocolErrorException : public std::exception
 {
 	public:
-		virtual const char *what(void) const throw() = 0;
+		explicit ProtocolErrorException(const uint16_t code, const std::vector<std::string> &params);
+		virtual const char* what(void) const throw();
+
+		uint16_t						getCode(void) const;
+		const std::vector<std::string>&	getParams(void) const;
+	private:
+		static std::string generateMessage(const uint16_t code, const std::vector<std::string>& params);
+
+		uint16_t						_code;
+   		std::vector<std::string>		_params;
+};
+
+class irc::InternalErrorException : public std::runtime_error
+{
+	public:
+		InternalErrorException(const std::string &msg);
+		virtual const char *what(void) const throw();
 };
 
 class irc::SystemErrorException : public std::runtime_error
@@ -62,166 +52,5 @@ class irc::SystemErrorException : public std::runtime_error
 		SystemErrorException(const std::string &msg);
 		virtual const char *what(void) const throw();
 };
-
-class irc::FatalErrorException : public std::runtime_error
-{
-	public:
-		FatalErrorException(const std::string &msg);
-		virtual const char *what(void) const throw();
-};
-
-class irc::AlreadyAuthenticatedException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::AlreadyConnectedException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::CantSendMessageToYourselfException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::ChannelAlreadyExistsException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::ChannelFullException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::ChannelNotFoundException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::ClientAlreadyExistsException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::ClientNotFoundException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::ErroneousNicknameException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::InvalidArgumentException : public std::invalid_argument
-{
-	public:
-		InvalidArgumentException(const std::string &msg);
-		virtual const char *what(void) const throw();
-};
-
-class irc::InvalidKeyException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::InvalidNameException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::InvalidPasswordException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::InvalidTopicException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::NicknameInUseException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::NotAuthenticatedException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::NotConnectedException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::OperatorNotInChannelException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::TooManyChannelsException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-
-class irc::UnknownCommandException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::UnknownModeException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::UserAlreadyMemberException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::UserAlreadyOperatorException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::UserNotMemberException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-class irc::UserNotOperatorException : public irc::IRCException
-{
-	public:
-		virtual const char *what(void) const throw();
-};
-
-//TODO chiedere a chatgpt se vede alcuni doppioni
 
 #endif

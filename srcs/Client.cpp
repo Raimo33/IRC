@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:08:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 15:20:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,9 +110,9 @@ void	Client::setIsConnected(bool is_connected)
 	if (_is_connected == is_connected)
 	{
 		if (is_connected)
-			throw AlreadyConnectedException();
+			throw InternalErrorException("Client is already connected");
 		else
-			throw AlreadyConnectedException();
+			throw InternalErrorException("Client is already disconnected");
 	}
 	_is_connected = is_connected;
 }
@@ -127,9 +127,9 @@ void	Client::setAuthenticated(bool is_authenticated)
 	if (_is_authenticated == is_authenticated)
 	{
 		if (is_authenticated)
-			throw AlreadyAuthenticatedException();
+			throw InternalErrorException("Client is already authenticated");
 		else
-			throw AlreadyAuthenticatedException();
+			throw InternalErrorException("Client is already unauthenticated");
 	}
 	_is_authenticated = is_authenticated;
 }
@@ -192,14 +192,12 @@ void	Client::sendMessage(const Channel &channel, const Message &msg) const
 	if (_channels.find(channel.getName()) == _channels.end())
 		throw UserNotMemberException();
 	if (channel.getMembers().size() == 1)
-		throw CantSendMessageToYourselfException();
+		throw NoRecipientException();
 	channel.receiveMessage(msg);
 }
 
 void	Client::sendMessage(const Client &receiver, const PrivateMessage &msg) const
 {
-	if (receiver.getUsername() == _username)
-		throw CantSendMessageToYourselfException();
 	EventHandler::sendBufferedString(receiver, msg.getContent());
 }
 
@@ -215,7 +213,7 @@ void	Client::receiveNumericReply(uint16_t code, const vector<string> &params, co
 	else
 	{
 		if (reply_codes.find(code) == reply_codes.end())
-			FatalErrorException("Internal error: unknown reply code");
+			InternalErrorException("unknown reply code");
 		oss << " :" << reply_codes.at(code);	
 	}
 	EventHandler::sendBufferedString(*this, oss.str());

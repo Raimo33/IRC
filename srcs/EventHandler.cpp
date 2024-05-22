@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:03:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 14:28:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,10 @@ void EventHandler::handlePrivmsg(const vector<string> &params)
 {
 	checkConnection(_client);
 	checkAuthentication(_client);
+
+	if (params.size() < 2)
+		throw NotEnoughParametersException();
+
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{
 		//channel msg PRIVMSG <channel> :<message>
@@ -170,9 +174,7 @@ void EventHandler::handlePrivmsg(const vector<string> &params)
 		Channel channel = _server->getChannel(params[0]);
 		int		n_members = channel.getMembers().size();
 
-		if (n_members == 1)
-			throw CantSendMessageToYourselfException();
-		if (n_members == 2)
+		if (n_members <= 2)
 		{
 			//promuovo il messaggio a private message
 			Client	*receiver;
@@ -241,7 +243,7 @@ void EventHandler::handleJoin(const vector<string> &params)
 void EventHandler::handlePass(const vector<string> &params)
 {
 	if (_client->getIsConnected())
-		throw AlreadyConnectedException();
+		throw AlreadyRegisteredException();
 
 	Hasher hasher(params[0]);
 

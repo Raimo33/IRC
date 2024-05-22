@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 03:05:20 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:09:55 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 13:23:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,5 @@ namespace irc
     const uint8_t		N_MODES = 5;
     const uint8_t		N_COMMANDS = 7;
 }
-
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:03:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 15:24:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ const Client &Server::getClient(const string &nickname) const
 void Server::addClient(Client *client)
 {
 	if (_clients.find(client->getUsername()) != _clients.end())
-		throw ClientAlreadyExistsException();
+		throw InternalErrorException("Client already exists");
 	_clients[client->getUsername()] = client;
 }
 
@@ -179,7 +179,7 @@ const Channel	&Server::getChannel(const string &name) const
 void	Server::addChannel(Channel *channel)
 {
 	if (_channels.find(channel->getName()) != _channels.end())
-		throw ChannelAlreadyExistsException();
+		throw InternalErrorException("Channel already exists");
 	_channels[channel->getName()] = channel;
 }
 
@@ -258,19 +258,21 @@ void Server::handleClient(Client *client, size_t *i)
 				throw SystemErrorException(strerror(errno));
 		}
 	}
-	catch (const FatalErrorException &e)
+	catch (const InternalErrorException &e)
 	{
 		throw;
 	}
-	catch (const IRCException &e)
+	catch (const ProtocolErrorException &e)
 	{
+		client->receiveNumericReply(e.getCode(), e.getParams());
 		//TODO send error message to client
-		cerr << e.what() << endl;
+		//logger.log("Error: " + string(e.what()));
 	}
 	catch (const exception &e)
 	{
 		//TODO send error message to client
-		cerr << e.what() << endl;
+
+		//logger.log("Unknown error: " + string(e.what()));
 	}
 }
 

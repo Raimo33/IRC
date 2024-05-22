@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:32:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 15:45:09 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "irc/Message.hpp"
 #include "irc/EventHandler.hpp"
 #include "irc/Exceptions.hpp"
+#include "irc/ReplyCodes.hpp"
 
 using namespace std;
 using namespace irc;
@@ -26,7 +27,7 @@ Channel::Channel(const string &name, ChannelOperator &op) :
 	_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT)
 {
 	if (!is_valid_channel_name(name))
-		throw InvalidNameException();
+		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, vector<string>(1, name));
 	_operators[op.getUsername()] = &op;
 	_members[op.getUsername()] = &op;
 	for (int i = 0; i < N_MODES; i++)
@@ -158,7 +159,13 @@ const Client &Channel::getMember(const string &nickname) const
 void Channel::addMember(Client &user)
 {
 	if (_members.find(user.getUsername()) != _members.end())
-		throw UserAlreadyMemberException();
+	{
+		vector<string> params(2);
+
+		params.push_back(user.getUsername());
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
+	}
 	if (_members.size() >= _member_limit)
 		throw ChannelFullException();
 	_members[user.getUsername()] = &user;
@@ -191,14 +198,26 @@ const Client &Channel::getPendingInvitation(const string &nickname) const
 void Channel::addPendingInvitation(Client *user)
 {
 	if (_pending_invitations.find(user->getUsername()) != _pending_invitations.end())
-		throw UserAlreadyMemberException();
+	{
+		vector<string> params(2);
+
+		params.push_back(user->getUsername());
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
+	}
 	_pending_invitations[user->getUsername()] = user;
 }
 
 void Channel::removePendingInvitation(const Client &user)
 {
 	if (_pending_invitations.find(user.getUsername()) == _pending_invitations.end())
-		throw UserNotMemberException();
+	{
+		vector<string> params(2);
+
+		params.push_back(user.getUsername());
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
+	}
 	_pending_invitations.erase(user.getUsername());
 }
 

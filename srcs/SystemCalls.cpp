@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:40:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 13:59:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,14 @@ namespace irc
 	int	bind_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 	{
 		if (bind(sockfd, addr, addrlen) == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("bind: " + string(strerror(errno)));
 		return (0);
 	}
 
 	int	listen_p(int sockfd, int backlog)
 	{
 		if (listen(sockfd, backlog) == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("listen: " + string(strerror(errno)));
 		return (0);
 	}
 
@@ -38,14 +38,14 @@ namespace irc
 
 		new_sockfd = accept(sockfd, addr, addrlen);
 		if (new_sockfd == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("accept: " + string(strerror(errno)));
 		return (new_sockfd);
 	}
 
 	int	connect_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 	{
 		if (connect(sockfd, addr, addrlen) == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("connect: " + string(strerror(errno)));
 		return (0);
 	}
 
@@ -55,7 +55,7 @@ namespace irc
 
 		sockfd = socket(domain, type, protocol);
 		if (sockfd == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("socket: " + string(strerror(errno)));
 		return (sockfd);
 	}
 
@@ -65,7 +65,7 @@ namespace irc
 
 		ret = close(fd);
 		if (ret == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("close: " + string(strerror(errno)));
 		return (ret);
 	}
 
@@ -75,7 +75,7 @@ namespace irc
 
 		ret = poll(fds, nfds, timeout);
 		if (ret == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("poll: " + string(strerror(errno)));
 		return (ret);
 	}
 
@@ -85,7 +85,7 @@ namespace irc
 
 		ret = shutdown(sockfd, how);
 		if (ret == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("shutdown: " + string(strerror(errno)));
 		return (ret);
 	}
 
@@ -95,7 +95,7 @@ namespace irc
 
 		ret = send(sockfd, buf, len, flags);
 		if (ret == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("send: " + string(strerror(errno)));
 		return (ret);
 	}
 
@@ -105,7 +105,7 @@ namespace irc
 
 		ret = recv(sockfd, buf, len, flags);
 		if (ret == -1)
-			throw SystemErrorException(strerror(errno));
+			throw SystemErrorException("recv: " + string(strerror(errno)));
 		return (ret);
 	}
 }

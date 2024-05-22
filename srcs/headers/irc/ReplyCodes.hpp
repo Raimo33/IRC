@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/20 15:57:53 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:22:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 14:36:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,7 +203,7 @@
 
 namespace irc
 {
-	const std::map<uint16_t, std::string> create_reply_codes(void);
+	const std::map<uint16_t, std::string>			create_reply_codes(void);
 	extern const std::map<uint16_t, std::string>	reply_codes;
 }
 
