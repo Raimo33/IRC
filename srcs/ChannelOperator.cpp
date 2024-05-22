@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 15:48:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 16:24:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,13 @@ void ChannelOperator::channelKick(const Client &user, Channel &channel) const
 
 	checkPrivilege(channel);
 	if (members.find(user.getUsername()) == members.end())
-		throw UserNotMemberException();
+	{
+		vector<string> params(2);
+
+		params.push_back(user.getUsername());
+		params.push_back(channel.getName());
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+	}
 	channel.removeMember(user);
 }
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 15:45:09 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 16:20:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ Channel::Channel(const string &name, ChannelOperator &op) :
 {
 	if (!is_valid_channel_name(name))
 		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, vector<string>(1, name));
-	_operators[op.getUsername()] = &op;
-	_members[op.getUsername()] = &op;
+	_operators[op.getNickname()] = &op;
+	_members[op.getNickname()] = &op;
 	for (int i = 0; i < N_MODES; i++)
 		_modes[i] = false;
 }
@@ -40,9 +40,9 @@ Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
 	_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT)
 {
 	if (!is_valid_channel_name(name))
-		throw InvalidNameException();
-	_operators[op.getUsername()] = &op;
-	_members[op.getUsername()] = &op;
+		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, vector<string>(1, name)); //TODO custom message (name + is not a valid channel name)
+	_operators[op.getNickname()] = &op;
+	_members[op.getNickname()] = &op;
 	for (int i = 0; i < N_MODES; i++)
 		_modes[i] = false;
 	_modes[MODE_K] = true;
@@ -69,7 +69,7 @@ const string &Channel::getName(void) const
 void Channel::setName(const string &new_name)
 {
 	if (!is_valid_channel_name(new_name))
-		throw InvalidNameException();
+		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, vector<string>(1, new_name)); //TODO custom message (new_name + is not a valid channel name)
 	_name = new_name;
 }
 
@@ -81,7 +81,7 @@ const string &Channel::getKey(void) const
 void Channel::setKey(const string &new_key)
 {
 	if (new_key.empty() || new_key.length() > MAX_CHANNEL_KEY_LEN)
-		throw InvalidKeyException();
+		throw ProtocolErrorException(ERR_KEYSET, vector<string>(1, _name)); //TODO messaggio custom (key + is not a valid key)
 	_key = new_key;
 }
 
@@ -93,7 +93,7 @@ const string &Channel::getTopic(void) const
 void Channel::setTopic(const string &new_topic)
 {
 	if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
-		throw InvalidTopicException();
+		throw ProtocolErrorException(RPL_NOTOPIC, vector<string>(1, _name));
 	_topic = new_topic;
 }
 
@@ -120,23 +120,46 @@ void Channel::setOperators(const map<string, ChannelOperator *> &new_operators)
 const Client &Channel::getOperator(const string &nickname) const
 {
 	if (_operators.find(nickname) == _operators.end())
-		throw UserNotMemberException();
+	{
+		vector<string> params(2);
+
+		params.push_back(nickname);
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, params); //TODO custom message (nickname + is not an operator of + channel name)
+	}
 	return *(_operators.at(nickname));
 }
 
 Client &Channel::addOperator(ChannelOperator *op)
 {
-	if (_operators.find(op->getUsername()) != _operators.end())
-		throw UserAlreadyOperatorException();
-	_operators[op->getUsername()] = op;
+	string nickname = op->getNickname();
+
+	if (_operators.find(nickname) != _operators.end())
+	{
+		vector<string> params(2);
+
+		//TODO aggiungere il nickname dell'utente che ha inviato il comando
+		params.push_back(nickname);
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERONCHANNEL, params); //TODO messaggio custom (nickname + is already an operator of + channel name)
+	}
+	_operators[nickname] = op;
 	return *op;
 }
 
 void Channel::removeOperator(const ChannelOperator &op)
 {
-	if (_operators.find(op.getUsername()) == _operators.end())
-		throw UserNotMemberException();
-	_operators.erase(op.getUsername());
+	string nickname = op.getNickname();
+
+	if (_operators.find(nickname) == _operators.end())
+	{
+		vector<string> params(2);
+
+		params.push_back(nickname);
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+	}
+	_operators.erase(nickname);
 }
 
 const map<string, Client *> &Channel::getMembers(void) const
@@ -152,30 +175,42 @@ void Channel::setMembers(const map<string, Client *> &new_members)
 const Client &Channel::getMember(const string &nickname) const
 {
 	if (_members.find(nickname) == _members.end())
-		throw UserNotMemberException();
+	{
+		vector<string> params(2);
+
+		params.push_back(nickname);
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+	}
 	return *(_members.at(nickname));
 }
 
 void Channel::addMember(Client &user)
 {
-	if (_members.find(user.getUsername()) != _members.end())
+	if (_members.find(user.getNickname()) != _members.end())
 	{
 		vector<string> params(2);
 
-		params.push_back(user.getUsername());
+		params.push_back(user.getNickname());
 		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
 	}
 	if (_members.size() >= _member_limit)
-		throw ChannelFullException();
-	_members[user.getUsername()] = &user;
+		throw ProtocolErrorException(ERR_CHANNELISFULL, vector<string>(1, _name));
+	_members[user.getNickname()] = &user;
 }
 
 void Channel::removeMember(const Client &user)
 {
-	if (_members.find(user.getUsername()) == _members.end())
-		throw UserNotMemberException();
-	_members.erase(user.getUsername());
+	if (_members.find(user.getNickname()) == _members.end())
+	{
+		vector<string> params(2);
+
+		params.push_back(user.getNickname());
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+	}
+	_members.erase(user.getNickname());
 }
 
 const map<string, Client *> &Channel::getPendingInvitations(void) const
@@ -191,34 +226,41 @@ void Channel::setPendingInvitations(const map<string, Client *> &new_invitations
 const Client &Channel::getPendingInvitation(const string &nickname) const
 {
 	if (_pending_invitations.find(nickname) == _pending_invitations.end())
-		throw UserNotMemberException();
+	{
+		vector<string> params(3);
+
+		//TODO aggiungere il nickname dell'utente che ha inviato il comando
+		params.push_back(nickname);
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+	}
 	return *(_pending_invitations.at(nickname));
 }
 
 void Channel::addPendingInvitation(Client *user)
 {
-	if (_pending_invitations.find(user->getUsername()) != _pending_invitations.end())
+	if (_pending_invitations.find(user->getNickname()) != _pending_invitations.end())
 	{
 		vector<string> params(2);
 
-		params.push_back(user->getUsername());
+		params.push_back(user->getNickname());
 		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
 	}
-	_pending_invitations[user->getUsername()] = user;
+	_pending_invitations[user->getNickname()] = user;
 }
 
 void Channel::removePendingInvitation(const Client &user)
 {
-	if (_pending_invitations.find(user.getUsername()) == _pending_invitations.end())
+	if (_pending_invitations.find(user.getNickname()) == _pending_invitations.end())
 	{
 		vector<string> params(2);
 
-		params.push_back(user.getUsername());
+		params.push_back(user.getNickname());
 		params.push_back(_name);
-		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
 	}
-	_pending_invitations.erase(user.getUsername());
+	_pending_invitations.erase(user.getNickname());
 }
 
 const bool *Channel::getModes(void) const
@@ -245,16 +287,36 @@ void Channel::setMode(const t_channel_modes &mode, const bool value)
 void Channel::promoteOperator(const string &nickname)
 {
 	if (_operators.find(nickname) != _operators.end())
-		throw UserAlreadyOperatorException();
+	{
+		vector<string> params(2);
+
+		params.push_back(nickname);
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
+	}
 	if (_members.find(nickname) == _members.end())
-		throw UserNotMemberException();
+	{
+		vector<string> params(3);
+
+		//TODO aggiungere il nickname dell'utente che ha inviato il comando
+		params.push_back(nickname);
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+	}
 	_operators[nickname] = new ChannelOperator(getMember(nickname));
 }
 
 void Channel::demoteOperator(const string &nickname)
 {
 	if (_operators.find(nickname) == _operators.end())
-		throw UserNotOperatorException();
+	{
+		vector<string> params(3);
+
+		//TODO aggiungere il nickname dell'utente che ha inviato il comando
+		params.push_back(nickname);
+		params.push_back(_name);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+	}
 	delete _operators[nickname];
 	_operators.erase(nickname);
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 15:23:19 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 16:24:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ class irc::ProtocolErrorException : public std::exception
 	public:
 		explicit ProtocolErrorException(const uint16_t code, const std::vector<std::string> &params);
 		virtual const char* what(void) const throw();
+		~ProtocolErrorException(void) throw();
 
 		uint16_t						getCode(void) const;
 		const std::vector<std::string>&	getParams(void) const;

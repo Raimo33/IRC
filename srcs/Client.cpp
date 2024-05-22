@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 15:20:50 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 16:27:54 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,13 @@ const Channel	*Client::getChannel(const string &channel_name) const
 	map<string, const Channel *>::const_iterator it = _channels.find(channel_name);
 
 	if (it == _channels.end())
-		throw UserNotMemberException();
+	{
+		vector<string> params(2);
+
+		params.push_back(_nickname);
+		params.push_back(channel_name);
+		throw ProtocolErrorException(ERR_NOTONCHANNEL, params);
+	}
 	return it->second;
 }
 
