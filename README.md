@@ -22,18 +22,18 @@ This project implements a fully-featured IRC server that adheres to the specific
 
 1. **Clone the repository:**
     ```sh
-    git clone https://github.com/yourusername/irc-server.git
+    git clone https://github.com/Raimo33/IRC.git
     ```
 
 2. **Build the server:**
     ```sh
-    cd irc-server
+    cd IRC
     make
     ```
 
 3. **Run the server:**
     ```sh
-    ./irc-server
+    ./ircserv
     ```
 
 ### Documentation
