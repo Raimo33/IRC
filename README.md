@@ -1,6 +1,6 @@
 ## Project Description
 
-An Internet Relay Chat (IRC) server compatible with RFCs 1459, 2810, 2811, 2812, and 2813.
+An basic Internet Relay Chat (IRC) server compatible with RFCs 1459, 2810, 2811, 2812, and 2813.
 
 This project implements a fully-featured IRC server that adheres to the specifications outlined in the following RFCs:
 - **[RFC 1459](https://tools.ietf.org/html/rfc1459)**: The original IRC protocol.
@@ -12,10 +12,10 @@ This project implements a fully-featured IRC server that adheres to the specific
 ### Features
 
 - Full support for user authentication and registration.
-- Channel management, including creation, moderation, and user roles.
+- Channel management, including creation, moderation.
 - Secure communication through SSL/TLS.
 - Extensible commands and modes for both users and channels.
-- Logging and monitoring capabilities for server administration.
+- Logging capabilities.
 - Compatibility with popular IRC clients.
 
 ### Getting Started
