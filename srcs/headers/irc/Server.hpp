@@ -6,16 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 21:13:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 22:00:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//TODO logging di sistema per errori/eventi importanti (esempio: fallimento di un comando send)
-//TODO logging silenzioso per exceptions non fondamentali, esempioo: un utente prova a fare leaveChannel di un canale dove non e' presente.
+//TODO logging di sistema su piu livelli. azioni degli utenti, errori di sistema, errori di protocollo
 //TODO lanciare le exceptions nei casi di errore nei setters/getters quindi solo a livelli bassi
-//TODO ricontrollare getUsername al posto di getNickname (getNickname e' giusto e deve essere la chiave univoca)
-//TODO ricontrollare tutte le ProtocolExceptions e mandare messaggi custom
-//TODO anche i messaggi standard utilizzano i parametri
+//TODO anche i messaggi  replycodes standard utilizzano i parametri e non sono costanti
 
 #ifndef SERVER_HPP
 # define SERVER_HPP

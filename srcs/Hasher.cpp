@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:57:54 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 22:36:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 21:55:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 using namespace std;
 using namespace irc;
 
-Hasher::Hasher(void)
+string Hasher::hash(const string &text)
 {
-	init();
+	return Hasher(text).hexdigest();
 }
 
 Hasher::Hasher(const string &text)
@@ -98,9 +98,9 @@ string Hasher::hexdigest(void) const
     return string(buf);
 }
 
-void Hasher::transform(const uint1 block[blocksize])
+void Hasher::transform(const uint8_t block[blocksize])
 {
-    uint4 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
+    uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
     decode(x, block, blocksize);
 
     FF(a, b, c, d, x[0], 7, 0xd76aa478);
@@ -179,7 +179,7 @@ void Hasher::transform(const uint1 block[blocksize])
     memset(x, 0, sizeof x);
 }
 
-void Hasher::encode(uint1 *output, const uint4 *input, size_type len)
+void Hasher::encode(uint8_t *output, const uint32_t *input, size_type len)
 {
     for (size_type i = 0, j = 0; j < len; ++i, j += 4)
 	{
@@ -190,56 +190,56 @@ void Hasher::encode(uint1 *output, const uint4 *input, size_type len)
     }
 }
 
-void Hasher::decode(uint4 *output, const uint1 *input, size_type len)
+void Hasher::decode(uint32_t *output, const uint8_t *input, size_type len)
 {
     for (size_type i = 0, j = 0; j < len; ++i, j += 4)
 	{
-        output[i] = ((uint4)input[j]) | (((uint4)input[j + 1]) << 8) |
-                    (((uint4)input[j + 2]) << 16) | (((uint4)input[j + 3]) << 24);
+        output[i] = ((uint32_t)input[j]) | (((uint32_t)input[j + 1]) << 8) |
+                    (((uint32_t)input[j + 2]) << 16) | (((uint32_t)input[j + 3]) << 24);
     }
 }
 
-inline Hasher::uint4 Hasher::F(uint4 x, uint4 y, uint4 z)
+inline uint32_t Hasher::F(uint32_t x, uint32_t y, uint32_t z)
 {
     return (x & y) | (~x & z);
 }
 
-inline Hasher::uint4 Hasher::G(uint4 x, uint4 y, uint4 z)
+inline uint32_t Hasher::G(uint32_t x, uint32_t y, uint32_t z)
 {
     return (x & z) | (y & ~z);
 }
 
-inline Hasher::uint4 Hasher::H(uint4 x, uint4 y, uint4 z)
+inline uint32_t Hasher::H(uint32_t x, uint32_t y, uint32_t z)
 {
     return x ^ y ^ z;
 }
 
-inline Hasher::uint4 Hasher::I(uint4 x, uint4 y, uint4 z)
+inline uint32_t Hasher::I(uint32_t x, uint32_t y, uint32_t z)
 {
     return y ^ (x | ~z);
 }
 
-inline Hasher::uint4 Hasher::rotate_left(uint4 x, int n)
+inline uint32_t Hasher::rotate_left(uint32_t x, int n)
 {
     return (x << n) | (x >> (32 - n));
 }
 
-inline void Hasher::FF(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+inline void Hasher::FF(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac)
 {
     a = rotate_left(a + F(b, c, d) + x + ac, s) + b;
 }
 
-inline void Hasher::GG(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+inline void Hasher::GG(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac)
 {
     a = rotate_left(a + G(b, c, d) + x + ac, s) + b;
 }
 
-inline void Hasher::HH(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+inline void Hasher::HH(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac)
 {
     a = rotate_left(a + H(b, c, d) + x + ac, s) + b;
 }
 
-inline void Hasher::II(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+inline void Hasher::II(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac)
 {
     a = rotate_left(a + I(b, c, d) + x + ac, s) + b;
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 21:38:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 21:57:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@
 namespace irc
 {
 	class SystemErrorException; //for system calls errors (unpredictable)
-	class InternalErrorException; //for internal programming errors such as setters
-	class ProtocolErrorException; //for IRC protocol errors
+	class InternalErrorException; //for internal programming errors such as null pointers, calling addClient 2 times on the same client, etc.
+	class ProtocolErrorException; //for IRC protocol errors (reply codes)
 }
 
 class irc::ProtocolErrorException : public std::exception

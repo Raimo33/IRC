@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 21:38:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 22:00:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ using namespace irc;
 
 Server::Server(const uint16_t port_no, const string &password) :
 	_port(port_no),
-	_pwd_hash(Hasher(password).hexdigest()),
+	_pwd_hash(Hasher::hash(password)),
 	_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
 	_handler(EventHandler(this))
 {
@@ -147,16 +147,16 @@ const Client &Server::getClient(const string &nickname) const
 
 void Server::addClient(Client *client)
 {
-	if (_clients.find(client->getUsername()) != _clients.end())
+	if (_clients.find(client->getNickname()) != _clients.end())
 		throw InternalErrorException("Server::addClient: Client already exists");
-	_clients[client->getUsername()] = client;
+	_clients[client->getNickname()] = client;
 }
 
 void Server::removeClient(const Client &client)
 {
-	if (!_clients.at(client.getUsername()))
+	if (!_clients.at(client.getNickname()))
 		throw InternalErrorException("Server::removeClient: Client not found");
-	_clients.erase(client.getUsername());
+	_clients.erase(client.getNickname());
 }
 
 const map<string, Channel *>	&Server::getChannels(void) const

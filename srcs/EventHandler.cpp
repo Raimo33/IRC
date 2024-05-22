@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 21:28:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 21:59:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,7 @@ void EventHandler::handlePrivmsg(const vector<string> &params)
 			Client	*receiver;
 
 			receiver = channel.getMembers().begin()->second;
-			if (receiver->getUsername() == _client->getUsername())
+			if (receiver->getNickname() == _client->getNickname())
 				receiver = channel.getMembers().rbegin()->second;
 			PrivateMessage *msg = new PrivateMessage(params[1], *_client, *receiver);
 			_client->sendMessage(*receiver, *msg);
@@ -259,9 +259,7 @@ void EventHandler::handlePass(const vector<string> &params)
 	if (params.size() < 1)
 		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PASS"); //TODO aggiungere la reason (usage: PASS <password>)
 
-	Hasher hasher(params[0]);
-
-	if (hasher.hexdigest() != _server->getPwdHash())
+	if (Hasher::hash(params[0]) != _server->getPwdHash())
 		throw ProtocolErrorException(ERR_PASSWDMISMATCH);
 	_client->setIsConnected(true);
 }
