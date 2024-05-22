@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 16:24:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 20:21:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <string>
 # include <exception>
 # include <stdexcept>
+# include <cstdarg>
 
 namespace irc
 {
@@ -27,14 +28,13 @@ namespace irc
 class irc::ProtocolErrorException : public std::exception
 {
 	public:
-		explicit ProtocolErrorException(const uint16_t code, const std::vector<std::string> &params);
+		explicit ProtocolErrorException(const uint16_t code, ...);
 		virtual const char* what(void) const throw();
 		~ProtocolErrorException(void) throw();
 
 		uint16_t						getCode(void) const;
 		const std::vector<std::string>&	getParams(void) const;
 	private:
-		static std::string generateMessage(const uint16_t code, const std::vector<std::string>& params);
 
 		uint16_t						_code;
    		std::vector<std::string>		_params;

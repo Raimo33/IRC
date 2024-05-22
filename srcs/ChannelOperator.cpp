@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 16:24:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 20:33:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,41 +25,31 @@ ChannelOperator::~ChannelOperator() {}
 
 void ChannelOperator::channelKick(const Client &user, Channel &channel) const
 {
-	map<string, Client *>				members = channel.getMembers();
+	map<string, Client *>			members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
+	const string					&nickname = user.getNickname();
 
 	checkPrivilege(channel);
-	if (members.find(user.getUsername()) == members.end())
-	{
-		vector<string> params(2);
-
-		params.push_back(user.getUsername());
-		params.push_back(channel.getName());
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
-	}
+	if (members.find(nickname) == members.end())
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname, channel.getName());
 	channel.removeMember(user);
 }
 
 void ChannelOperator::channelInvite(Client &user, Channel &channel) const
 {
-	map<string, Client *>				members = channel.getMembers();
+	map<string, Client *>			members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
+	const string					&nickname = user.getNickname();
 
 	checkPrivilege(channel);
-	if (members.find(user.getUsername()) != members.end())
-	{
-		vector<string> params(2);
-
-		params.push_back(user.getUsername());
-		params.push_back(channel.getName());
-		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
-	}
+	if (members.find(nickname) != members.end())
+		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname, channel.getName());
 	channel.addPendingInvitation(&user);
 }
 
 void ChannelOperator::channelTopicSet(Channel &channel, const string &new_topic) const
 {
-	map<string, Client *>				members = channel.getMembers();
+	map<string, Client *>			members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
 
 	checkPrivilege(channel);
@@ -81,7 +71,7 @@ void ChannelOperator::checkPrivilege(const Channel &channel) const
 	map<string, ChannelOperator *>	operators = channel.getOperators();
 
 	if (members.find(_username) == members.end())
-		throw ProtocolErrorException(ERR_NOTONCHANNEL, vector<string>(1, channel.getName()));
+		throw ProtocolErrorException(ERR_NOTONCHANNEL, channel.getName());
 	if (operators.find(_username) == operators.end())
-		throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, vector<string>(1, channel.getName()));
+		throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, channel.getName());
 }

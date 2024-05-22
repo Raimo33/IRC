@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 16:22:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 20:04:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 //TODO lanciare le exceptions nei casi di errore nei setters/getters quindi solo a livelli bassi
 //TODO ricontrollare getUsername al posto di getNickname (getNickname e' giusto e deve essere la chiave univoca)
 //TODO ricontrollare tutte le ProtocolExceptions e mandare messaggi custom
+//TODO rendere ProtocolExceptions una variadica template class
 
 #ifndef SERVER_HPP
 # define SERVER_HPP

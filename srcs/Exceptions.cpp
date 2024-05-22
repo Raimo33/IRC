@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 15:22:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 20:21:25 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,17 @@ const char *InternalErrorException::what(void) const throw()
 	return runtime_error::what();
 }
 
-ProtocolErrorException::ProtocolErrorException(const uint16_t code, const vector<string> &params) :
-	_code(code),
-	_params(params) {}
+ProtocolErrorException::ProtocolErrorException(const uint16_t code, ...) :
+	_code(code)
+{
+	va_list args;
+	va_start(args, code);
+	const char *param;
+
+	while ((param = va_arg(args, const char *)))
+		_params.push_back(string(param));
+	va_end(args);
+}
 
 const char *ProtocolErrorException::what(void) const throw()
 {
