@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:42:19 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 03:09:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,7 @@
 # include <algorithm>
 # include <stdint.h>
 # include <stdexcept>
-
-# include "Standards.hpp"
+# include "Constants.hpp"
 
 namespace irc
 {

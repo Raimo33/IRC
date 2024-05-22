@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/20 15:57:53 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/20 17:56:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 03:22:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,5 +196,15 @@
 # define ERR_USERSDONTMATCH		502
 # define RPL_ETRACEFULL			708
 # define RPL_ETRACEEND			759
+
+# include <map>
+# include <string>
+# include <stdint.h>
+
+namespace irc
+{
+	const std::map<uint16_t, std::string> create_reply_codes(void);
+	extern const std::map<uint16_t, std::string>	reply_codes;
+}
 
 #endif

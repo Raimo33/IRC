@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 03:37:14 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,14 +76,9 @@ const char *ErroneousNicknameException::what(void) const throw()
     return "User nickname is invalid";
 }
 
-const char *HandshakeFailedException::what(void) const throw()
-{
-    return "Handshake failed";
-}
-
 const char *InvalidArgumentException::what(void) const throw()
 {
-    return std::invalid_argument::what();
+	return invalid_argument::what();
 }
 
 const char *InvalidKeyException::what(void) const throw()
@@ -160,4 +155,7 @@ const char *UserNotOperatorException::what(void) const throw()
 {
     return "Client is not an operator of the channel";
 }
+
+
+
 

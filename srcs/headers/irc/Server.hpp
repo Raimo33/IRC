@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:42:55 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 03:09:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,15 +33,14 @@
 # include <algorithm>
 
 # include "SystemCalls.hpp"
-# include "Standards.hpp"
+# include "Constants.hpp"
 # include "EventHandler.hpp"
 
 namespace irc
 {
 	class Client;
 	class Channel;
-	class EventHandler;
-	
+
 	class Server
 	{
 		public:
@@ -62,13 +61,12 @@ namespace irc
 			const Channel									&getChannel(const std::string &name) const;
 			void											addChannel(Channel *channel);
 			void											removeChannel(const Channel &channel);
-			const std::vector<pollfd>							&getPollfds(void);
+			const std::vector<pollfd>						&getPollfds(void);
 			void											setPollfds(const std::vector<pollfd> &pollfds);
 			void											addPollfd(const pollfd pollfd);
 			void											removePollfd(const pollfd pollfd);
 			void											removePollfd(const int socket);
 			int												getSocket(void) const;
-			//setEventHandler e getEventHandler non servono perche' EventHandler e' un singleton
 
 			void											handleClient(Client *client, size_t *i);
 			void											disconnectClient(Client *client);
@@ -76,10 +74,10 @@ namespace irc
 			void											configureNonBlocking(const int client_socket) const;
 			void											run(void);
 
-			static const std::map<uint16_t, std::string>	reply_codes;
 
 		private:
-			static const std::map<uint16_t, std::string>	initReplyCodes(void);
+					
+			// static const std::map<uint16_t, std::string>	initReplyCodes(void);
 
 			const uint16_t									_port; //la porta va da 0 a 65535 (2 bytes)
 			const std::string								_pwd_hash; //la password che serve a qualsiasi Client per accedere a questo server
@@ -87,7 +85,8 @@ namespace irc
 			std::map<std::string, Channel *>				_channels; // {channel_name, Channel *}
 			std::vector<pollfd>								_pollfds; //TODO usare map invece che std::vector, mapparli con il socket
 			const int										_socket;
-			EventHandler									_event_handler;
+			EventHandler									_handler;
+			
 	};
 }
 

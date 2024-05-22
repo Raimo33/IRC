@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:55:59 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:29:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 01:24:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 
 namespace irc
 {
+	//TODO rendere la funzione hash static 
 	class Hasher //utilizza Hasher
 	{
 		public:

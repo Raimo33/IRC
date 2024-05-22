@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 03:08:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,9 @@
 #include "irc/PrivateMessage.hpp"
 #include "irc/Server.hpp"
 #include "irc/utils.hpp"
-#include "irc/Standards.hpp"
+
 #include "irc/Exceptions.hpp"
+#include "irc/ReplyCodes.hpp"
 
 using namespace std;
 using namespace irc;
@@ -206,16 +207,16 @@ void	Client::receiveNumericReply(uint16_t code, const vector<string> &params, co
 {
 	ostringstream oss;
 
-	oss << ":" SERVER_NAME << " " << code << " " << _nickname;
+	oss << ":" << SERVER_NAME << " " << code << " " << _nickname;
 	for (size_t i = 0; i < params.size(); i++)
 		oss << " " << params[i];
 	if (!msg.empty())
 		oss << " :" << msg;
 	else
 	{
-		if (Server::reply_codes.find(code) == Server::reply_codes.end())
+		if (reply_codes.find(code) == reply_codes.end())
 			FatalErrorException("Internal error: unknown reply code");
-		oss << " :" << Server::reply_codes.at(code);	
+		oss << " :" << reply_codes.at(code);	
 	}
 	EventHandler::sendBufferedString(*this, oss.str());
 }

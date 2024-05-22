@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/22 03:03:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "irc/Client.hpp"
 #include "irc/utils.hpp"
 #include "irc/ReplyCodes.hpp"
-#include "irc/Standards.hpp"
+
 #include "irc/Exceptions.hpp"
 
 using namespace std;
@@ -30,14 +30,29 @@ static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
 
 EventHandler::EventHandler(void) :
-	_commands(initCommandMap()),
-	_client(NULL) {}
+	_server(NULL),
+	_client(NULL),
+	_commands(initCommands())
+{
+	initHandlers();
+}
+
+EventHandler::EventHandler(Server *server) :
+	_server(server),
+	_client(NULL),
+	_commands(initCommands())
+{
+	initHandlers();
+}
 
 EventHandler::EventHandler(const EventHandler &copy) :
-	_commands(copy._commands),
+	_server(copy._server),
 	_client(copy._client),
-	_server(copy._server) {}
-
+	_commands(copy._commands)
+{
+	initHandlers();
+}
+	
 EventHandler::~EventHandler(void) {}
 
 const map<string, e_cmd_type>	&EventHandler::getCommands(void) const
@@ -68,47 +83,40 @@ void	EventHandler::setServer(Server *server)
 //JOIN #channel1,#channel2,#channel3 key1,key2,key3
 void	EventHandler::processInput(string raw_input)
 {
-	s_input	input = parseInput(raw_input);
+	s_input input = parseInput(raw_input);
 
-	switch (input.command)
-	{
-		case PRIVMSG: //usato sia per messaggi privati che per messaggi nei canali
-			checkConnection(_client);
-			checkAuthentication(_client);
-			executeCommandPrivmsg(input.params);
-			break;
-		//JOIN <channel1,channel2,channel3> <key1,key2,key3>
-		case JOIN:
-			checkConnection(_client);
-			checkAuthentication(_client);
-			executeCommandJoin(input.params);
-			break;
-		case MODE:
-			checkConnection(_client);
-			checkAuthentication(_client);
-			executeCommandMode(input.params);
-			break;
-		//PASS <connectionpassword>
-		case PASS: //viene usata dagli utenti per autenticarsi
-			executeCommandPass(input.params);
-			break;
-		//NICK <nickname>
-		case NICK:
-			checkConnection(_client);
-			executeCommandNick(input.params);
-			break;
-		//Client <username>
-		case USER:
-			checkConnection(_client);
-			executeCommandUser(input.params);
-			break;
-		//QUIT
-		case QUIT:
-			executeCommandQuit(input.params);
-			break;
-		default:
-			throw UnknownCommandException();
-	}
+    if (input.command < 0 || input.command >= N_COMMANDS)
+        throw UnknownCommandException();
+
+    (this->*(_handlers[input.command]))(input.params);
+}
+
+void	EventHandler::initHandlers(void)
+{
+	_handlers[PRIVMSG] = &EventHandler::handlePrivmsg;
+	_handlers[JOIN] = &EventHandler::handleJoin;
+	_handlers[MODE] = &EventHandler::handleMode;
+	_handlers[PASS] = &EventHandler::handlePass;
+	_handlers[NICK] = &EventHandler::handleNick;
+	_handlers[QUIT] = &EventHandler::handleQuit;
+}
+
+const std::map<std::string, e_cmd_type>	EventHandler::initCommands(void)
+{
+	static map<string, e_cmd_type>	commands;
+
+	if (!commands.empty()) //se il map e' gia' stato inizializzato
+		return commands;
+
+	commands["PRIVMSG"] = PRIVMSG;
+	commands["JOIN"] = JOIN;
+	commands["MODE"] = MODE;
+	commands["PASS"] = PASS;
+	commands["NICK"] = NICK;
+	commands["USER"] = USER;
+	commands["QUIT"] = QUIT;
+
+	return commands;
 }
 
 //input: ":<prefix> <command> <params> <crlf>"
@@ -117,7 +125,7 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	s_input	input;
 	string	command;
 
-	raw_input = raw_input.substr(0, MAX_INPUT_LENGTH - 1); //limito la lunghezza dell'input (per evitare buffer overflow
+	raw_input = raw_input.substr(0, MAX_INPUT_LEN - 1); //limito la lunghezza dell'input (per evitare buffer overflow
 
 	if (raw_input.size() >= 2 && raw_input.substr(raw_input.size() - 2) == "\r\n")
 		raw_input = raw_input.substr(0, raw_input.size() - 2);
@@ -151,8 +159,10 @@ s_input	EventHandler::parseInput(string &raw_input) const
 	return input;
 }
 
-void EventHandler::executeCommandPrivmsg(const vector<string> &params)
+void EventHandler::handlePrivmsg(const vector<string> &params)
 {
+	checkConnection(_client);
+	checkAuthentication(_client);
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{
 		//channel msg PRIVMSG <channel> :<message>
@@ -190,15 +200,19 @@ void EventHandler::executeCommandPrivmsg(const vector<string> &params)
 	}
 }
 
-void EventHandler::executeCommandMode(const vector<string> &params)
+void EventHandler::handleMode(const vector<string> &params)
 {
+	checkConnection(_client);
+	checkAuthentication(_client);
 	//TODO implementare
 	(void)params;
 }
 
-void EventHandler::executeCommandJoin(const vector<string> &params)
+//JOIN <channel1,channel2,channel3> <key1,key2,key3>
+void EventHandler::handleJoin(const vector<string> &params)
 {
-	//JOIN <channel1,channel2,channel3> <key1,key2,key3>
+	checkConnection(_client);
+	checkAuthentication(_client);
 	vector<string> channels = split(params[0], ','); //se non e' in cpp98 mettiamolo in utils
 	vector<string> keys = split(params[1], ',');
 
@@ -224,7 +238,7 @@ void EventHandler::executeCommandJoin(const vector<string> &params)
 	};
 }
 
-void EventHandler::executeCommandPass(const vector<string> &params)
+void EventHandler::handlePass(const vector<string> &params)
 {
 	if (_client->getIsConnected())
 		throw AlreadyConnectedException();
@@ -236,8 +250,9 @@ void EventHandler::executeCommandPass(const vector<string> &params)
 	_client->setIsConnected(true);
 }
 
-void EventHandler::executeCommandNick(const vector<string> &params)
+void EventHandler::handleNick(const vector<string> &params)
 {
+	checkConnection(_client);
 	try
 	{
 		checkNicknameValidity(params[0]);
@@ -255,33 +270,18 @@ void EventHandler::executeCommandNick(const vector<string> &params)
 	}
 }
 
-void EventHandler::executeCommandQuit(const vector<string> &params)
+void EventHandler::handleQuit(const vector<string> &params)
 {
 	(void)params;
 	_server->removeClient(*_client);
 }
 
-void EventHandler::executeCommandUser(const vector<string> &params)
+void EventHandler::handleUser(const vector<string> &params)
 {
+	checkConnection(_client);
 	_client->setUsername(params[0]);
 	if (!_client->getNickname().empty())
 		_client->setAuthenticated(true);
-}
-
-const map<string, e_cmd_type>	&EventHandler::initCommandMap(void) const
-{
-	static map<string, e_cmd_type>	commands;
-
-	if (!commands.empty()) //se il map e' gia' stato inizializzato
-		return commands;
-	commands["PRIVMSG"] = PRIVMSG;
-	commands["JOIN"] = JOIN;
-	commands["MODE"] = MODE;
-	commands["PASS"] = PASS;
-	commands["NICK"] = NICK;
-	commands["USER"] = USER;
-	commands["QUIT"] = QUIT;
-	return commands;
 }
 
 void	EventHandler::sendBufferedString(const Client &client, const string &string)
