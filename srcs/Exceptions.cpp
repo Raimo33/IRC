@@ -6,58 +6,63 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 21:40:19 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 17:41:08 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdint.h>
-#include <string>
+#include <map>
 #include <vector>
+#include <string>
 
 #include "irc/Exceptions.hpp"
+#include "irc/Constants.hpp"
+#include "irc/ReplyCodes.hpp"
 
 using namespace std;
-using namespace irc;
 
-SystemErrorException::SystemErrorException(const string &msg) : runtime_error(msg) {}
-
-const char *SystemErrorException::what(void) const throw()
+namespace irc
 {
-	return runtime_error::what();
-}
+	SystemErrorException::SystemErrorException(const string &msg) : runtime_error(msg) {}
 
-InternalErrorException::InternalErrorException(const string &msg) : runtime_error(msg) {}
+	const char *SystemErrorException::what(void) const throw()
+	{
+		return runtime_error::what();
+	}
 
-const char *InternalErrorException::what(void) const throw()
-{
-	return runtime_error::what();
-}
+	InternalErrorException::InternalErrorException(const string &msg) : runtime_error(msg) {}
 
-ProtocolErrorException::ProtocolErrorException(const uint16_t code, ...) :
-	_code(code)
-{
-	va_list args;
-	va_start(args, code);
-	const char *param;
+	const char *InternalErrorException::what(void) const throw()
+	{
+		return runtime_error::what();
+	}
 
-	while ((param = va_arg(args, const char *)))
-		_params.push_back(string(param));
-	va_end(args);
-}
+	ProtocolErrorException::ProtocolErrorException(const uint32_t code, ...)
+	{
+		string	param;
+		va_list	args;
 
-ProtocolErrorException::~ProtocolErrorException(void) throw() {}
+		va_start(args, code);
+		_content.prefix = SERVER_NAME;
+		_content.code = code;
+		param = string(va_arg(args, const char *));
+		while (!param.empty())
+		{
+			_content.params.push_back(param);
+			param = string(va_arg(args, const char *));
+		}
+		va_end(args);
 
-const char *ProtocolErrorException::what(void) const throw()
-{
-	return "";
-}
+		map<uint16_t, string>::const_iterator it = reply_codes.find(code);
+		if (it == reply_codes.end())
+			throw InternalErrorException("ProtocolErrorException::ProtocolErrorException: Unknown reply code");
+		_content.text = it->second;
+	}
 
-uint16_t ProtocolErrorException::getCode(void) const
-{
-	return _code;
-}
+	ProtocolErrorException::~ProtocolErrorException(void) throw() {}
 
-const vector<string> &ProtocolErrorException::getParams(void) const
-{
-	return _params;
+	const struct s_replyContent	&ProtocolErrorException::getContent(void) const
+	{
+		return _content;
+	}
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 13:57:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 18:44:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,25 +19,12 @@
 
 # include "utils.hpp"
 # include "Constants.hpp"
+# include "Content.hpp"
 
 namespace irc
 {
 	class Client;
 	class Server;
-
-	enum e_cmd_type
-	{
-		PASS,
-		NICK,
-		USER,
-		JOIN,
-		PRIVMSG,
-		QUIT,
-		KICK,
-		INVITE,
-		TOPIC,
-		MODE,
-	};
 
 	class EventHandler
 	{
@@ -54,16 +41,20 @@ namespace irc
 			void											setServer(Server *server);
 
 			void 											processInput(std::string raw_input);
-
-			static void										sendBufferedMessage(const Client &receiver, const struct s_messageBase &message);
+			
+			static void										sendBufferedContent(const Client &receiver, const struct s_contentBase *message);
 
 		private:
 
 			typedef void (EventHandler::*CommandHandler)(const std::vector<std::string>&);
 
+			static void										buildRawReplyMessage(const struct s_replyContent *reply, std::string *first, std::string *second);
+			static void										buildRawCommandMessage(const struct s_commandContent *command, std::string *first, std::string *second);
+
 			void											initHandlers(void);
 			const std::map<std::string, e_cmd_type>			initCommands(void);
-			s_message										parseInput(std::string &raw_input) const;
+			static std::map<uint16_t, std::string>			initCommandStrings(void);
+			struct s_commandContent							parseInput(std::string &raw_input) const;
 			void											handlePrivmsg(const std::vector<std::string> &params); //chiama sendMessage di User
 			void											handleJoin(const std::vector<std::string> &params);
 			void											handlePass(const std::vector<std::string> &params);
@@ -80,6 +71,7 @@ namespace irc
 			Client											*_client;
 			const std::map<std::string, e_cmd_type>			_commands;
 			CommandHandler									_handlers[N_COMMANDS]; //TODO fare const
+			static const std::map<uint16_t, std::string>	_command_strings;
 	};
 }
 	

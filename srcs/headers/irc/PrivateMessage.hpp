@@ -6,20 +6,20 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:03:42 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 13:16:26 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 15:29:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PRIVATEMESSAGE_HPP
 # define PRIVATEMESSAGE_HPP
 
-# include "IMessage.hpp"
+# include "AMessage.hpp"
 
 namespace irc
 {
 	class Client;
 
-	class PrivateMessage: public IMessage
+	class PrivateMessage: public AMessage
 	{
 		public:
 			explicit PrivateMessage(const std::string &text, const Client &sender, const Client &receiver);

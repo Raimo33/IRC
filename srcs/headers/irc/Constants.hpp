@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 03:05:20 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 13:19:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 16:12:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ namespace irc
     const uint16_t		BUFFER_SIZE = 1024;
     const uint8_t		MAX_SERVER_PASSWORD_LEN = 64;
     const uint8_t		N_MODES = 5;
-    const uint8_t		N_COMMANDS = 7;
+    const uint8_t		N_COMMANDS = 10;
 }
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:10:56 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 19:02:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,47 +14,91 @@
 #include "irc/Constants.hpp"
 
 using namespace std;
-using namespace irc;
 
-bool	is_channel_prefix(const char c)
+namespace irc
 {
-	return (c == '#' || c == '&'/* || c == '!' || c == '+' || c == '~' || c == '%' || c == '.'*/);
-}
-
-bool	is_valid_channel_name(const string &name)
-{
-	if (name.empty() || !is_channel_prefix(name[0]) || name.length() > MAX_CHANNEL_NAME_LEN)
-		return false;
-	return true;
-}
-
-bool	is_valid_nickname(const string &name)
-{
-	if (name.empty() || name.length() > MAX_NICKNAME_LEN)
-		return false;
-	if (!isalpha(name[0]))
-		return false;
-	for (size_t i = 1; i < name.length(); i++)
+	bool	is_channel_prefix(const char c)
 	{
-		char c = name[i];
-        if (!isalnum(c) && c != '-' && !((c >= 91 && c <= 96) || c == '{' || c == '}' || c == '|'))
-            return false;
+		return (c == '#' || c == '&'/* || c == '!' || c == '+' || c == '~' || c == '%' || c == '.'*/);
 	}
-	return true;
-}
 
-vector<string>	split(const string &s, char delim)
-{
-	vector<string>	result;
-	stringstream	ss(s);
-	string			item;
+	bool	is_valid_channel_name(const string &name)
+	{
+		if (name.empty() || !is_channel_prefix(name[0]) || name.length() > MAX_CHANNEL_NAME_LEN)
+			return false;
+		return true;
+	}
 
-	while (getline(ss, item, delim))
-		result.push_back(item);
-	return result;
-}
+	bool	is_valid_nickname(const string &name)
+	{
+		if (name.empty() || name.length() > MAX_NICKNAME_LEN)
+			return false;
+		if (!isalpha(name[0]))
+			return false;
+		for (size_t i = 1; i < name.length(); i++)
+		{
+			char c = name[i];
+			if (!isalnum(c) && c != '-' && !((c >= 91 && c <= 96) || c == '{' || c == '}' || c == '|'))
+				return false;
+		}
+		return true;
+	}
 
-size_t min(size_t a, size_t b)
-{
-	return (a < b ? a : b);
+	bool	has_crlf(const string &s)
+	{
+		uint32_t	len = s.length();
+
+		return (s[len - 2] == '\r' && s[len - 1] == '\n');
+	}
+
+	vector<string>	split(const string &s, char delim)
+	{
+		vector<string>	result;
+		stringstream	ss(s);
+		string			item;
+
+		while (getline(ss, item, delim))
+			result.push_back(item);
+		return result;
+	}
+
+	size_t min(size_t a, size_t b)
+	{
+		return (a < b ? a : b);
+	}
+
+
+	template <typename T>
+	string to_string(T value)
+	{
+		ostringstream oss;
+		oss << value;
+		return oss.str();
+	}
+
+	template <>
+    std::string to_string<unsigned short>(unsigned short value)
+	{
+        return irc::to_string(value);
+    }
+
+	template<typename T>
+	std::string join(const std::vector<T>& elements, const std::string& delimiter)
+	{
+		std::ostringstream oss;
+
+		for (typename std::vector<T>::const_iterator it = elements.begin(); it != elements.end(); ++it)
+		{
+			if (it != elements.begin())
+				oss << delimiter;
+			oss << *it;
+		}
+		return oss.str();
+	}
+
+	template <>
+	std::string join<std::string>(const std::vector<std::string>& elements, const std::string& delimiter)
+	{
+		return irc::join<std::string>(elements, delimiter);
+	}
 }

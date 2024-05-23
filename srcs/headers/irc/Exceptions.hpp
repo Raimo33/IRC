@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 14:02:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 16:21:08 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 # include <vector>
 # include <stdint.h>
 
+# include <irc/Content.hpp>
+
 namespace irc
 {
 	class SystemErrorException; //for system calls errors (unpredictable)
@@ -29,16 +31,14 @@ namespace irc
 
 class irc::ProtocolErrorException : public std::exception
 {
-	//TODO far costruire direttamente a lui la struct s_replyMessage
 	public:
-		explicit ProtocolErrorException(const uint16_t code, ...);
-		virtual const char* what(void) const throw();
+		explicit ProtocolErrorException(const uint32_t code, ...);
 		~ProtocolErrorException(void) throw();
 
-		struct s_replyMessage	&getContent(void) const;
-	private:
+		const struct s_replyContent	&getContent(void) const;
 
-		struct s_replyMessage	_content;
+	private:
+		struct s_replyContent	_content;
 };
 
 class irc::InternalErrorException : public std::runtime_error

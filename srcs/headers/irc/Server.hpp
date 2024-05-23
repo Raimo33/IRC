@@ -6,12 +6,11 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 13:56:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 15:38:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO logging di sistema su piu livelli. azioni degli utenti, errori di sistema, errori di protocollo
-//TODO anche i messaggi  replycodes standard utilizzano i parametri e non sono costanti
 //TODO implementare scambio di file (ERR_FILEERROR)
 
 #ifndef SERVER_HPP
@@ -40,26 +39,6 @@ namespace irc
 {
 	class Client;
 	class Channel;
-
-	//TODO valutare se spostare questa dichiarazione in un file a parte
-	struct s_messageBase
-	{
-		std::string					prefix;
-		std::vector<std::string>	parameters;
-		std::string					text;
-
-		virtual ~s_messageBase(void) = 0;
-	};
-
-	struct s_commandMessage : public s_messageBase //messaggio in arrivo (comando) oppure PRIVMSG in uscita
-	{
-		std::string	command;
-	};
-
-	struct s_replyMessage : public s_messageBase //messaggio di output (reply)
-	{
-		std::string	code;
-	};
 
 	class Server
 	{

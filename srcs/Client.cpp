@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 13:54:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 18:50:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,213 +21,236 @@
 #include "irc/ReplyCodes.hpp"
 
 using namespace std;
-using namespace irc;
 
-Client::Client(Server *server, const int socket, const string &ip_addr, const uint16_t port) :
-	_channels(),
-	_nickname(),
-	_username(),
-	_is_authenticated(false),
-	_port(port),
-	_ip_addr(ip_addr),
-	_socket(socket),
-	_server(server) {}
-
-Client::Client(const Client &copy) :
-	_channels(copy._channels),
-	_nickname(copy._nickname),
-	_username(copy._username),
-	_is_authenticated(copy._is_authenticated),
-	_port(copy._port),
-	_ip_addr(copy._ip_addr),
-	_socket(copy._socket),
-	_server(copy._server) {}
-
-Client::~Client(void) {}
-
-const map<string, const Channel *>	&Client::getChannels(void) const
+namespace irc
 {
-	return _channels;
-}
+	Client::Client(Server *server, const int socket, const string &ip_addr, const uint16_t port) :
+		_channels(),
+		_nickname(),
+		_username(),
+		_is_authenticated(false),
+		_port(port),
+		_ip_addr(ip_addr),
+		_socket(socket),
+		_server(server) {}
 
-void	Client::setChannels(const map<string, const Channel *> &channels)
-{
-	_channels = channels;
-}
+	Client::Client(const Client &copy) :
+		_channels(copy._channels),
+		_nickname(copy._nickname),
+		_username(copy._username),
+		_is_authenticated(copy._is_authenticated),
+		_port(copy._port),
+		_ip_addr(copy._ip_addr),
+		_socket(copy._socket),
+		_server(copy._server) {}
 
-const Channel	*Client::getChannel(const string &channel_name) const
-{
-	map<string, const Channel *>::const_iterator it = _channels.find(channel_name);
+	Client::~Client(void) {}
 
-	if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
-		throw ProtocolErrorException(ERR_NOTONCHANNEL, _nickname, channel_name);
-	return it->second;
-}
-
-void	Client::addChannel(const Channel &channel)
-{
-	if (_channels.size() >= MAX_CHANNELS_PER_USER)
-		throw ProtocolErrorException(ERR_TOOMANYCHANNELS, channel.getName());
-	_channels[channel.getName()] = &channel;
-}
-
-void	Client::removeChannel(const Channel &channel)
-{
-	const string &channel_name = channel.getName();
-	map<string, const Channel *>::iterator it = _channels.find(channel_name);
-
-	if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _nickname, channel_name);
-	_channels.erase(it);
-}
-
-const string	&Client::getNickname(void) const
-{
-	return _nickname;
-}
-
-void	Client::setNickname(const string &nickname)
-{
-	_nickname = nickname;
-}
-
-const string	&Client::getUsername(void) const
-{
-	return _username;
-}
-
-void	Client::setUsername(const string &username)
-{
-	_username = username;
-}
-
-bool	Client::getIsConnected(void) const
-{
-	return _is_connected;
-}
-
-void	Client::setIsConnected(bool is_connected)
-{
-	if (_is_connected == is_connected)
+	const map<string, const Channel *>	&Client::getChannels(void) const
 	{
-		if (is_connected)
-			throw InternalErrorException("Client is already connected");
-		else
-			throw InternalErrorException("Client is already disconnected");
+		return _channels;
 	}
-	_is_connected = is_connected;
-}
 
-bool	Client::getIsAuthenticated(void) const
-{
-	return _is_authenticated;
-}
-
-void	Client::setAuthenticated(bool is_authenticated)
-{
-	if (_is_authenticated == is_authenticated)
+	void	Client::setChannels(const map<string, const Channel *> &channels)
 	{
-		if (is_authenticated)
-			throw InternalErrorException("Client is already authenticated");
-		else
-			throw InternalErrorException("Client is already unauthenticated");
+		_channels = channels;
 	}
-	_is_authenticated = is_authenticated;
-	receiveNumericReply(RPL_WELCOME, vector<string>(1, _nickname), "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr);
-	receiveNumericReply(RPL_YOURHOST, vector<string>(1, _nickname), "Your host is " + string(SERVER_NAME) + ", running version " + string(SERVER_VERSION));
-}
 
-uint16_t	Client::getPort(void) const
-{
-	return _port;
-}
-
-const string	&Client::getIpAddr(void) const
-{
-	return _ip_addr;
-}
-
-int	Client::getSocket(void) const
-{
-	return _socket;
-}
-
-Server	*Client::getServer(void) const
-{
-	return _server;
-}
-
-void	Client::joinChannel(Channel &channel)
-{
-	try
+	const Channel	*Client::getChannel(const string &channel_name) const
 	{
-		channel.addMember(*this); //se fallisce addMember la lascio catchare a chi sta su
-		addChannel(channel);
+		map<string, const Channel *>::const_iterator it = _channels.find(channel_name);
+
+		if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
+			throw ProtocolErrorException(ERR_NOTONCHANNEL, _nickname.c_str(), channel_name.c_str());
+		return it->second;
 	}
-	catch (const ProtocolErrorException &e) //catcho il fallimento di addChannel
+
+	void	Client::addChannel(const Channel &channel)
 	{
-		//annullo il successo di addMember
-		if (e.getCode() == ERR_TOOMANYCHANNELS)
-			channel.removeMember(*this);
-		throw e;
+		if (_channels.size() >= MAX_CHANNELS_PER_USER)
+			throw ProtocolErrorException(ERR_TOOMANYCHANNELS, channel.getName().c_str());
+		_channels[channel.getName()] = &channel;
+	}
+
+	void	Client::removeChannel(const Channel &channel)
+	{
+		const string &channel_name = channel.getName();
+		map<string, const Channel *>::iterator it = _channels.find(channel_name);
+
+		if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
+			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _nickname.c_str(), channel_name.c_str());
+		_channels.erase(it);
+	}
+
+	const string	&Client::getNickname(void) const
+	{
+		return _nickname;
+	}
+
+	void	Client::setNickname(const string &nickname)
+	{
+		_nickname = nickname;
+	}
+
+	const string	&Client::getUsername(void) const
+	{
+		return _username;
+	}
+
+	void	Client::setUsername(const string &username)
+	{
+		_username = username;
+	}
+
+	bool	Client::getIsConnected(void) const
+	{
+		return _is_connected;
+	}
+
+	void	Client::setIsConnected(bool is_connected)
+	{
+		if (_is_connected == is_connected)
+		{
+			if (is_connected)
+				throw InternalErrorException("Client is already connected");
+			else
+				throw InternalErrorException("Client is already disconnected");
+		}
+		_is_connected = is_connected;
+	}
+
+	bool	Client::getIsAuthenticated(void) const
+	{
+		return _is_authenticated;
+	}
+
+	void	Client::setAuthenticated(bool is_authenticated)
+	{
+		if (_is_authenticated == is_authenticated)
+		{
+			if (is_authenticated)
+				throw InternalErrorException("Client is already authenticated");
+			else
+				throw InternalErrorException("Client is already unauthenticated");
+		}
+		_is_authenticated = is_authenticated;
+
+		struct s_replyContent welcome;
+		struct s_replyContent yourhost;
+
+		welcome.prefix = SERVER_NAME;
+		welcome.code = RPL_WELCOME;
+		welcome.params.push_back(_nickname);
+		welcome.text = "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr;
+
+		yourhost.prefix = SERVER_NAME;
+		yourhost.code = RPL_YOURHOST;
+		yourhost.params.push_back(_nickname);
+		yourhost.text = "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION;
+
+		EventHandler::sendBufferedContent(*this, &welcome);
+		EventHandler::sendBufferedContent(*this, &yourhost);
+	}
+
+	uint16_t	Client::getPort(void) const
+	{
+		return _port;
+	}
+
+	const string	&Client::getIpAddr(void) const
+	{
+		return _ip_addr;
+	}
+
+	int	Client::getSocket(void) const
+	{
+		return _socket;
+	}
+
+	Server	*Client::getServer(void) const
+	{
+		return _server;
+	}
+
+	void	Client::joinChannel(Channel &channel)
+	{
+		try
+		{
+			channel.addMember(*this); //se fallisce addMember la lascio catchare a chi sta su
+			addChannel(channel);
+		}
+		catch (const ProtocolErrorException &e) //catcho il fallimento di addChannel
+		{
+			//annullo il successo di addMember
+			if (e.getContent().code == ERR_TOOMANYCHANNELS)
+				channel.removeMember(*this);
+			throw e;
+		}
+	}
+
+	void	Client::joinChannel(Channel &channel, const string &key)
+	{
+		if (!_is_authenticated)
+			throw ProtocolErrorException(ERR_NOTREGISTERED);		
+		if (channel.getMode(MODE_K) && channel.getKey() != key)
+			throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName().c_str());
+		joinChannel(channel);
+
+		struct s_replyContent topic;
+		struct s_replyContent namreply;
+		struct s_replyContent endofnames;
+
+		topic.prefix = SERVER_NAME;
+		topic.code = RPL_TOPIC;
+		topic.params.push_back(_nickname);
+		topic.params.push_back(channel.getName());
+		topic.text = channel.getTopic();
+		//optional: RPL_TOPIC_WHO_TIME
+		namreply.prefix = SERVER_NAME;
+		namreply.code = RPL_NAMREPLY;
+		namreply.params.push_back(_nickname);
+		namreply.params.push_back("="); //TODO in futuro mettere channel.getType() al posto di "="
+		namreply.params.push_back(channel.getName());
+		namreply.text = channel.getMembersString();
+
+		endofnames.prefix = SERVER_NAME;
+		endofnames.code = RPL_ENDOFNAMES;
+		endofnames.params.push_back(_nickname);
+		endofnames.params.push_back(channel.getName());
+
+		EventHandler::sendBufferedContent(*this, &topic);
+		EventHandler::sendBufferedContent(*this, &namreply);
+		EventHandler::sendBufferedContent(*this, &endofnames);	
+	}
+
+	void	Client::leaveChannel(Channel &channel)
+	{
+		if (!_is_authenticated)
+			throw ProtocolErrorException(ERR_NOTREGISTERED);
+		channel.removeMember(*this);
+		removeChannel(channel);
+	}
+
+	void	Client::sendMessage(const Channel &channel, const Message &msg) const
+	{
+		const string &channel_name = channel.getName();
+		
+		if (_channels.find(channel_name) == _channels.end())
+			throw ProtocolErrorException(ERR_NOTONCHANNEL, _nickname.c_str(), channel_name.c_str());
+		channel.receiveMessage(msg);
+	}
+
+	void	Client::sendMessage(const Client &receiver, const PrivateMessage &msg) const
+	{
+		if (!receiver.getIsAuthenticated())
+			throw ProtocolErrorException(ERR_NOLOGIN, receiver.getNickname().c_str());
+
+		struct s_commandContent msg_content;
+
+		msg_content.prefix = ":" + _nickname;
+		msg_content.cmd = PRIVMSG;
+		msg_content.params.push_back(receiver.getNickname());
+		msg_content.text = msg.getText();
+		EventHandler::sendBufferedContent(receiver, &msg_content);
 	}
 }
-
-void	Client::joinChannel(Channel &channel, const string &key)
-{
-	if (!_is_authenticated)
-		throw ProtocolErrorException(ERR_NOTREGISTERED);		
-	if (channel.getMode(MODE_K) && channel.getKey() != key)
-		throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
-	joinChannel(channel);
-	receiveNumericReply(RPL_TOPIC, &vector<string>(1, channel.getName()), channel.getTopic());
-	//optional: RPL_TOPIC_WHO_TIME	
-	receiveNumericReply(RPL_NAMREPLY, &vector<string>(1, "= " + channel.getName()), channel.getMembersString()); //TODO in futuro mettere channel.getType() al posto di "="
-	receiveNumericReply(RPL_ENDOFNAMES, &vector<string>(1, channel.getName()));
-	
-}
-
-void	Client::leaveChannel(Channel &channel)
-{
-	if (!_is_authenticated)
-		throw ProtocolErrorException(ERR_NOTREGISTERED);
-	channel.removeMember(*this);
-	removeChannel(channel);
-}
-
-void	Client::sendMessage(const Channel &channel, const Message &msg) const
-{
-	const string &channel_name = channel.getName();
-	
-	if (_channels.find(channel_name) == _channels.end())
-		throw ProtocolErrorException(ERR_NOTONCHANNEL, _nickname, channel_name);
-	channel.receiveMessage(msg);
-}
-
-void	Client::sendMessage(const Client &receiver, const PrivateMessage &msg) const
-{
-	if (!receiver.getIsAuthenticated())
-		throw ProtocolErrorException(ERR_NOLOGIN, receiver.getNickname());
-	EventHandler::sendBufferedMessage(receiver, msg.getContent());
-}
-
-// void	Client::receiveNumericReply(uint16_t code, const vector<string> *params, const string &msg) const
-// {
-// 	struct s_message reply;
-
-// 	reply.prefix = ":" + string(SERVER_NAME);
-// 	reply.command = to_string(code);
-// 	reply.params.push_back(_nickname);
-// 	reply.params.push_back(to_string(code));
-// 	reply.params.insert(reply.params.end(), params->begin(), params->end());
-	
-// 	if (!msg.empty())
-// 		reply.params.push_back(msg);
-// 	else
-// 	{
-// 		if (reply_codes.find(code) == reply_codes.end())
-// 			InternalErrorException("Client::receiveNumericReply: unknown reply code");
-// 		reply.params.push_back(reply_codes.at(code));	
-// 	}
-// 	EventHandler::sendBufferedMessage(*this, reply);
-// }
