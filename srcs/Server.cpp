@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 18:50:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 19:14:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,8 +275,6 @@ namespace irc
 		}
 		catch (const exception &e)
 		{
-			//TODO send error message to client
-
 			//logger.log("Unknown error: " + string(e.what()));
 		}
 	}

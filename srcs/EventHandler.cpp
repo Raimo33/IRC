@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 19:10:09 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 19:13:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,7 +206,6 @@ namespace irc
 	//input: ":<prefix> <command> <params> <crlf>"
 	s_commandContent	EventHandler::parseInput(string &raw_input) const
 	{
-		//TODO rifare
 		s_commandContent	input;
 		string				command;
 		size_t				space_pos;
