@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 18:09:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 13:38:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,14 @@
 using namespace std;
 using namespace irc;
 
-IMessage::IMessage(const string &content, const Client &sender) :
-	_content(content),
+IMessage::IMessage(const string &text, const Client &sender) :
+	_content() //TODO formare il messaggio
+	_content({SERVER_NAME, })
 	_timestamp(time(NULL)),
 	_sender(&sender) {}
 
 IMessage::IMessage(const IMessage &copy) :
-	_content(copy._content),
+	_content(copy._content), //TODO formare il messaggio
 	_timestamp(copy._timestamp),
 	_sender(copy._sender) {}
 
@@ -32,7 +33,7 @@ const Client	&IMessage::getSender(void) const
 	return *_sender;
 }
 
-const string	&IMessage::getContent(void) const
+const struct s_message	&IMessage::getContent(void) const
 {
 	return _content;
 }

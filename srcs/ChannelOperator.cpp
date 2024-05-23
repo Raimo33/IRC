@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 20:33:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 12:26:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ ChannelOperator::ChannelOperator(const ChannelOperator &copy) : Client(copy) {}
 
 ChannelOperator::~ChannelOperator() {}
 
-void ChannelOperator::channelKick(const Client &user, Channel &channel) const
+void ChannelOperator::kick(const Client &user, Channel &channel) const
 {
 	map<string, Client *>			members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
@@ -35,7 +35,7 @@ void ChannelOperator::channelKick(const Client &user, Channel &channel) const
 	channel.removeMember(user);
 }
 
-void ChannelOperator::channelInvite(Client &user, Channel &channel) const
+void ChannelOperator::invite(Client &user, Channel &channel) const
 {
 	map<string, Client *>			members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
@@ -47,7 +47,7 @@ void ChannelOperator::channelInvite(Client &user, Channel &channel) const
 	channel.addPendingInvitation(&user);
 }
 
-void ChannelOperator::channelTopicSet(Channel &channel, const string &new_topic) const
+void ChannelOperator::topicSet(Channel &channel, const string &new_topic) const
 {
 	map<string, Client *>			members = channel.getMembers();
 	map<string, ChannelOperator *>	operators = channel.getOperators();
@@ -57,7 +57,7 @@ void ChannelOperator::channelTopicSet(Channel &channel, const string &new_topic)
 }
 
 //MODE #channel +n params
-void ChannelOperator::channelModeChange(Channel &channel, const t_channel_modes &mode, const bool status) const
+void ChannelOperator::modeChange(Channel &channel, const t_channel_modes &mode, const bool status) const
 {
 	//TODO implementare
 	(void)channel;

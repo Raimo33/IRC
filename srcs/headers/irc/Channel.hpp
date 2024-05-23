@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:09:27 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 12:52:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ namespace irc
 		MODE_L = 4
 	}	t_channel_modes;
 
-	class Channel
+	class Channel //TODO valutare se renderlo una interfaccia e renderlo la base di PublicChannel, PrivateChannel e SecretChannel
 	{
 		public:
 			explicit Channel(const std::string &name, ChannelOperator &op); //on creation there must be at least one operator
@@ -44,6 +44,7 @@ namespace irc
 			Channel(const Channel &copy);
 			~Channel(void);
 		
+			//TODO valutare quali metodi rendere private, non possono stare tutti public, e' una bad practice
 			const std::string								&getName(void) const;
 			void											setName(const std::string &new_name);
 			const std::string								&getKey(void) const;
@@ -55,7 +56,7 @@ namespace irc
 			const std::map<std::string, ChannelOperator *>	&getOperators(void) const;
 			void											setOperators(const std::map<std::string, ChannelOperator *> &new_operators);
 			const Client									&getOperator(const std::string &nickname) const;
-			Client											&addOperator(ChannelOperator *op);
+			void											addOperator(ChannelOperator *op);
 			void											removeOperator(const ChannelOperator &op);
 			const std::map<std::string, Client *>			&getMembers(void) const;
 			void											setMembers(const std::map<std::string, Client *> &new_members);
@@ -71,14 +72,14 @@ namespace irc
 			void											setModes(const bool new_modes[N_MODES]);
 			bool											getMode(const t_channel_modes &mode) const;
 			void											setMode(const t_channel_modes &mode, const bool value);
+			const std::string								&getMembersString(void) const;
+			void											setMembersString(const std::string new_members_string);
 
 			void											receiveMessage(const Message &msg) const;
 
 			friend class 									ChannelOperator;
 
-		private:
-			void											promoteOperator(const std::string &nickname);
-			void											demoteOperator(const std::string &nickname);
+		protected:
 
 			std::string										_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
 			std::string										_key; //la chiave del canale non viene hashata, si conserva quella raw
@@ -88,6 +89,7 @@ namespace irc
 			std::map<std::string, Client *>					_members; // {nickname, user}
 			std::map<std::string, Client *>					_pending_invitations; // {nickname, user} (il channel operator puo fare /invite)
 			bool											_modes[N_MODES];
+			std::string										_members_string;
 	};
 }
 

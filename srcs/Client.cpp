@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 20:50:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 13:54:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "irc/PrivateMessage.hpp"
 #include "irc/Server.hpp"
 #include "irc/utils.hpp"
-
+#include "irc/Constants.hpp"
 #include "irc/Exceptions.hpp"
 #include "irc/ReplyCodes.hpp"
 
@@ -133,6 +133,8 @@ void	Client::setAuthenticated(bool is_authenticated)
 			throw InternalErrorException("Client is already unauthenticated");
 	}
 	_is_authenticated = is_authenticated;
+	receiveNumericReply(RPL_WELCOME, vector<string>(1, _nickname), "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr);
+	receiveNumericReply(RPL_YOURHOST, vector<string>(1, _nickname), "Your host is " + string(SERVER_NAME) + ", running version " + string(SERVER_VERSION));
 }
 
 uint16_t	Client::getPort(void) const
@@ -157,11 +159,9 @@ Server	*Client::getServer(void) const
 
 void	Client::joinChannel(Channel &channel)
 {
-	if (!_is_authenticated)
-		throw ProtocolErrorException(ERR_NOTREGISTERED);
 	try
 	{
-		channel.addMember(*this);
+		channel.addMember(*this); //se fallisce addMember la lascio catchare a chi sta su
 		addChannel(channel);
 	}
 	catch (const ProtocolErrorException &e) //catcho il fallimento di addChannel
@@ -176,10 +176,15 @@ void	Client::joinChannel(Channel &channel)
 void	Client::joinChannel(Channel &channel, const string &key)
 {
 	if (!_is_authenticated)
-		throw ProtocolErrorException(ERR_NOTREGISTERED);
-	if (channel.getKey() != key)
+		throw ProtocolErrorException(ERR_NOTREGISTERED);		
+	if (channel.getMode(MODE_K) && channel.getKey() != key)
 		throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
 	joinChannel(channel);
+	receiveNumericReply(RPL_TOPIC, &vector<string>(1, channel.getName()), channel.getTopic());
+	//optional: RPL_TOPIC_WHO_TIME	
+	receiveNumericReply(RPL_NAMREPLY, &vector<string>(1, "= " + channel.getName()), channel.getMembersString()); //TODO in futuro mettere channel.getType() al posto di "="
+	receiveNumericReply(RPL_ENDOFNAMES, &vector<string>(1, channel.getName()));
+	
 }
 
 void	Client::leaveChannel(Channel &channel)
@@ -201,23 +206,28 @@ void	Client::sendMessage(const Channel &channel, const Message &msg) const
 
 void	Client::sendMessage(const Client &receiver, const PrivateMessage &msg) const
 {
-	EventHandler::sendBufferedString(receiver, msg.getContent());
+	if (!receiver.getIsAuthenticated())
+		throw ProtocolErrorException(ERR_NOLOGIN, receiver.getNickname());
+	EventHandler::sendBufferedMessage(receiver, msg.getContent());
 }
 
-void	Client::receiveNumericReply(uint16_t code, const vector<string> &params, const string &msg) const
-{
-	ostringstream oss;
+// void	Client::receiveNumericReply(uint16_t code, const vector<string> *params, const string &msg) const
+// {
+// 	struct s_message reply;
 
-	oss << ":" << SERVER_NAME << " " << code << " " << _nickname;
-	for (size_t i = 0; i < params.size(); i++)
-		oss << " " << params[i];
-	if (!msg.empty())
-		oss << " :" << msg;
-	else
-	{
-		if (reply_codes.find(code) == reply_codes.end())
-			InternalErrorException("Client::receiveNumericReply: unknown reply code");
-		oss << " :" << reply_codes.at(code);	
-	}
-	EventHandler::sendBufferedString(*this, oss.str());
-}
+// 	reply.prefix = ":" + string(SERVER_NAME);
+// 	reply.command = to_string(code);
+// 	reply.params.push_back(_nickname);
+// 	reply.params.push_back(to_string(code));
+// 	reply.params.insert(reply.params.end(), params->begin(), params->end());
+	
+// 	if (!msg.empty())
+// 		reply.params.push_back(msg);
+// 	else
+// 	{
+// 		if (reply_codes.find(code) == reply_codes.end())
+// 			InternalErrorException("Client::receiveNumericReply: unknown reply code");
+// 		reply.params.push_back(reply_codes.at(code));	
+// 	}
+// 	EventHandler::sendBufferedMessage(*this, reply);
+// }

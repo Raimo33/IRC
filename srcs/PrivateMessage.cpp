@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 15:06:36 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:41:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 13:16:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 using namespace std;
 using namespace irc;
 
-PrivateMessage::PrivateMessage(const string &content, const Client &sender, const Client &receiver) :
-	IMessage(content, sender),
+PrivateMessage::PrivateMessage(const string &text, const Client &sender, const Client &receiver) :
+	IMessage(text, sender),
 	_receiver(&receiver) {}
 
 PrivateMessage::PrivateMessage(const PrivateMessage &copy) :

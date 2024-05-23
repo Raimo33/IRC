@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 21:59:42 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 14:01:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ void	EventHandler::setServer(Server *server)
 //JOIN #channel1,#channel2,#channel3 key1,key2,key3
 void	EventHandler::processInput(string raw_input)
 {
-	s_input input = parseInput(raw_input);
+	s_message input = parseInput(raw_input);
 
     if (input.command < 0 || input.command >= N_COMMANDS)
         throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, input.command);
@@ -95,10 +95,14 @@ void	EventHandler::initHandlers(void)
 {
 	_handlers[PRIVMSG] = &EventHandler::handlePrivmsg;
 	_handlers[JOIN] = &EventHandler::handleJoin;
-	_handlers[MODE] = &EventHandler::handleMode;
 	_handlers[PASS] = &EventHandler::handlePass;
 	_handlers[NICK] = &EventHandler::handleNick;
 	_handlers[QUIT] = &EventHandler::handleQuit;
+
+	_handlers[KICK] = &EventHandler::handleKick;
+	_handlers[INVITE] = &EventHandler::handleInvite;
+	_handlers[TOPIC] = &EventHandler::handleTopic;
+	_handlers[MODE] = &EventHandler::handleMode;
 }
 
 const std::map<std::string, e_cmd_type>	EventHandler::initCommands(void)
@@ -115,17 +119,29 @@ const std::map<std::string, e_cmd_type>	EventHandler::initCommands(void)
 	commands["NICK"] = NICK;
 	commands["USER"] = USER;
 	commands["QUIT"] = QUIT;
+	// commands["TOPIC"] = TOPIC;
 
 	return commands;
 }
 
-//input: ":<prefix> <command> <params> <crlf>"
-s_input	EventHandler::parseInput(string &raw_input) const
+void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_messageBase &message)
 {
-	s_input	input;
+	string	full_msg;
+
+	if (!message.prefix.empty())
+		full_msg += ":" + message.prefix + " ";
+
+	//TODO tramite il dynamic cast capire il tipo di messaggio e costruire il messaggio accordingly
+	//TODO implementare (deve ripetere il prefix e i parametri ogni volta)
+}
+
+//input: ":<prefix> <command> <params> <crlf>"
+s_message	EventHandler::parseInput(string &raw_input) const
+{
+	s_message	input;
 	string	command;
 
-	raw_input = raw_input.substr(0, MAX_INPUT_LEN - 1); //limito la lunghezza dell'input (per evitare buffer overflow
+	raw_input = raw_input.substr(0, MAX_MSG_LENGTH - 1); //limito la lunghezza dell'input (per evitare buffer overflow
 
 	if (raw_input.size() >= 2 && raw_input.substr(raw_input.size() - 2) == "\r\n")
 		raw_input = raw_input.substr(0, raw_input.size() - 2);
@@ -164,8 +180,10 @@ void EventHandler::handlePrivmsg(const vector<string> &params)
 	checkConnection(_client);
 	checkAuthentication(_client);
 
+	if (params.size() < 1)
+		throw ProtocolErrorException(ERR_NORECIPIENT, "PRIVMSG"); //TODO aggiungere la reason (No recipient given (PRIVMSG))
 	if (params.size() < 2)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PRIVMSG"); //TODO aggiungere la reason (usage: PRIVMSG <receiver> <message>)
+		throw ProtocolErrorException(ERR_NOTEXTTOSEND);
 
 	if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 	{
@@ -202,17 +220,6 @@ void EventHandler::handlePrivmsg(const vector<string> &params)
 	}
 }
 
-void EventHandler::handleMode(const vector<string> &params)
-{
-	checkConnection(_client);
-	checkAuthentication(_client);
-
-	if (params.size() < 2)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE"); //TODO aggiungere la reason (usage: MODE <channel> <mode>)
-	//TODO implementare
-	(void)params;
-}
-
 //JOIN <channel1,channel2,channel3> <key1,key2,key3>
 void EventHandler::handleJoin(const vector<string> &params)
 {
@@ -244,6 +251,7 @@ void EventHandler::handleJoin(const vector<string> &params)
 					_server->addChannel(new Channel(channels[i], keys[i], op));
 				else
 					_server->addChannel(new Channel(channels[i], op));
+				_client->joinChannel(_server->getChannel(channels[i]));
 			}
 			else
 				throw e;
@@ -267,11 +275,26 @@ void EventHandler::handlePass(const vector<string> &params)
 void EventHandler::handleNick(const vector<string> &params)
 {
 	checkConnection(_client);
+	if (_client->getIsAuthenticated() || !_client->getNickname().empty())
+		throw ProtocolErrorException(ERR_ALREADYREGISTRED);
 	if (params.size() < 1)
 		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN);
 	checkNicknameValidity(params[0]);
 	_client->setNickname(params[0]);
 	if (!_client->getUsername().empty())
+		_client->setAuthenticated(true);
+}
+
+//TODO gestire <hostname> <servername> <realname>
+void EventHandler::handleUser(const vector<string> &params)
+{
+	checkConnection(_client);
+	if (_client->getIsAuthenticated() || !_client->getUsername().empty())
+		throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+	if (params.size() < 1)
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "USER"); //TODO aggiungere la reason (usage: USER <username> <hostname> <servername> <realname>)
+	_client->setUsername(params[0]);
+	if (!_client->getNickname().empty())
 		_client->setAuthenticated(true);
 }
 
@@ -281,27 +304,51 @@ void EventHandler::handleQuit(const vector<string> &params)
 	_server->removeClient(*_client);
 }
 
-void EventHandler::handleUser(const vector<string> &params)
+//per i comandi da operator, il checkPrivilege viene gia' fatto in ChannelOperator
+
+void EventHandler::handleKick(const vector<string> &params)
 {
 	checkConnection(_client);
-	_client->setUsername(params[0]);
-	if (!_client->getNickname().empty())
-		_client->setAuthenticated(true);
+	checkAuthentication(_client);
+
+	if (params.size() < 2)
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK"); //TODO aggiungere la reason (usage: KICK <channel> <nickname> <reason>
+
+	//TODO imlementare
 }
 
-void	EventHandler::sendBufferedString(const Client &client, const string &string)
+void EventHandler::handleInvite(const vector<string> &params)
 {
-	const char		*raw_msg = string.c_str();
-	int				socket = client.getSocket();
-	const size_t	total_len = strlen(raw_msg);
-	size_t			chars_sent = 0;
+	checkConnection(_client);
+	checkAuthentication(_client);
 
-	while (chars_sent < total_len)
-	{
-		size_t len = min(total_len - chars_sent, BUFFER_SIZE - 1);
-		send(socket, raw_msg + chars_sent, len, 0); //TODO gestire errori, provare a inviare di nuovo (mettere in un file di log)
-		chars_sent += len;
-	}
+	if (params.size() < 2)
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "INVITE"); //TODO aggiungere la reason (usage: INVITE <nickname> <channel>)
+	//TODO implementare
+}
+
+void EventHandler::handleTopic(const vector<string> &params)
+{
+	checkConnection(_client);
+	checkAuthentication(_client);
+
+	//TODO implementare
+	//(RPL_TOPIC)
+}
+
+void EventHandler::handleMode(const vector<string> &params)
+{
+	checkConnection(_client);
+	checkAuthentication(_client);
+
+	if (params.size() < 2)
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE"); //TODO aggiungere la reason (usage: MODE <channel> <mode>)
+	//TODO implementare
+	//(RPL_CHANNELMODEIS)
+	//(RPL_TOPIC_WHO_TIME)
+	//(RPL_TOPIC)
+	//(ERR_UNKNOWNMODE)
+	(void)params;
 }
 
 void	EventHandler::checkNicknameValidity(const string &nickname) const

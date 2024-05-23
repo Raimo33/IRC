@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:09:27 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 13:57:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,20 +27,16 @@ namespace irc
 
 	enum e_cmd_type
 	{
-		PASS = 0,
-		NICK = 1,
-		USER = 2,
-		JOIN = 3,
-		PRIVMSG = 4,
-		MODE = 5,
-		QUIT = 6
-	};
-
-	struct s_input
-	{
-		std::string					prefix;
-		e_cmd_type					command;
-		std::vector<std::string>	params;
+		PASS,
+		NICK,
+		USER,
+		JOIN,
+		PRIVMSG,
+		QUIT,
+		KICK,
+		INVITE,
+		TOPIC,
+		MODE,
 	};
 
 	class EventHandler
@@ -59,7 +55,7 @@ namespace irc
 
 			void 											processInput(std::string raw_input);
 
-			static void										sendBufferedString(const Client &receiver, const std::string &string);
+			static void										sendBufferedMessage(const Client &receiver, const struct s_messageBase &message);
 
 		private:
 
@@ -67,14 +63,17 @@ namespace irc
 
 			void											initHandlers(void);
 			const std::map<std::string, e_cmd_type>			initCommands(void);
-			s_input											parseInput(std::string &raw_input) const;
+			s_message										parseInput(std::string &raw_input) const;
 			void											handlePrivmsg(const std::vector<std::string> &params); //chiama sendMessage di User
-			void											handleMode(const std::vector<std::string> &params);
 			void											handleJoin(const std::vector<std::string> &params);
 			void											handlePass(const std::vector<std::string> &params);
 			void											handleNick(const std::vector<std::string> &params);
-			void											handleQuit(const std::vector<std::string> &params);
 			void											handleUser(const std::vector<std::string> &params);
+			void											handleQuit(const std::vector<std::string> &params);
+			void											handleKick(const std::vector<std::string> &params);
+			void											handleInvite(const std::vector<std::string> &params);
+			void											handleTopic(const std::vector<std::string> &params);
+			void											handleMode(const std::vector<std::string> &params);
 			void											checkNicknameValidity(const std::string &nickname) const;
 
 			Server											*_server;

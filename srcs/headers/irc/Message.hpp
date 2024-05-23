@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:57:26 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/21 19:42:42 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 13:15:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ namespace irc
 	{
 		public:
 			//un messaggio in un canale di 2 persone deve passare come private message
-			explicit Message(const std::string &content, const Client &sender, const Channel &channel);
+			explicit Message(const std::string &text, const Client &sender, const Channel &channel);
 			Message(const Message &copy);
 			~Message(void);
 

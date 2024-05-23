@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 22:00:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/23 14:02:54 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,7 +269,7 @@ void Server::handleClient(Client *client, size_t *i)
 	}
 	catch (const ProtocolErrorException &e)
 	{
-		client->receiveNumericReply(e.getCode(), e.getParams());
+		EventHandler::sendBufferedMessage(e.getContent());
 		//logger.log("Error: " + string(e.what()));
 	}
 	catch (const exception &e)
