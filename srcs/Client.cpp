@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:15:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:27:00 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ namespace irc
 		_channels(),
 		_nickname(),
 		_username(),
+		_realname(),
 		_is_authenticated(false),
 		_port(port),
 		_ip_addr(ip_addr),
@@ -39,6 +40,7 @@ namespace irc
 		_channels(copy._channels),
 		_nickname(copy._nickname),
 		_username(copy._username),
+		_realname(copy._realname),
 		_is_authenticated(copy._is_authenticated),
 		_port(copy._port),
 		_ip_addr(copy._ip_addr),
@@ -101,6 +103,16 @@ namespace irc
 	void	Client::setUsername(const string &username)
 	{
 		_username = username;
+	}
+
+	const string	&Client::getRealname(void) const
+	{
+		return _realname;
+	}
+
+	void	Client::setRealname(const string &realname)
+	{
+		_realname = realname;
 	}
 
 	bool	Client::getIsConnected(void) const

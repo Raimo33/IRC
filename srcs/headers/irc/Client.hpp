@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 15:30:50 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:29:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,8 @@ namespace irc
 			void											setNickname(const std::string &nickname);
 			const std::string								&getUsername(void) const;
 			void											setUsername(const std::string &username);
+			const std::string								&getRealname(void) const;
+			void											setRealname(const std::string &realname);
 			bool											getIsConnected(void) const;
 			void											setIsConnected(bool is_connected);
 			bool											getIsAuthenticated(void) const;
@@ -61,7 +63,7 @@ namespace irc
 			std::map<std::string, const Channel *>			_channels; // {channel_name, channel}
 			std::string										_nickname;
 			std::string										_username;
-			std::string										_realname;
+			std::string										_realname;  //usato solo da WHOIS e company
 			bool											_is_connected; // dopo che ha fatto il comando PASS
 			bool											_is_authenticated; //dopo che ha fatto il comando NICK e USER
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:01:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:29:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -412,7 +412,6 @@ namespace irc
 			_client->setAuthenticated(true);
 	}
 
-	//TODO gestire <hostname> <servername> <realname>
 	void EventHandler::handleUser(const vector<string> &params)
 	{
 		checkConnection(_client);
@@ -421,6 +420,9 @@ namespace irc
 		if (params.size() < 1)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: USER <username> <hostname> <servername> <realname>", ERR_NEEDMOREPARAMS, "USER"));
 		_client->setUsername(params[0]);
+		(void)params[1]; //params[1] = hostname
+		(void)params[2]; //params[2] = servername
+		_client->setRealname(params[3]);
 		if (!_client->getNickname().empty())
 			_client->setAuthenticated(true);
 	}
