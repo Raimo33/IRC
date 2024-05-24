@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:45:42 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 17:15:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,12 @@ namespace irc
 	{
 		if (name.empty() || name.length() > MAX_NICKNAME_LEN)
 			return false;
-		if (!isalpha(name[0]))
+		if (isalpha(name[0]) == false)
 			return false;
 		for (size_t i = 1; i < name.length(); i++)
 		{
 			char c = name[i];
-			if (!isalnum(c) && c != '-' && !((c >= 91 && c <= 96) || c == '{' || c == '}' || c == '|'))
+			if (isalnum(c) == false && c != '-' && !((c >= 91 && c <= 96) || c == '{' || c == '}' || c == '|'))
 				return false;
 		}
 		return true;

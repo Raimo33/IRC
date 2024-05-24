@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:29:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 17:13:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ namespace irc
 		content.prefix = string(SERVER_NAME);
 		content.code = code;
 		param = string(va_arg(args, const char *));
-		while (!param.empty())
+		while (param.empty() == false)
 		{
 			content.params.push_back(param);
 			param = string(va_arg(args, const char *));
@@ -134,7 +134,7 @@ namespace irc
 		content.prefix = prefix;
 		content.cmd = static_cast<e_cmd_type>(cmd);
 		param = string(va_arg(args, const char *));
-		while (!param.empty())
+		while (param.empty() == false)
 		{
 			content.params.push_back(param);
 			param = string(va_arg(args, const char *));
@@ -173,12 +173,12 @@ namespace irc
 			to_send = first_part + second_part.substr(0, send_length) + "\r\n";
 			second_part = second_part.substr(send_length); // Update second_part correctly
 			send_p(receiver.getSocket(), to_send.c_str(), to_send.length(), 0);
-		} while (!second_part.empty());
+		} while (second_part.empty() == false);
 	}
 
 	void	EventHandler::getRawReplyMessage(const Client &receiver, const struct s_replyContent *reply, string *first_part, string *second_part)
 	{
-		if (!reply->prefix.empty())
+		if (reply->prefix.empty() == false)
 			*first_part += ":" + reply->prefix + " ";
 		*first_part += irc::to_string(reply->code);
 		*first_part += " " + receiver.getNickname() + " ";
@@ -191,7 +191,7 @@ namespace irc
 
 	void	EventHandler::getRawCommandMessage(const struct s_commandContent *command, string *first_part, string *second_part)
 	{
-		if (!command->prefix.empty())
+		if (command->prefix.empty() == false)
 			*first_part += ":" + command->prefix + " ";
 		*first_part += _command_strings.at(command->cmd);
 		*first_part += " ";
@@ -217,7 +217,7 @@ namespace irc
 	{
 		static map<string, e_cmd_type>	commands;
 
-		if (!commands.empty()) //se il map e' gia' stato inizializzato
+		if (commands.empty() == false) //se il map e' gia' stato inizializzato
 			return commands;
 
 		commands["PASS"] = PASS;
@@ -402,20 +402,20 @@ namespace irc
 	void EventHandler::handleNick(const vector<string> &params)
 	{
 		checkConnection(_client);
-		if (_client->getIsAuthenticated() || !_client->getNickname().empty())
+		if (_client->getIsAuthenticated() || _client->getNickname().empty() == false)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_ALREADYREGISTRED));
 		if (params.size() < 1)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NONICKNAMEGIVEN));
 		checkNicknameValidity(params[0]);
 		_client->setNickname(params[0]);
-		if (!_client->getUsername().empty())
+		if (_client->getUsername().empty() == false)
 			_client->setAuthenticated(true);
 	}
 
 	void EventHandler::handleUser(const vector<string> &params)
 	{
 		checkConnection(_client);
-		if (_client->getIsAuthenticated() || !_client->getUsername().empty())
+		if (_client->getIsAuthenticated() || _client->getUsername().empty() == false)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_ALREADYREGISTRED));
 		if (params.size() < 1)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: USER <username> <hostname> <servername> <realname>", ERR_NEEDMOREPARAMS, "USER"));
@@ -423,7 +423,7 @@ namespace irc
 		(void)params[1]; //params[1] = hostname
 		(void)params[2]; //params[2] = servername
 		_client->setRealname(params[3]);
-		if (!_client->getNickname().empty())
+		if (_client->getNickname().empty() == false)
 			_client->setAuthenticated(true);
 	}
 
@@ -509,7 +509,7 @@ namespace irc
 
 	void	EventHandler::checkNicknameValidity(const string &nickname) const
 	{
-		if (!is_valid_nickname(nickname))
+		if (is_valid_nickname(nickname) == false)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(MAX_NICKNAME_LEN), ERR_ERRONEOUSNICKNAME, nickname.c_str()));
 		if (_server->isClientConnected(nickname))
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NICKNAMEINUSE, nickname.c_str()));
@@ -520,12 +520,12 @@ namespace irc
 
 static void checkConnection(const Client *client)
 {
-	if (!client->getIsConnected())
+	if (client->getIsConnected() == false)
 		throw ProtocolErrorException(EventHandler::buildReplyContent("you are not connected, use PASS <password> first", ERR_NOTREGISTERED));
 }
 
 static void checkAuthentication(const Client *client)
 {
-	if (!client->getIsAuthenticated())
+	if (client->getIsAuthenticated() == false)
 		throw ProtocolErrorException(EventHandler::buildReplyContent("you are not registered, use NICK <nickname> and USER <username> first", ERR_NOTREGISTERED));
 }

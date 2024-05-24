@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:27:00 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 17:10:59 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,7 @@ namespace irc
 
 	void	Client::joinChannel(Channel &channel, const string &key)
 	{
-		if (!_is_authenticated)
+		if (_is_authenticated == false)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTREGISTERED));		
 		if (channel.getMode(MODE_K) && channel.getKey() != key)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_BADCHANNELKEY, channel.getName().c_str()));
@@ -209,7 +209,7 @@ namespace irc
 
 	void	Client::leaveChannel(Channel &channel)
 	{
-		if (!_is_authenticated)
+		if (_is_authenticated == false)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTREGISTERED));
 		channel.removeMember(*this);
 		removeChannel(channel);
@@ -226,7 +226,7 @@ namespace irc
 
 	void	Client::sendMessage(const Client &receiver, const PrivateMessage &msg) const
 	{
-		if (!receiver.getIsAuthenticated())
+		if (receiver.getIsAuthenticated() == false)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOLOGIN, receiver.getNickname().c_str()));
 
 		const struct s_commandContent msg_content = EventHandler::buildCommandContent(_nickname, msg.getText(), PRIVMSG, receiver.getNickname().c_str());

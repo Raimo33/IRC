@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 15:51:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 17:14:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ namespace irc
 
 	void Server::removeClient(const Client &client)
 	{
-		if (!_clients.at(client.getNickname()))
+		if (_clients.find(client.getNickname()) == _clients.end())
 			throw InternalErrorException("Server::removeClient: Client not found");
 		_clients.erase(client.getNickname());
 	}
