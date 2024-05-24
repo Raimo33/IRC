@@ -6,14 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:21:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:51:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO classe logger di sistema su piu livelli. azioni degli utenti, errori di sistema, errori di protocollo
 //TODO implementare scambio di file (ERR_FILEERROR)
+//TODO mettere false al posto di !
 
-//TODO valutare se rimuovere la classe ChannelOperator e utilizzare semplicemente una mappa in channel con i nickname degli operatori
 
 #ifndef SERVER_HPP
 # define SERVER_HPP

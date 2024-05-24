@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 15:51:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 17:08:45 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,10 @@ namespace irc
 			uint32_t										getMemberLimit(void) const;
 			void											setMemberLimit(const uint32_t new_limit);
 			const std::map<std::string, ChannelOperator *>	&getOperators(void) const;
-			void											setOperators(const std::map<std::string, ChannelOperator *> &new_operators);
-			const Client									&getOperator(const std::string &nickname) const;
-			void											addOperator(ChannelOperator *op);
-			void											removeOperator(const ChannelOperator &op);
+			// void											setOperators(const std::map<std::string, ChannelOperator *> &new_operators);
+			// const Client									&getOperator(const std::string &nickname) const;
+			void											addOperator(ChannelOperator &op);
+			void											removeOperator(ChannelOperator &op);
 			const std::map<std::string, Client *>			&getMembers(void) const;
 			void											setMembers(const std::map<std::string, Client *> &new_members);
 			const Client									&getMember(const std::string &nickname) const;
@@ -76,6 +76,8 @@ namespace irc
 			void											setMembersString(const std::string new_members_string);
 
 			void											receiveMessage(const Message &msg) const;
+			bool											isOperator(const std::string &nickname) const;
+			bool											isOperator(const Client *user) const;
 
 			friend class 									ChannelOperator;
 
@@ -85,13 +87,10 @@ namespace irc
 			std::string										_key; //la chiave del canale non viene hashata, si conserva quella raw
 			std::string										_topic;
 			uint32_t										_member_limit;
-			std::map<std::string, ChannelOperator *>		_operators; // {nickname, operator}
 			std::map<std::string, Client *>					_members; // {nickname, user} //TODO mettere al @ se e' operator
 			std::map<std::string, Client *>					_pending_invitations; // {nickname, user} (il channel operator puo fare /invite)
 			bool											_modes[N_MODES];
 			std::string										_members_string;
-
-		private:
 			
 			void											checkName(const std::string &name) const;
 			void											checkKey(const std::string &key) const;

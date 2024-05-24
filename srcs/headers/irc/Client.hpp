@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:29:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:41:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ namespace irc
 		public:
 			explicit Client(Server *server, const int socket, const std::string &ip_addr, const uint16_t port);
 			Client(const Client &copy);
-			~Client(void);
+			virtual ~Client(void);
 
 			const std::map<std::string, const Channel *>	&getChannels(void) const;
 			void											setChannels(const std::map<std::string, const Channel *> &channels);

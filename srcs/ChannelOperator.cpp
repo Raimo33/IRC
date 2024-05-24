@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:12:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:50:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,12 +75,7 @@ namespace irc
 
 	void ChannelOperator::checkPrivilege(const Channel &channel) const
 	{
-		map<string, Client *>			members = channel.getMembers();
-		map<string, ChannelOperator *>	operators = channel.getOperators();
-
-		if (members.find(_username) == members.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTONCHANNEL, channel.getName().c_str()));
-		if (operators.find(_username) == operators.end())
+		if (channel.isOperator(this) == false)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_CHANOPRIVSNEEDED, channel.getName().c_str()));
 	}
 }
