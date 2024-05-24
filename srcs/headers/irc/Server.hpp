@@ -6,14 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 13:05:50 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:31:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO logging di sistema su piu livelli. azioni degli utenti, errori di sistema, errori di protocollo
 //TODO implementare scambio di file (ERR_FILEERROR)
 //TODO aggiungere parametro client ad ogni ProtocolErrorException
-//TODO chiamare EventHandler::buildReplyContent() in tutti i metodi che chiamano sendBufferedContent() e ProtocolErrorExcpetion
 
 #ifndef SERVER_HPP
 # define SERVER_HPP

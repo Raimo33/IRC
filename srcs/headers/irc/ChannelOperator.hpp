@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 11:50:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:02:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ namespace irc
 			ChannelOperator(const ChannelOperator &copy);
 			~ChannelOperator(void);
 
-			void	kick(const Client &user, Channel &channel) const; //chiama removeMember di Channel
+			void	kick(Client &user, Channel &channel, const std::string &reason = "") const; //chiama removeMember di Channel e removeChannel di Client
 			void	invite(Client &user, Channel &channel) const; //chiama addInvite di Channel
 			void	topicSet(Channel &channel, const std::string &new_topic) const; // chiama setTopic di Channel
 			void	modeChange(Channel &channel, const t_channel_modes &mode, const bool status) const; // chiama setMode di Channel

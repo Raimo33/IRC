@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 13:11:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:31:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,19 +30,20 @@ namespace irc
 	{
 		public:
 			EventHandler(void);
-			EventHandler(Server *server);
+			EventHandler(Server &server);
 			EventHandler(const EventHandler &copy);
 			~EventHandler(void);
 
 			const std::map<std::string, e_cmd_type>			&getCommands(void) const;
-			const Client									*getClient(void) const;
-			void											setClient(Client *client);
-			const Server									*getServer(void) const;
-			void											setServer(Server *server);
+			const Client									&getClient(void) const;
+			void											setClient(Client &client);
+			const Server									&getServer(void) const;
+			void											setServer(Server &server);
 
 			void 											processInput(std::string raw_input);
 
 			static const struct s_replyContent				buildReplyContent(const std::string &custom_msg, const uint32_t code, ...);
+			static const struct s_commandContent			buildCommandContent(const std::string &prefix, const std::string &custom_msg, const uint32_t cmd, ...);
 			static void										sendBufferedContent(const Client &receiver, const struct s_contentBase *message);
 
 		private:

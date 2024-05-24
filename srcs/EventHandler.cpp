@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 13:20:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:52:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,8 @@ namespace irc
 		initHandlers();
 	}
 
-	EventHandler::EventHandler(Server *server) :
-		_server(server),
+	EventHandler::EventHandler(Server &server) :
+		_server(&server),
 		_client(NULL),
 		_commands(initCommands())
 	{
@@ -64,24 +64,24 @@ namespace irc
 		return _commands;
 	}
 
-	const Client	*EventHandler::getClient(void) const
+	const Client	&EventHandler::getClient(void) const
 	{
-		return _client;
+		return *_client;
 	}
 
-	void	EventHandler::setClient(Client *client)
+	void	EventHandler::setClient(Client &client)
 	{
-		_client = client;
+		_client = &client;
 	}
 
-	const Server	*EventHandler::getServer(void) const
+	const Server	&EventHandler::getServer(void) const
 	{
-		return _server;
+		return *_server;
 	}
 
-	void	EventHandler::setServer(Server *server)
+	void	EventHandler::setServer(Server &server)
 	{
-		_server = server;
+		_server = &server;
 	}
 
 	//JOIN #channel1,#channel2,#channel3 key1,key2,key3
@@ -121,6 +121,28 @@ namespace irc
 		}
 		else
 			content.text = custom_msg;
+		return content;
+	}
+
+	//TODO utilizzare buildCommandContent in parseInput
+	const struct s_commandContent	EventHandler::buildCommandContent(const string &prefix, const string &custom_msg, const uint32_t cmd, ...)
+	{
+		struct s_commandContent	content;
+		string					param;
+		va_list					args;
+
+		va_start(args, cmd);
+		content.prefix = prefix;
+		content.cmd = static_cast<e_cmd_type>(cmd);
+		param = string(va_arg(args, const char *));
+		while (!param.empty())
+		{
+			content.params.push_back(param);
+			param = string(va_arg(args, const char *));
+		}
+		va_end(args);
+
+		content.text = custom_msg;
 		return content;
 	}
 
@@ -410,17 +432,21 @@ namespace irc
 		_server->removeClient(*_client);
 	}
 
-	//per i comandi da operator, il checkPrivilege viene gia' fatto in ChannelOperator
-
 	void EventHandler::handleKick(const vector<string> &params)
 	{
 		checkConnection(_client);
 		checkAuthentication(_client);
-
 		if (params.size() < 2)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: KICK <channel> <nickname> <reason>", ERR_NEEDMOREPARAMS, "KICK"));
 
-		//TODO imlementare
+		Channel			channel = _server->getChannel(params[0]);
+		Client			target = _server->getClient(params[1]);
+		ChannelOperator	op(*_client);
+
+		if (params.size() < 3)
+			op.kick(target, channel);
+		else
+			op.kick(target, channel, params[2]);
 	}
 
 	void EventHandler::handleInvite(const vector<string> &params)
@@ -430,7 +456,12 @@ namespace irc
 
 		if (params.size() < 2)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: INVITE <nickname> <channel>", ERR_NEEDMOREPARAMS, "INVITE"));
-		//TODO implementare
+
+		Client			target = _server->getClient(params[0]);
+		Channel			channel = _server->getChannel(params[1]);
+		ChannelOperator	op(*_client);
+
+		op.invite(target, channel);
 	}
 
 	void EventHandler::handleTopic(const vector<string> &params)
@@ -438,9 +469,26 @@ namespace irc
 		checkConnection(_client);
 		checkAuthentication(_client);
 
-		(void)params;	
-		//TODO implementare
-		//(RPL_TOPIC)
+		const size_t	n_params = params.size();
+
+		if (n_params < 1)
+			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: TOPIC <channel> [<topic>]", ERR_NEEDMOREPARAMS, "TOPIC"));
+		Channel channel = _client->getChannel(params[0]);
+		if (n_params == 1)
+		{
+			const struct s_replyContent topic = EventHandler::buildReplyContent(channel.getTopic(), RPL_TOPIC, _client->getNickname().c_str(), channel.getName().c_str());
+			EventHandler::sendBufferedContent(*_client, &topic);
+		}
+		else
+		{
+			if (channel.getMode(MODE_T))
+			{
+				ChannelOperator op(*_client);
+				op.topicSet(channel, params[1]);
+			}
+			else
+				channel.setTopic(params[1], *_client);
+		}
 	}
 
 	void EventHandler::handleMode(const vector<string> &params)

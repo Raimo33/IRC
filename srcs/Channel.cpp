@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 13:14:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:50:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,8 +92,12 @@ namespace irc
 		return _topic;
 	}
 
-	void Channel::setTopic(const string &new_topic)
+	void Channel::setTopic(const string &new_topic, const Client &setter)
 	{
+		const string &nickname = setter.getNickname();
+
+		if (_modes[MODE_T] && _operators.find(nickname) == _operators.end())
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_CHANOPRIVSNEEDED, nickname.c_str(), _name.c_str()));
 		if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
 			throw ProtocolErrorException(EventHandler::buildReplyContent(new_topic + " is too long", RPL_NOTOPIC, _name.c_str()));
 		_topic = new_topic;
@@ -221,14 +225,7 @@ namespace irc
 			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " is already invited to " + _name, ERR_USERONCHANNEL, nickname.c_str(), _name.c_str()));
 		_pending_invitations[nickname] = user;
 
-		struct s_replyContent inviting;
-
-		inviting.prefix = string(SERVER_NAME);
-		inviting.code = RPL_INVITING;
-		inviting.params.push_back(_name);
-		inviting.params.push_back(nickname);
-		inviting.text = "You have been invited to " + _name;
-
+		const struct s_replyContent inviting = EventHandler::buildReplyContent("You have been invited to " + _name, RPL_INVITING, _name.c_str(), nickname.c_str());
 		EventHandler::sendBufferedContent(*user, &inviting);
 	}
 
@@ -277,12 +274,7 @@ namespace irc
 
 		for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
 		{
-			struct s_commandContent msg_content;
-
-			msg_content.prefix = ":" + msg.getSender().getNickname();
-			msg_content.cmd = PRIVMSG;
-			msg_content.params.push_back(_name);
-			msg_content.text = msg.getText();
+			const struct s_commandContent msg_content = EventHandler::buildCommandContent(msg.getSender().getNickname(), msg.getText(), PRIVMSG, _name.c_str());
 			EventHandler::sendBufferedContent(*(receiver->second), &msg_content);
 		}
 	}

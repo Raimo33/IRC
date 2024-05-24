@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 13:18:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:30:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,13 +57,13 @@ namespace irc
 		_channels = channels;
 	}
 
-	const Channel	*Client::getChannel(const string &channel_name) const
+	const Channel	&Client::getChannel(const string &channel_name) const
 	{
 		map<string, const Channel *>::const_iterator it = _channels.find(channel_name);
 
 		if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTONCHANNEL, _nickname.c_str(), channel_name.c_str()));
-		return it->second;
+		return *it->second;
 	}
 
 	void	Client::addChannel(const Channel &channel)
@@ -136,19 +136,8 @@ namespace irc
 		}
 		_is_authenticated = is_authenticated;
 
-		struct s_replyContent welcome;
-		struct s_replyContent yourhost;
-
-		welcome.prefix = SERVER_NAME;
-		welcome.code = RPL_WELCOME;
-		welcome.params.push_back(_nickname);
-		welcome.text = "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr;
-
-		yourhost.prefix = SERVER_NAME;
-		yourhost.code = RPL_YOURHOST;
-		yourhost.params.push_back(_nickname);
-		yourhost.text = "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION;
-
+		const struct s_replyContent welcome = EventHandler::buildReplyContent(("Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr).c_str(), RPL_WELCOME, _nickname.c_str());
+		const struct s_replyContent yourhost = EventHandler::buildReplyContent("Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION, RPL_YOURHOST, _nickname.c_str());
 		EventHandler::sendBufferedContent(*this, &welcome);
 		EventHandler::sendBufferedContent(*this, &yourhost);
 	}
@@ -168,9 +157,9 @@ namespace irc
 		return _socket;
 	}
 
-	Server	*Client::getServer(void) const
+	Server	&Client::getServer(void) const
 	{
-		return _server;
+		return *_server;
 	}
 
 	void	Client::joinChannel(Channel &channel)
@@ -197,28 +186,10 @@ namespace irc
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_BADCHANNELKEY, channel.getName().c_str()));
 		joinChannel(channel);
 
-		struct s_replyContent topic;
-		struct s_replyContent namreply;
-		struct s_replyContent endofnames;
-
-		topic.prefix = SERVER_NAME;
-		topic.code = RPL_TOPIC;
-		topic.params.push_back(_nickname);
-		topic.params.push_back(channel.getName());
-		topic.text = channel.getTopic();
-		//optional: RPL_TOPIC_WHO_TIME
-		namreply.prefix = SERVER_NAME;
-		namreply.code = RPL_NAMREPLY;
-		namreply.params.push_back(_nickname);
-		namreply.params.push_back("="); //TODO in futuro mettere channel.getType() al posto di "="
-		namreply.params.push_back(channel.getName());
-		namreply.text = channel.getMembersString();
-
-		endofnames.prefix = SERVER_NAME;
-		endofnames.code = RPL_ENDOFNAMES;
-		endofnames.params.push_back(_nickname);
-		endofnames.params.push_back(channel.getName());
-
+		const struct s_replyContent topic = EventHandler::buildReplyContent(channel.getTopic(), RPL_TOPIC, _nickname.c_str(), channel.getName().c_str());
+		const struct s_replyContent namreply = EventHandler::buildReplyContent(channel.getMembersString(), RPL_NAMREPLY, _nickname.c_str(), "=", channel.getName().c_str());
+		const struct s_replyContent endofnames = EventHandler::buildReplyContent("", RPL_ENDOFNAMES, _nickname.c_str(), channel.getName().c_str());
+		//TODO in futuro mettere channel.getType() al posto di "="
 		EventHandler::sendBufferedContent(*this, &topic);
 		EventHandler::sendBufferedContent(*this, &namreply);
 		EventHandler::sendBufferedContent(*this, &endofnames);	
@@ -246,12 +217,7 @@ namespace irc
 		if (!receiver.getIsAuthenticated())
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOLOGIN, receiver.getNickname().c_str()));
 
-		struct s_commandContent msg_content;
-
-		msg_content.prefix = ":" + _nickname;
-		msg_content.cmd = PRIVMSG;
-		msg_content.params.push_back(receiver.getNickname());
-		msg_content.text = msg.getText();
+		const struct s_commandContent msg_content = EventHandler::buildCommandContent(_nickname, msg.getText(), PRIVMSG, receiver.getNickname().c_str());
 		EventHandler::sendBufferedContent(receiver, &msg_content);
 	}
 }

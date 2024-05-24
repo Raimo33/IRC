@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:47:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:30:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ namespace irc
 
 			const std::map<std::string, const Channel *>	&getChannels(void) const;
 			void											setChannels(const std::map<std::string, const Channel *> &channels);
-			const Channel									*getChannel(const std::string &channel_name) const;
+			const Channel									&getChannel(const std::string &channel_name) const;
 			void											addChannel(const Channel &channel);
 			void											removeChannel(const Channel &channel);
 			const std::string								&getNickname(void) const;
@@ -48,7 +48,7 @@ namespace irc
 			uint16_t										getPort(void) const;
 			const std::string								&getIpAddr(void) const;
 			int												getSocket(void) const;
-			Server											*getServer(void) const;
+			Server											&getServer(void) const;
 
 			void											joinChannel(Channel &channel);
 			void											joinChannel(Channel &channel, const std::string &key);

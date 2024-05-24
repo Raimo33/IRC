@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 15:06:36 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:00:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:32:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ namespace irc
 
 	PrivateMessage::~PrivateMessage(void) {}
 
-	const Client *PrivateMessage::getReceiver(void) const
+	const Client &PrivateMessage::getReceiver(void) const
 	{
-		return _receiver;
+		return *_receiver;
 	}
 }

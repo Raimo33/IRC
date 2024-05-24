@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:47:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:51:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ namespace irc
 			const std::string								&getKey(void) const;
 			void											setKey(const std::string &new_key);
 			const std::string								&getTopic(void) const;
-			void											setTopic(const std::string &new_topic);
+			void											setTopic(const std::string &new_topic, const Client &setter);
 			uint32_t										getMemberLimit(void) const;
 			void											setMemberLimit(const uint32_t new_limit);
 			const std::map<std::string, ChannelOperator *>	&getOperators(void) const;

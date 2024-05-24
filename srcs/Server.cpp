@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 13:20:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:51:40 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ namespace irc
 		_port(port_no),
 		_pwd_hash(Hasher::hash(password)),
 		_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
-		_handler(EventHandler(this))
+		_handler(EventHandler(*this))
 	{
 		struct sockaddr_in server_addr;
 		pollfd server_poll_fd;
@@ -255,7 +255,7 @@ namespace irc
 			if (bytes_read > 0)
 			{
 				buffer[bytes_read - 1] = '\0';
-				_handler.setClient(client);
+				_handler.setClient(*client);
 				_handler.processInput(buffer); // se tutto va bene esegue il comando
 			}
 			else if (bytes_read <= 0)
