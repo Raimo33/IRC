@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:13:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 17:59:14 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,26 +36,20 @@ namespace irc
 	EventHandler::EventHandler(void) :
 		_server(NULL),
 		_client(NULL),
-		_commands(initCommands())
-	{
-		initHandlers();
-	}
+		_commands(initCommands()),
+		_handlers(initHandlers()) {}
 
 	EventHandler::EventHandler(Server &server) :
 		_server(&server),
 		_client(NULL),
-		_commands(initCommands())
-	{
-		initHandlers();
-	}
+		_commands(initCommands()),
+		_handlers(initHandlers()) {}
 
 	EventHandler::EventHandler(const EventHandler &copy) :
 		_server(copy._server),
 		_client(copy._client),
-		_commands(copy._commands)
-	{
-		initHandlers();
-	}
+		_commands(copy._commands),
+		_handlers(copy._handlers) {}
 		
 	EventHandler::~EventHandler(void) {}
 
@@ -199,20 +193,6 @@ namespace irc
 		*second_part += " :" + command->text;
 	}
 
-	void	EventHandler::initHandlers(void)
-	{
-		_handlers[PRIVMSG] = &EventHandler::handlePrivmsg;
-		_handlers[JOIN] = &EventHandler::handleJoin;
-		_handlers[PASS] = &EventHandler::handlePass;
-		_handlers[NICK] = &EventHandler::handleNick;
-		_handlers[QUIT] = &EventHandler::handleQuit;
-
-		_handlers[KICK] = &EventHandler::handleKick;
-		_handlers[INVITE] = &EventHandler::handleInvite;
-		_handlers[TOPIC] = &EventHandler::handleTopic;
-		_handlers[MODE] = &EventHandler::handleMode;
-	}
-
 	const std::map<std::string, e_cmd_type>	EventHandler::initCommands(void)
 	{
 		static map<string, e_cmd_type>	commands;
@@ -233,6 +213,24 @@ namespace irc
 		commands["MODE"] = MODE;
 
 		return commands;
+	}
+
+	const vector<EventHandler::CommandHandler>	EventHandler::initHandlers(void)
+	{
+		vector<CommandHandler>	handlers(N_COMMANDS);
+
+		handlers[PRIVMSG] = &EventHandler::handlePrivmsg;
+		handlers[JOIN] = &EventHandler::handleJoin;
+		handlers[PASS] = &EventHandler::handlePass;
+		handlers[NICK] = &EventHandler::handleNick;
+		handlers[QUIT] = &EventHandler::handleQuit;
+
+		handlers[KICK] = &EventHandler::handleKick;
+		handlers[INVITE] = &EventHandler::handleInvite;
+		handlers[TOPIC] = &EventHandler::handleTopic;
+		handlers[MODE] = &EventHandler::handleMode;
+		
+		return handlers;
 	}
 
 	std::map<uint16_t, std::string> EventHandler::initCommandStrings(void)

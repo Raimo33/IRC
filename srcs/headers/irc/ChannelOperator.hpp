@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:01:25 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:50:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 17:52:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,8 @@ namespace irc
 			void	invite(Client &user, Channel &channel) const; //chiama addInvite di Channel
 			void	topicSet(Channel &channel, const std::string &new_topic) const; // chiama setTopic di Channel
 			void	modeChange(Channel &channel, const t_channel_modes &mode, const bool status) const; // chiama setMode di Channel
-			void	promoteOperator(Channel &channel, const Client &user) const; // chiama addOperator di Channel //TODO d
-			void	demoteOperator(Channel &channel, ChannelOperator &op) const; // chiama removeOperator di Channel //TODO d
+			void	promoteOperator(Channel &channel, const Client &user) const; // chiama addOperator di Channel
+			void	demoteOperator(Channel &channel, ChannelOperator &op) const; // chiama removeOperator di Channel
 
 		private:
 			void	checkPrivilege(const Channel &channel) const;

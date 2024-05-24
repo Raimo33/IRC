@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:01:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 17:58:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,8 @@ namespace irc
 			static void										getRawReplyMessage(const Client &receiver, const struct s_replyContent *reply, std::string *first, std::string *second);
 			static void										getRawCommandMessage(const struct s_commandContent *command, std::string *first, std::string *second);
 
-			void											initHandlers(void);
 			const std::map<std::string, e_cmd_type>			initCommands(void);
+			const vector<CommandHandler>					initHandlers(void);
 			static std::map<uint16_t, std::string>			initCommandStrings(void);
 			struct s_commandContent							parseInput(std::string &raw_input) const;
 			void											handlePrivmsg(const std::vector<std::string> &params); //chiama sendMessage di User
@@ -72,7 +72,7 @@ namespace irc
 			Server											*_server;
 			Client											*_client;
 			const std::map<std::string, e_cmd_type>			_commands;
-			CommandHandler									_handlers[N_COMMANDS]; //TODO fare const
+			const std::vector<CommandHandler>				_handlers;
 			static const std::map<uint16_t, std::string>	_command_strings;
 	};
 }
