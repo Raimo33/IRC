@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:58:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 18:24:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ namespace irc
 			static void										getRawCommandMessage(const struct s_commandContent *command, std::string *first, std::string *second);
 
 			const std::map<std::string, e_cmd_type>			initCommands(void);
-			const vector<CommandHandler>					initHandlers(void);
+			const std::vector<CommandHandler>				initHandlers(void);
 			static std::map<uint16_t, std::string>			initCommandStrings(void);
 			struct s_commandContent							parseInput(std::string &raw_input) const;
 			void											handlePrivmsg(const std::vector<std::string> &params); //chiama sendMessage di User
