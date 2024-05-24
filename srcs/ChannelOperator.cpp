@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:50:50 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 17:50:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,19 @@ namespace irc
 		(void)channel;
 		(void)mode;
 		(void)status;
+	}
+
+	void ChannelOperator::promoteOperator(Channel &channel, const Client &user) const
+	{
+		checkPrivilege(channel);
+		ChannelOperator op(user);
+		channel.addOperator(op);
+	}
+
+	void ChannelOperator::demoteOperator(Channel &channel, ChannelOperator &op) const
+	{
+		checkPrivilege(channel);
+		channel.removeOperator(op);
 	}
 
 	void ChannelOperator::checkPrivilege(const Channel &channel) const
