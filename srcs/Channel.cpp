@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 15:50:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:08:39 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ namespace irc
 	const Client &Channel::getOperator(const string &nickname) const
 	{
 		if (_operators.find(nickname) == _operators.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " is not an operator of " + _name, ERR_CHANOPRIVSNEEDED, nickname.c_str(), _name.c_str()));
+			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " is not an operator of " + _name, ERR_CHANOPRIVSNEEDED, _name.c_str()));
 		return *(_operators.at(nickname));
 	}
 
@@ -153,7 +153,7 @@ namespace irc
 		delete _operators.at(nickname);
 		_operators.erase(nickname);
 
-		const struct s_replyContent notoperanymore = EventHandler::buildReplyContent("", RPL_NOTOPERANYMORE, nickname.c_str());
+		const struct s_replyContent notoperanymore = EventHandler::buildReplyContent("", RPL_NOTOPERANYMORE);
 		EventHandler::sendBufferedContent(op, &notoperanymore);
 	}
 
@@ -220,13 +220,10 @@ namespace irc
 	void Channel::addPendingInvitation(Client *user)
 	{
 		const string &nickname = user->getNickname();
-		
+
 		if (_pending_invitations.find(nickname) != _pending_invitations.end())
 			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " is already invited to " + _name, ERR_USERONCHANNEL, nickname.c_str(), _name.c_str()));
 		_pending_invitations[nickname] = user;
-
-		const struct s_replyContent inviting = EventHandler::buildReplyContent("You have been invited to " + _name, RPL_INVITING, _name.c_str(), nickname.c_str());
-		EventHandler::sendBufferedContent(*user, &inviting);
 	}
 
 	void Channel::removePendingInvitation(const Client &user)

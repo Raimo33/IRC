@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 15:46:38 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:12:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ namespace irc
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERONCHANNEL, nickname.c_str(), channel.getName().c_str()));
 		channel.addPendingInvitation(&user);
 
-		const struct s_replyContent		reply_to_issuer = EventHandler::buildReplyContent("", RPL_INVITING, _nickname.c_str(), nickname.c_str(), channel.getName().c_str());
+		const struct s_replyContent		reply_to_issuer = EventHandler::buildReplyContent("", RPL_INVITING, nickname.c_str(), channel.getName().c_str());
 		EventHandler::sendBufferedContent(*this, &reply_to_issuer);
 
 		const struct s_commandContent	message_to_target = EventHandler::buildCommandContent(_nickname, "", INVITE, nickname.c_str(), channel.getName().c_str());

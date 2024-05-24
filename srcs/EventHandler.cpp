@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 15:53:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:01:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,7 +164,7 @@ namespace irc
 			throw InternalErrorException("EventHandler::sendBufferedContent: Invalid reply code");
 
 		if (reply)
-			getRawReplyMessage(reply, &first_part, &second_part);
+			getRawReplyMessage(receiver, reply, &first_part, &second_part);
 		else
 			getRawCommandMessage(command, &first_part, &second_part);
 		block_size = MAX_MSG_LENGTH - first_part.size() - 2; //2 per \r\n
@@ -176,12 +176,12 @@ namespace irc
 		} while (!second_part.empty());
 	}
 
-	void	EventHandler::getRawReplyMessage(const struct s_replyContent *reply, string *first_part, string *second_part)
+	void	EventHandler::getRawReplyMessage(const Client &receiver, const struct s_replyContent *reply, string *first_part, string *second_part)
 	{
 		if (!reply->prefix.empty())
 			*first_part += ":" + reply->prefix + " ";
 		*first_part += irc::to_string(reply->code);
-		*first_part += " ";
+		*first_part += " " + receiver.getNickname() + " ";
 		*first_part += join(reply->params, " ");
 		if (reply->text.empty())
 			*second_part += " :" + reply_codes.at(reply->code);

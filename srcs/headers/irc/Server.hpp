@@ -6,13 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 13:31:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:17:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//TODO logging di sistema su piu livelli. azioni degli utenti, errori di sistema, errori di protocollo
+//TODO classe logger di sistema su piu livelli. azioni degli utenti, errori di sistema, errori di protocollo
 //TODO implementare scambio di file (ERR_FILEERROR)
-//TODO aggiungere parametro client ad ogni ProtocolErrorException
 
 #ifndef SERVER_HPP
 # define SERVER_HPP

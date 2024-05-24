@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 15:31:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:01:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ namespace irc
 
 			typedef void (EventHandler::*CommandHandler)(const std::vector<std::string>&);
 
-			static void										getRawReplyMessage(const struct s_replyContent *reply, std::string *first, std::string *second);
+			static void										getRawReplyMessage(const Client &receiver, const struct s_replyContent *reply, std::string *first, std::string *second);
 			static void										getRawCommandMessage(const struct s_commandContent *command, std::string *first, std::string *second);
 
 			void											initHandlers(void);

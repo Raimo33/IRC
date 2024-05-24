@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 13:06:09 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:16:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ namespace irc
 		return runtime_error::what();
 	}
 
-	ProtocolErrorException::ProtocolErrorException(const struct s_replyContent &content) :
+	ProtocolErrorException::ProtocolErrorException(const struct s_replyContent &content) : //potremmo anche fare il throw della struct direttamente
 		_content(content) {}
 
 	ProtocolErrorException::~ProtocolErrorException(void) throw() {}

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 15:30:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 16:15:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ namespace irc
 		map<string, const Channel *>::const_iterator it = _channels.find(channel_name);
 
 		if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTONCHANNEL, _nickname.c_str(), channel_name.c_str()));
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTONCHANNEL, channel_name.c_str()));
 		return *it->second;
 	}
 
@@ -186,9 +186,9 @@ namespace irc
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_BADCHANNELKEY, channel.getName().c_str()));
 		joinChannel(channel);
 
-		const struct s_replyContent topic = EventHandler::buildReplyContent(channel.getTopic(), RPL_TOPIC, _nickname.c_str(), channel.getName().c_str());
-		const struct s_replyContent namreply = EventHandler::buildReplyContent(channel.getMembersString(), RPL_NAMREPLY, _nickname.c_str(), "=", channel.getName().c_str());
-		const struct s_replyContent endofnames = EventHandler::buildReplyContent("", RPL_ENDOFNAMES, _nickname.c_str(), channel.getName().c_str());
+		const struct s_replyContent topic = EventHandler::buildReplyContent(channel.getTopic(), RPL_TOPIC, channel.getName().c_str());
+		const struct s_replyContent namreply = EventHandler::buildReplyContent(channel.getMembersString(), RPL_NAMREPLY, "=", channel.getName().c_str());
+		const struct s_replyContent endofnames = EventHandler::buildReplyContent("", RPL_ENDOFNAMES, channel.getName().c_str());
 		//TODO in futuro mettere channel.getType() al posto di "="
 		EventHandler::sendBufferedContent(*this, &topic);
 		EventHandler::sendBufferedContent(*this, &namreply);
@@ -208,7 +208,7 @@ namespace irc
 		const string &channel_name = channel.getName();
 		
 		if (_channels.find(channel_name) == _channels.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTONCHANNEL, _nickname.c_str(), channel_name.c_str()));
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTONCHANNEL, channel_name.c_str()));
 		channel.receiveMessage(msg);
 	}
 
