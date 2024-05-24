@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 17:41:08 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 12:43:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,9 @@
 #include "irc/Constants.hpp"
 #include "irc/ReplyCodes.hpp"
 
-using namespace std;
+using std::string;
+using std::map;
+using std::vector;
 
 namespace irc
 {
@@ -37,7 +39,7 @@ namespace irc
 		return runtime_error::what();
 	}
 
-	ProtocolErrorException::ProtocolErrorException(const uint32_t code, ...)
+	ProtocolErrorException::ProtocolErrorException(const string &custom_msg, const uint32_t code, ...)
 	{
 		string	param;
 		va_list	args;
@@ -53,10 +55,15 @@ namespace irc
 		}
 		va_end(args);
 
-		map<uint16_t, string>::const_iterator it = reply_codes.find(code);
-		if (it == reply_codes.end())
-			throw InternalErrorException("ProtocolErrorException::ProtocolErrorException: Unknown reply code");
-		_content.text = it->second;
+		if (custom_msg.empty())
+		{
+			map<uint16_t, string>::const_iterator it = reply_codes.find(code);
+			if (it == reply_codes.end())
+				throw InternalErrorException("ProtocolErrorException::ProtocolErrorException: Unknown reply code");
+			_content.text = it->second;
+		}
+		else
+			_content.text = custom_msg;
 	}
 
 	ProtocolErrorException::~ProtocolErrorException(void) throw() {}

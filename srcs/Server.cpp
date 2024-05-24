@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 19:14:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 12:42:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,11 @@
 
 #include "irc/Exceptions.hpp"
 
-using namespace std;
+using std::string;
+using std::map;
+using std::vector;
+using std::cout;
+using std::endl;
 
 namespace irc
 {
@@ -142,7 +146,7 @@ namespace irc
 	const Client &Server::getClient(const string &nickname) const
 	{
 		if (_clients.find(nickname) == _clients.end())
-			throw ProtocolErrorException(ERR_NOSUCHNICK, nickname.c_str());
+			throw ProtocolErrorException("", ERR_NOSUCHNICK, nickname.c_str());
 		return *(_clients.at(nickname));
 	}
 
@@ -173,7 +177,7 @@ namespace irc
 	const Channel	&Server::getChannel(const string &name) const
 	{
 		if (_channels.find(name) == _channels.end())
-			throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name.c_str());
+			throw ProtocolErrorException("", ERR_NOSUCHCHANNEL, name.c_str());
 		return *(_channels.at(name));
 	}
 
@@ -273,7 +277,7 @@ namespace irc
 			EventHandler::sendBufferedContent(*client, &e.getContent());
 			//logger.log("Error: " + string(e.what()));
 		}
-		catch (const exception &e)
+		catch (const std::exception &e)
 		{
 			//logger.log("Unknown error: " + string(e.what()));
 		}
@@ -296,9 +300,9 @@ namespace irc
 
 		flags = fcntl(socket, F_GETFL); //TODO aggiungere fcntl a SystemCalls (probabilmente variadic function)
 		if (flags == -1)
-			throw runtime_error(strerror(errno));
+			throw std::runtime_error(strerror(errno));
 		fcntl(socket, F_SETFL, flags | O_NONBLOCK);
 		if (flags == -1)
-			throw runtime_error(strerror(errno));
+			throw std::runtime_error(strerror(errno));
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 13:59:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 11:57:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "irc/Exceptions.hpp"
 #include "irc/SystemCalls.hpp"
 
-using namespace std;
+using std::string;
 
 namespace irc
 {

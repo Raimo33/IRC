@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 19:13:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 12:42:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,10 @@
 #include "irc/ReplyCodes.hpp"
 #include "irc/Exceptions.hpp"
 
-using namespace std;
+using std::string;
+using std::map;
+using std::vector;
+
 using namespace irc;
 
 static void checkConnection(const Client *client);
@@ -87,7 +90,7 @@ namespace irc
 		s_commandContent input = parseInput(raw_input);
 
 		if (input.cmd < 0 || input.cmd >= N_COMMANDS)
-			throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, raw_input.c_str());
+			throw ProtocolErrorException("", ERR_UNKNOWNCOMMAND, raw_input.c_str());
 
 		(this->*(_handlers[input.cmd]))(input.params);
 	}
@@ -222,7 +225,7 @@ namespace irc
 		space_pos = raw_input.find(' ');
 		command = raw_input.substr(0, space_pos - 1); //prendo il comando come stringa
 		if (_commands.find(command) == _commands.end()) //se il comando non esiste
-			throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, command.c_str());
+			throw ProtocolErrorException("", ERR_UNKNOWNCOMMAND, command.c_str());
 		input.cmd = _commands.at(command); //associo il comando all'enum
 		raw_input = raw_input.substr(space_pos + 1); //supero il comando
 
@@ -248,9 +251,9 @@ namespace irc
 		checkAuthentication(_client);
 
 		if (params.size() < 1)
-			throw ProtocolErrorException(ERR_NORECIPIENT, "PRIVMSG"); //TODO aggiungere la reason (No recipient given (PRIVMSG))
+			throw ProtocolErrorException("no recipient given (PRIVMSG)", ERR_NORECIPIENT, "PRIVMSG");
 		if (params.size() < 2)
-			throw ProtocolErrorException(ERR_NOTEXTTOSEND);
+			throw ProtocolErrorException("", ERR_NOTEXTTOSEND);
 
 		if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
 		{
@@ -293,7 +296,7 @@ namespace irc
 		checkConnection(_client);
 		checkAuthentication(_client);
 		if (params.size() < 1)
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN"); //TODO aggiungere la reason (usage: JOIN <channel> <key>)
+			throw ProtocolErrorException("usage: JOIN <channel> <key>", ERR_NEEDMOREPARAMS, "JOIN");
 
 		vector<string> channels = split(params[0], ',');
 		vector<string> keys = split(params[1], ',');
@@ -336,13 +339,13 @@ namespace irc
 	void EventHandler::handlePass(const vector<string> &params)
 	{
 		if (_client->getIsConnected())
-			throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+			throw ProtocolErrorException("", ERR_ALREADYREGISTRED);
 
 		if (params.size() < 1)
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PASS"); //TODO aggiungere la reason (usage: PASS <password>)
+			throw ProtocolErrorException("usage: PASS <password>", ERR_NEEDMOREPARAMS, "PASS");
 
 		if (Hasher::hash(params[0]) != _server->getPwdHash())
-			throw ProtocolErrorException(ERR_PASSWDMISMATCH);
+			throw ProtocolErrorException("", ERR_PASSWDMISMATCH);
 		_client->setIsConnected(true);
 	}
 
@@ -350,9 +353,9 @@ namespace irc
 	{
 		checkConnection(_client);
 		if (_client->getIsAuthenticated() || !_client->getNickname().empty())
-			throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+			throw ProtocolErrorException("", ERR_ALREADYREGISTRED);
 		if (params.size() < 1)
-			throw ProtocolErrorException(ERR_NONICKNAMEGIVEN);
+			throw ProtocolErrorException("", ERR_NONICKNAMEGIVEN);
 		checkNicknameValidity(params[0]);
 		_client->setNickname(params[0]);
 		if (!_client->getUsername().empty())
@@ -364,9 +367,9 @@ namespace irc
 	{
 		checkConnection(_client);
 		if (_client->getIsAuthenticated() || !_client->getUsername().empty())
-			throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+			throw ProtocolErrorException("", ERR_ALREADYREGISTRED);
 		if (params.size() < 1)
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "USER"); //TODO aggiungere la reason (usage: USER <username> <hostname> <servername> <realname>)
+			throw ProtocolErrorException("usage: USER <username> <hostname> <servername> <realname>", ERR_NEEDMOREPARAMS, "USER");
 		_client->setUsername(params[0]);
 		if (!_client->getNickname().empty())
 			_client->setAuthenticated(true);
@@ -386,7 +389,7 @@ namespace irc
 		checkAuthentication(_client);
 
 		if (params.size() < 2)
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK"); //TODO aggiungere la reason (usage: KICK <channel> <nickname> <reason>
+			throw ProtocolErrorException("usage: KICK <channel> <nickname> <reason>", ERR_NEEDMOREPARAMS, "KICK");
 
 		//TODO imlementare
 	}
@@ -397,7 +400,7 @@ namespace irc
 		checkAuthentication(_client);
 
 		if (params.size() < 2)
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "INVITE"); //TODO aggiungere la reason (usage: INVITE <nickname> <channel>)
+			throw ProtocolErrorException("usage: INVITE <nickname> <channel>", ERR_NEEDMOREPARAMS, "INVITE");
 		//TODO implementare
 	}
 
@@ -417,7 +420,7 @@ namespace irc
 		checkAuthentication(_client);
 
 		if (params.size() < 2)
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE"); //TODO aggiungere la reason (usage: MODE <channel> <mode>)
+			throw ProtocolErrorException("usage: MODE <channel> <mode>", ERR_NEEDMOREPARAMS, "MODE");
 		//TODO implementare
 		//(RPL_CHANNELMODEIS)
 		//(RPL_TOPIC_WHO_TIME)
@@ -429,9 +432,9 @@ namespace irc
 	void	EventHandler::checkNicknameValidity(const string &nickname) const
 	{
 		if (!is_valid_nickname(nickname))
-			throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname.c_str()); //TODO aggiungere la reason (allowed characters: A-Z, a-z, 0-9, -, [, ], \, `, ^, {, }, MAX_NICKNAME_LEN)
+			throw ProtocolErrorException("allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(MAX_NICKNAME_LEN), ERR_ERRONEOUSNICKNAME, nickname.c_str());
 		if (_server->isClientConnected(nickname))
-			throw ProtocolErrorException(ERR_NICKNAMEINUSE, nickname.c_str());
+			throw ProtocolErrorException("", ERR_NICKNAMEINUSE, nickname.c_str());
 	}
 
 	const std::map<uint16_t, std::string> EventHandler::_command_strings = EventHandler::initCommandStrings();
@@ -440,11 +443,11 @@ namespace irc
 static void checkConnection(const Client *client)
 {
 	if (!client->getIsConnected())
-		throw ProtocolErrorException(ERR_NOTREGISTERED); //TODO aggiungere la reason (you are not connected, use PASS <password> first)
+		throw ProtocolErrorException("you are not connected, use PASS <password> first", ERR_NOTREGISTERED);
 }
 
 static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
-		throw ProtocolErrorException(ERR_NOTREGISTERED); //TODO aggiungere la reason (you are not registered, use NICK <nickname> and USER <username> first)
+		throw ProtocolErrorException("you are not registered, use NICK <nickname> and USER <username> first", ERR_NOTREGISTERED);
 }

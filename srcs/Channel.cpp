@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 18:50:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 12:36:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@
 #include "irc/Constants.hpp"
 #include "irc/Content.hpp"
 
-using namespace std;
+using std::string;
+using std::map;
 
 namespace irc
 {
@@ -29,8 +30,7 @@ namespace irc
 		_name(name),
 		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT)
 	{
-		if (!is_valid_channel_name(name))
-			throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name.c_str()); //TODO custom message (name + is not a valid channel name)
+		checkName(name);
 		_operators[op.getNickname()] = &op;
 		_members[op.getNickname()] = &op;
 		for (int i = 0; i < N_MODES; i++)
@@ -42,8 +42,7 @@ namespace irc
 		_key(key),
 		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT)
 	{
-		if (!is_valid_channel_name(name))
-			throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name.c_str()); //TODO custom message (name + is not a valid channel name)
+		checkName(name);
 		_operators[op.getNickname()] = &op;
 		_members[op.getNickname()] = &op;
 		for (int i = 0; i < N_MODES; i++)
@@ -71,8 +70,7 @@ namespace irc
 
 	void Channel::setName(const string &new_name)
 	{
-		if (!is_valid_channel_name(new_name))
-			throw ProtocolErrorException(ERR_NOSUCHCHANNEL, new_name.c_str()); //TODO custom message (new_name + is not a valid channel name)
+		checkName(new_name);
 		_name = new_name;
 	}
 
@@ -83,22 +81,21 @@ namespace irc
 
 	void Channel::setKey(const string &new_key)
 	{
-		if (new_key.empty() || new_key.length() > MAX_CHANNEL_KEY_LEN)
-			throw ProtocolErrorException(ERR_KEYSET, _name.c_str()); //TODO messaggio custom (key + is not a valid key)
+		checkKey(new_key);
 		_key = new_key;
 	}
 
 	const string &Channel::getTopic(void) const
 	{
 		if (_topic.empty())
-			throw ProtocolErrorException(RPL_NOTOPIC, _name.c_str());
+			throw ProtocolErrorException("", RPL_NOTOPIC, _name.c_str());
 		return _topic;
 	}
 
 	void Channel::setTopic(const string &new_topic)
 	{
 		if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
-			throw ProtocolErrorException(RPL_NOTOPIC, _name.c_str()); //TODO messaggio custom (topic + is too long)
+			throw ProtocolErrorException(new_topic + " is too long", RPL_NOTOPIC, _name.c_str());
 		_topic = new_topic;
 	}
 
@@ -125,7 +122,7 @@ namespace irc
 	const Client &Channel::getOperator(const string &nickname) const
 	{
 		if (_operators.find(nickname) == _operators.end())
-			throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, nickname.c_str(), _name.c_str()); //TODO custom message (nickname + is not an operator of + channel name)
+			throw ProtocolErrorException(nickname + " is not an operator of " + _name, ERR_CHANOPRIVSNEEDED, nickname.c_str(), _name.c_str());
 		return *(_operators.at(nickname));
 	}
 
@@ -134,9 +131,9 @@ namespace irc
 		string nickname = op->getNickname();
 
 		if (_operators.find(nickname) != _operators.end())
-			throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str()); //TODO messaggio custom (nickname + is already an operator of + channel name)
+			throw ProtocolErrorException(nickname + " is already an operator of " + _name, ERR_USERONCHANNEL, nickname.c_str(), _name.c_str());
 		if (_members.find(nickname) == _members.end())
-			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str());
+			throw ProtocolErrorException("", ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str());
 		_operators[nickname] = op;
 
 		struct s_replyContent youreoper;
@@ -153,8 +150,8 @@ namespace irc
 		string nickname = op.getNickname();
 
 		if (_operators.find(nickname) == _operators.end())
-			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()); //TODO messaggio custom (nickname + is not an operator of + channel name)
-		delete _operators[nickname];
+			throw ProtocolErrorException(nickname + " is not an operator of " + _name, ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str());
+		delete _operators.at(nickname);
 		_operators.erase(nickname);
 
 		struct s_replyContent notoperanymore;
@@ -179,7 +176,7 @@ namespace irc
 	const Client &Channel::getMember(const string &nickname) const
 	{
 		if (_members.find(nickname) == _members.end())
-			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str());
+			throw ProtocolErrorException("", ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str());
 		return *(_members.at(nickname));
 	}
 
@@ -188,11 +185,11 @@ namespace irc
 		const string &nickname = user.getNickname();
 
 		if (_modes[MODE_I] && _pending_invitations.find(nickname) == _pending_invitations.end())
-			throw ProtocolErrorException(ERR_INVITEONLYCHAN, _name.c_str());
+			throw ProtocolErrorException("", ERR_INVITEONLYCHAN, _name.c_str());
 		if (_members.find(nickname) != _members.end())
-			throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str());
+			throw ProtocolErrorException("", ERR_USERONCHANNEL, nickname.c_str(), _name.c_str());
 		if (_members.size() >= _member_limit)
-			throw ProtocolErrorException(ERR_CHANNELISFULL, _name.c_str());
+			throw ProtocolErrorException("", ERR_CHANNELISFULL, _name.c_str());
 		_members[nickname] = &user;
 		if (!_members_string.empty())
 			_members_string += " ";
@@ -204,7 +201,7 @@ namespace irc
 		const string &nickname = user.getNickname();
 		
 		if (_members.find(nickname) == _members.end())
-			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str());
+			throw ProtocolErrorException("", ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str());
 		_members.erase(nickname);
 		_members_string.erase(_members_string.find(nickname), nickname.length() + 1);
 	}
@@ -222,7 +219,7 @@ namespace irc
 	const Client &Channel::getPendingInvitation(const string &nickname) const
 	{
 		if (_pending_invitations.find(nickname) == _pending_invitations.end())
-			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()); //TODO custom message (nickname + was not invited to + channel name)
+			throw ProtocolErrorException(nickname + " was not invited to " + _name, ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str());
 		return *(_pending_invitations.at(nickname));
 	}
 
@@ -231,7 +228,7 @@ namespace irc
 		const string &nickname = user->getNickname();
 		
 		if (_pending_invitations.find(nickname) != _pending_invitations.end())
-			throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str()); //TODO custom message (nickname + is already invited to + channel name)
+			throw ProtocolErrorException(nickname + " is already invited to " + _name, ERR_USERONCHANNEL, nickname.c_str(), _name.c_str());
 		_pending_invitations[nickname] = user;
 
 		struct s_replyContent inviting;
@@ -250,7 +247,7 @@ namespace irc
 		const string &nickname = user.getNickname();
 
 		if (_pending_invitations.find(nickname) == _pending_invitations.end())
-			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()); //TODO custom message (nickname + was not invited to + channel name)
+			throw ProtocolErrorException(nickname + " was not invited to " + _name, ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str());
 		_pending_invitations.erase(nickname);
 	}
 
@@ -298,5 +295,17 @@ namespace irc
 			msg_content.text = msg.getText();
 			EventHandler::sendBufferedContent(*(receiver->second), &msg_content);
 		}
+	}
+
+	void	Channel::checkName(const string &name) const
+	{
+		if (!is_valid_channel_name(name))
+			throw ProtocolErrorException(name + " is not a valid channel name", ERR_NOSUCHCHANNEL, name.c_str());
+	}
+
+	void	Channel::checkKey(const string &key) const
+	{
+		if (key != _key)
+			throw ProtocolErrorException(key + " is not a valid channel key", ERR_BADCHANNELKEY, _name.c_str());
 	}
 }

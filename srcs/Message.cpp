@@ -6,13 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:59:00 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 17:42:54 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 11:56:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc/Message.hpp"
 	
-using namespace std;
+using std::string;
 
 namespace irc
 {

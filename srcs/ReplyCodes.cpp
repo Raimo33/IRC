@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 02:55:58 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/22 03:22:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 12:02:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,14 @@
 #include <map>
 #include <string>
 
+using std::string;
+using std::map;
+
 namespace irc
 {
-	const std::map<uint16_t, std::string> create_reply_codes(void)
+	const map<uint16_t, string> create_reply_codes(void)
 	{
-		std::map<uint16_t, std::string> reply_codes;
+		map<uint16_t, string> reply_codes;
 		reply_codes.insert(std::make_pair(RPL_WELCOME, "Welcome"));
 		reply_codes.insert(std::make_pair(RPL_YOURHOST, "Your host"));
 		reply_codes.insert(std::make_pair(RPL_CREATED, "Created"));

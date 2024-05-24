@@ -6,13 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 15:06:36 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 17:43:08 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 12:00:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc/PrivateMessage.hpp"
 
-using namespace std;
+using std::string;
+
 namespace irc
 {
 	PrivateMessage::PrivateMessage(const string &text, const Client &sender, const Client &receiver) :
