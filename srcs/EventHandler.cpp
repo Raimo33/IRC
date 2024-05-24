@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 15:52:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 15:53:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,6 @@ namespace irc
 		return content;
 	}
 
-	//TODO utilizzare buildCommandContent in parseInput
 	const struct s_commandContent	EventHandler::buildCommandContent(const string &prefix, const string &custom_msg, const uint32_t cmd, ...)
 	{
 		struct s_commandContent	content;
