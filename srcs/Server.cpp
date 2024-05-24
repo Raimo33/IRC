@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:42:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:20:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ namespace irc
 	const Client &Server::getClient(const string &nickname) const
 	{
 		if (_clients.find(nickname) == _clients.end())
-			throw ProtocolErrorException("", ERR_NOSUCHNICK, nickname.c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOSUCHNICK, nickname.c_str()));
 		return *(_clients.at(nickname));
 	}
 
@@ -177,7 +177,7 @@ namespace irc
 	const Channel	&Server::getChannel(const string &name) const
 	{
 		if (_channels.find(name) == _channels.end())
-			throw ProtocolErrorException("", ERR_NOSUCHCHANNEL, name.c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOSUCHCHANNEL, name.c_str()));
 		return *(_channels.at(name));
 	}
 

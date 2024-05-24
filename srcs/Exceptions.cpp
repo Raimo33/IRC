@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:43:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:06:09 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,32 +39,8 @@ namespace irc
 		return runtime_error::what();
 	}
 
-	ProtocolErrorException::ProtocolErrorException(const string &custom_msg, const uint32_t code, ...)
-	{
-		string	param;
-		va_list	args;
-
-		va_start(args, code);
-		_content.prefix = SERVER_NAME;
-		_content.code = code;
-		param = string(va_arg(args, const char *));
-		while (!param.empty())
-		{
-			_content.params.push_back(param);
-			param = string(va_arg(args, const char *));
-		}
-		va_end(args);
-
-		if (custom_msg.empty())
-		{
-			map<uint16_t, string>::const_iterator it = reply_codes.find(code);
-			if (it == reply_codes.end())
-				throw InternalErrorException("ProtocolErrorException::ProtocolErrorException: Unknown reply code");
-			_content.text = it->second;
-		}
-		else
-			_content.text = custom_msg;
-	}
+	ProtocolErrorException::ProtocolErrorException(const struct s_replyContent &content) :
+		_content(content) {}
 
 	ProtocolErrorException::~ProtocolErrorException(void) throw() {}
 

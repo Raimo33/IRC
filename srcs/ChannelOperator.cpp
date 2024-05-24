@@ -6,13 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:36:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:17:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc/ChannelOperator.hpp"
 #include "irc/Exceptions.hpp"
 #include "irc/ReplyCodes.hpp"
+#include "irc/EventHandler.hpp"
 
 using std::map;
 using std::string;
@@ -33,7 +34,7 @@ namespace irc
 
 		checkPrivilege(channel);
 		if (members.find(nickname) == members.end())
-			throw ProtocolErrorException("", ERR_USERNOTINCHANNEL, nickname.c_str(), channel.getName().c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERNOTINCHANNEL, nickname.c_str(), channel.getName().c_str()));
 		channel.removeMember(user);
 	}
 
@@ -45,7 +46,7 @@ namespace irc
 
 		checkPrivilege(channel);
 		if (members.find(nickname) != members.end())
-			throw ProtocolErrorException("", ERR_USERONCHANNEL, nickname.c_str(), channel.getName().c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERONCHANNEL, nickname.c_str(), channel.getName().c_str()));
 		channel.addPendingInvitation(&user);
 	}
 
@@ -73,8 +74,8 @@ namespace irc
 		map<string, ChannelOperator *>	operators = channel.getOperators();
 
 		if (members.find(_username) == members.end())
-			throw ProtocolErrorException("", ERR_NOTONCHANNEL, channel.getName().c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTONCHANNEL, channel.getName().c_str()));
 		if (operators.find(_username) == operators.end())
-			throw ProtocolErrorException("", ERR_CHANOPRIVSNEEDED, channel.getName().c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_CHANOPRIVSNEEDED, channel.getName().c_str()));
 	}
 }

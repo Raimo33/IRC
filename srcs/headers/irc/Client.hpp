@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 16:25:27 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 12:47:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ namespace irc
 		protected:
 
 			std::map<std::string, const Channel *>			_channels; // {channel_name, channel}
-			std::string										_nickname; //TODO mettere al @ se e' operator
+			std::string										_nickname;
 			std::string										_username;
 			std::string										_realname;
 			bool											_is_connected; // dopo che ha fatto il comando PASS

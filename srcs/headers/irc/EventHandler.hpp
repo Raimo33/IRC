@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 18:44:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:11:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,15 +41,16 @@ namespace irc
 			void											setServer(Server *server);
 
 			void 											processInput(std::string raw_input);
-			
+
+			static const struct s_replyContent				buildReplyContent(const std::string &custom_msg, const uint32_t code, ...);
 			static void										sendBufferedContent(const Client &receiver, const struct s_contentBase *message);
 
 		private:
 
 			typedef void (EventHandler::*CommandHandler)(const std::vector<std::string>&);
 
-			static void										buildRawReplyMessage(const struct s_replyContent *reply, std::string *first, std::string *second);
-			static void										buildRawCommandMessage(const struct s_commandContent *command, std::string *first, std::string *second);
+			static void										getRawReplyMessage(const struct s_replyContent *reply, std::string *first, std::string *second);
+			static void										getRawCommandMessage(const struct s_commandContent *command, std::string *first, std::string *second);
 
 			void											initHandlers(void);
 			const std::map<std::string, e_cmd_type>			initCommands(void);

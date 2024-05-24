@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:37:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:18:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,14 +62,14 @@ namespace irc
 		map<string, const Channel *>::const_iterator it = _channels.find(channel_name);
 
 		if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
-			throw ProtocolErrorException("", ERR_NOTONCHANNEL, _nickname.c_str(), channel_name.c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTONCHANNEL, _nickname.c_str(), channel_name.c_str()));
 		return it->second;
 	}
 
 	void	Client::addChannel(const Channel &channel)
 	{
 		if (_channels.size() >= MAX_CHANNELS_PER_USER)
-			throw ProtocolErrorException("", ERR_TOOMANYCHANNELS, channel.getName().c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_TOOMANYCHANNELS, channel.getName().c_str()));
 		_channels[channel.getName()] = &channel;
 	}
 
@@ -79,7 +79,7 @@ namespace irc
 		map<string, const Channel *>::iterator it = _channels.find(channel_name);
 
 		if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
-			throw ProtocolErrorException("", ERR_USERNOTINCHANNEL, _nickname.c_str(), channel_name.c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERNOTINCHANNEL, _nickname.c_str(), channel_name.c_str()));
 		_channels.erase(it);
 	}
 
@@ -192,9 +192,9 @@ namespace irc
 	void	Client::joinChannel(Channel &channel, const string &key)
 	{
 		if (!_is_authenticated)
-			throw ProtocolErrorException("", ERR_NOTREGISTERED);		
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTREGISTERED));		
 		if (channel.getMode(MODE_K) && channel.getKey() != key)
-			throw ProtocolErrorException("", ERR_BADCHANNELKEY, channel.getName().c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_BADCHANNELKEY, channel.getName().c_str()));
 		joinChannel(channel);
 
 		struct s_replyContent topic;
@@ -227,7 +227,7 @@ namespace irc
 	void	Client::leaveChannel(Channel &channel)
 	{
 		if (!_is_authenticated)
-			throw ProtocolErrorException("", ERR_NOTREGISTERED);
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTREGISTERED));
 		channel.removeMember(*this);
 		removeChannel(channel);
 	}
@@ -237,14 +237,14 @@ namespace irc
 		const string &channel_name = channel.getName();
 		
 		if (_channels.find(channel_name) == _channels.end())
-			throw ProtocolErrorException("", ERR_NOTONCHANNEL, _nickname.c_str(), channel_name.c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTONCHANNEL, _nickname.c_str(), channel_name.c_str()));
 		channel.receiveMessage(msg);
 	}
 
 	void	Client::sendMessage(const Client &receiver, const PrivateMessage &msg) const
 	{
 		if (!receiver.getIsAuthenticated())
-			throw ProtocolErrorException("", ERR_NOLOGIN, receiver.getNickname().c_str());
+			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOLOGIN, receiver.getNickname().c_str()));
 
 		struct s_commandContent msg_content;
 

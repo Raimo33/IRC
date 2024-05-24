@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:22:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/24 12:47:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ namespace irc
 			std::string										_topic;
 			uint32_t										_member_limit;
 			std::map<std::string, ChannelOperator *>		_operators; // {nickname, operator}
-			std::map<std::string, Client *>					_members; // {nickname, user}
+			std::map<std::string, Client *>					_members; // {nickname, user} //TODO mettere al @ se e' operator
 			std::map<std::string, Client *>					_pending_invitations; // {nickname, user} (il channel operator puo fare /invite)
 			bool											_modes[N_MODES];
 			std::string										_members_string;
