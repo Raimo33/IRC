@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 15:47:59 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 15:48:40 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,18 +92,14 @@ namespace irc
 	const struct s_replyContent	EventHandler::buildReplyContent(const string &custom_msg, const uint32_t code, ...)
 	{
 		struct s_replyContent	content;
-		string					param;
 		va_list					args;
+		const char				*arg;
 
 		va_start(args, code);
 		content.prefix = string(SERVER_NAME);
 		content.code = code;
-		param = string(va_arg(args, const char *));
-		while (param.empty() == false)
-		{
-			content.params.push_back(param);
-			param = string(va_arg(args, const char *));
-		}
+		while ((arg = va_arg(args, const char *)))
+			content.params.push_back(std::string(arg));
 		va_end(args);
 
 		if (custom_msg.empty())
@@ -275,7 +271,10 @@ namespace irc
 			raw_input = raw_input.substr(space_pos + 1); //supero il prefix
 		}
 		space_pos = raw_input.find(' ');
-		command = raw_input.substr(0, space_pos - 1); //prendo il comando come stringa
+		if (space_pos == string::npos)
+			command = raw_input;
+		else
+			command = raw_input.substr(0, space_pos); //forse -1
 		if (_commands.find(command) == _commands.end()) //se il comando non esiste
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_UNKNOWNCOMMAND, command.c_str()));
 		input.cmd = _commands.at(command); //associo il comando all'enum

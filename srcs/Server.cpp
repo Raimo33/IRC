@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:14:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 14:29:59 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,9 @@ namespace irc
 	Server::Server(const uint16_t port_no, const string &password) :
 		_port(port_no),
 		_pwd_hash(Hasher::hash(password)),
+		_clients(map<string, Client *>()),
+		_channels(map<string, Channel *>()),
+		_pollfds(vector<pollfd>()),
 		_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
 		_handler(EventHandler(*this))
 	{
@@ -50,6 +53,9 @@ namespace irc
 		server_poll_fd.fd = _socket;
 		server_poll_fd.events = POLLIN;
 		_pollfds.push_back(server_poll_fd);
+		_pollfds[0].fd = _socket;
+		_pollfds[0].events = POLLIN;
+		_pollfds[0].revents = 0;
 	}
 
 	Server::Server(const Server &copy) :
@@ -65,6 +71,10 @@ namespace irc
 	Server::~Server(void)
 	{
 		//TODO delete di tutto
+		close_p(_socket);
+		_clients.clear();
+		_channels.clear();
+		_pollfds.clear();
 	}
 
 	void	Server::run(void)
@@ -206,6 +216,9 @@ namespace irc
 	void	Server::addPollfd(const pollfd pollfd)
 	{
 		_pollfds.push_back(pollfd);
+		_pollfds[_pollfds.size() - 1].fd = pollfd.fd;
+		_pollfds[_pollfds.size() - 1].events = POLLIN;
+		_pollfds[_pollfds.size() - 1].revents = 0;
 	}
 
 	void	Server::removePollfd(const pollfd pollfd)
@@ -244,7 +257,7 @@ namespace irc
 
 	void Server::handleClient(Client *client, size_t *i)
 	{
-		char buffer[BUFFER_SIZE];
+		char buffer[BUFFER_SIZE] = {0};
 
 		if (!client)
 			throw InternalErrorException("Server::handleClient: Client not found");
@@ -254,7 +267,6 @@ namespace irc
 			int bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
 			if (bytes_read > 0)
 			{
-				buffer[bytes_read - 1] = '\0';
 				_handler.setClient(*client);
 				_handler.processInput(buffer); // se tutto va bene esegue il comando
 			}

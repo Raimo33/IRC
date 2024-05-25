@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 12:01:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 13:34:56 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ namespace irc
 		_nickname(),
 		_username(),
 		_realname(),
+		_is_connected(false),
 		_is_authenticated(false),
 		_port(port),
 		_ip_addr(ip_addr),
@@ -41,6 +42,7 @@ namespace irc
 		_nickname(copy._nickname),
 		_username(copy._username),
 		_realname(copy._realname),
+		_is_connected(copy._is_connected),
 		_is_authenticated(copy._is_authenticated),
 		_port(copy._port),
 		_ip_addr(copy._ip_addr),
