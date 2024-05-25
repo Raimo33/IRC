@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 15:46:29 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 18:30:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,10 @@ namespace irc
 
 			void 											processInput(std::string raw_input);
 
-			static const struct s_replyContent				buildReplyContent(const std::string &custom_msg, const uint32_t code, ...);
-			static const struct s_commandContent			buildCommandContent(const std::string &prefix, const std::string &custom_msg, const uint32_t cmd, ...);
+			static const struct s_replyContent				buildReplyContent(const uint16_t code, const std::string *params = NULL, const std::string &custom_msg = "");
+			static const struct s_replyContent				buildReplyContent(const uint16_t code, const std::string param, const std::string &custom_msg = "");
+			static const struct s_commandContent			buildCommandContent(const std::string &prefix, const e_cmd_type cmd, const std::string *params = NULL, const std::string &custom_msg = "");
+			static const struct s_commandContent			buildCommandContent(const std::string &prefix, const e_cmd_type cmd, const std::string param, const std::string &custom_msg = "");
 			static void										sendBufferedContent(const Client &receiver, const struct s_contentBase *message);
 
 		private:
@@ -57,12 +59,12 @@ namespace irc
 			const std::vector<CommandHandler>				initHandlers(void);
 			static std::map<uint16_t, std::string>			initCommandStrings(void);
 			struct s_commandContent							parseInput(std::string &raw_input) const;
-			void											handlePrivmsg(const std::vector<std::string> &params); //chiama sendMessage di User
-			void											handleJoin(const std::vector<std::string> &params);
-			void											handlePart(const std::vector<std::string> &params);
 			void											handlePass(const std::vector<std::string> &params);
 			void											handleNick(const std::vector<std::string> &params);
 			void											handleUser(const std::vector<std::string> &params);
+			void											handleJoin(const std::vector<std::string> &params);
+			void											handlePart(const std::vector<std::string> &params);
+			void											handlePrivmsg(const std::vector<std::string> &params); //chiama sendMessage di User
 			void											handleQuit(const std::vector<std::string> &params);
 			void											handleKick(const std::vector<std::string> &params);
 			void											handleInvite(const std::vector<std::string> &params);

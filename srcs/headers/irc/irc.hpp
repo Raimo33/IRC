@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:00:53 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 16:21:27 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 18:35:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,6 @@
 # include "irc/ChannelOperator.hpp"
 # include "irc/Channel.hpp"
 # include "irc/EventHandler.hpp"
-# include "irc/AMessage.hpp"
-# include "irc/Message.hpp"
-# include "irc/PrivateMessage.hpp"
 # include "irc/Hasher.hpp"
 # include "irc/Exceptions.hpp"
 # include "irc/utils.hpp"

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:16:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 17:57:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include "irc/Exceptions.hpp"
 #include "irc/Constants.hpp"
 #include "irc/ReplyCodes.hpp"
+#include "irc/EventHandler.hpp"
 
 using std::string;
 using std::map;
@@ -39,8 +40,11 @@ namespace irc
 		return runtime_error::what();
 	}
 
-	ProtocolErrorException::ProtocolErrorException(const struct s_replyContent &content) : //potremmo anche fare il throw della struct direttamente
-		_content(content) {}
+	ProtocolErrorException::ProtocolErrorException(const uint16_t code, const string *params, const string &custom_msg) :
+		_content(EventHandler::buildReplyContent(code, params, custom_msg)) {}
+
+	ProtocolErrorException::ProtocolErrorException(const uint16_t code, const string param, const string &custom_msg) :
+		_content(EventHandler::buildReplyContent(code, param, custom_msg)) {}
 
 	ProtocolErrorException::~ProtocolErrorException(void) throw() {}
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:50:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 17:59:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,34 +28,45 @@ namespace irc
 
 	void ChannelOperator::kick(Client &user, Channel &channel, const string &reason) const
 	{
-		map<string, Client *>			members = channel.getMembers();
-		const string					&nickname = user.getNickname();
+		map<string, Client *>	members = channel.getMembers();
+		const string			&nickname = user.getNickname();
 
 		checkPrivilege(channel);
 		if (members.find(nickname) == members.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERNOTINCHANNEL, nickname.c_str(), channel.getName().c_str()));
+		{
+			const string params[] = { nickname, channel.getName() };
+			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+		}
 		channel.removeMember(user);
 		user.removeChannel(channel);
 
-		const struct s_commandContent message_to_target = EventHandler::buildCommandContent("", reason, KICK, channel.getName().c_str(), _nickname.c_str());
-		EventHandler::sendBufferedContent(user, &message_to_target);
+		const string params[] = { channel.getName(), _nickname };
+		const struct s_commandContent message_to_channel = EventHandler::buildCommandContent("", KICK, params, reason);
+		channel.receiveMessage(message_to_channel);
 	}
 
 	void ChannelOperator::invite(Client &user, Channel &channel) const
 	{
-		map<string, Client *>			members = channel.getMembers();
-		const string					&nickname = user.getNickname();
+		map<string, Client *>	members = channel.getMembers();
+		const string			&nickname = user.getNickname();
 
 		checkPrivilege(channel);
 		if (members.find(nickname) != members.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERONCHANNEL, nickname.c_str(), channel.getName().c_str()));
+		{
+			const string params[] = { nickname, channel.getName() };
+			throw ProtocolErrorException(ERR_USERONCHANNEL, params);
+		}
 		channel.addPendingInvitation(&user);
-
-		const struct s_replyContent		reply_to_issuer = EventHandler::buildReplyContent("", RPL_INVITING, nickname.c_str(), channel.getName().c_str());
-		EventHandler::sendBufferedContent(*this, &reply_to_issuer);
-
-		const struct s_commandContent	message_to_target = EventHandler::buildCommandContent(_nickname, "", INVITE, nickname.c_str(), channel.getName().c_str());
-		EventHandler::sendBufferedContent(user, &message_to_target);
+		{
+			const string params[] = { nickname, channel.getName() };
+			const struct s_replyContent reply_to_issuer = EventHandler::buildReplyContent(RPL_INVITING, params);
+			EventHandler::sendBufferedContent(*this, &reply_to_issuer);
+		}
+		{
+			const string params[] = { nickname, channel.getName() };
+			const struct s_commandContent message_to_target = EventHandler::buildCommandContent(_nickname, INVITE, params);
+			EventHandler::sendBufferedContent(user, &message_to_target);
+		}
 	}
 
 	void ChannelOperator::topicSet(Channel &channel, const string &new_topic) const
@@ -89,6 +100,6 @@ namespace irc
 	void ChannelOperator::checkPrivilege(const Channel &channel) const
 	{
 		if (channel.isOperator(this) == false)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_CHANOPRIVSNEEDED, channel.getName().c_str()));
+			throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, channel.getName());
 	}
 }

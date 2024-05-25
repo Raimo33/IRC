@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 14:29:59 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/25 18:34:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,10 +71,6 @@ namespace irc
 	Server::~Server(void)
 	{
 		//TODO delete di tutto
-		close_p(_socket);
-		_clients.clear();
-		_channels.clear();
-		_pollfds.clear();
 	}
 
 	void	Server::run(void)
@@ -156,7 +152,7 @@ namespace irc
 	const Client &Server::getClient(const string &nickname) const
 	{
 		if (_clients.find(nickname) == _clients.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOSUCHNICK, nickname.c_str()));
+			throw ProtocolErrorException(ERR_NOSUCHNICK, nickname);
 		return *(_clients.at(nickname));
 	}
 
@@ -187,7 +183,7 @@ namespace irc
 	const Channel	&Server::getChannel(const string &name) const
 	{
 		if (_channels.find(name) == _channels.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOSUCHCHANNEL, name.c_str()));
+			throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name);
 		return *(_channels.at(name));
 	}
 

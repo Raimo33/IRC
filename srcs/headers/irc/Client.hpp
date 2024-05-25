@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 16:41:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 18:08:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,8 @@ namespace irc
 			void											joinChannel(Channel &channel);
 			void											joinChannel(Channel &channel, const std::string &key);
 			void											leaveChannel(Channel &channel);
-			void											sendMessage(const Channel &channel, const Message &msg) const;
-			void											sendMessage(const Client &receiver, const PrivateMessage &msg) const;
+			void											sendMessage(const Channel &channel, const struct s_commandContent &msg) const; //TODO valutare se passare direttamente il messaggio come testo
+			void											sendMessage(const Client &receiver, const struct s_commandContent &msg) const;
 			
 		protected:
 

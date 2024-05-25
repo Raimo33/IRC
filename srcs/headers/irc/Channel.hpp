@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 13:00:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 17:06:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ namespace irc
 {
 	class ChannelOperator;
 	class Client;
-	class Message;
 
 	typedef enum e_channel_modes
 	{
@@ -70,7 +69,7 @@ namespace irc
 			bool									getMode(const t_channel_modes &mode) const;
 			void									setMode(const t_channel_modes &mode, const bool value);
 
-			void									receiveMessage(const Message &msg) const;
+			void									receiveMessage(const struct s_commandContent &message) const;
 			bool									isOperator(const std::string &nickname) const;
 			bool									isOperator(const Client *user) const;
 			std::string								getMembersString(void) const;

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 11:53:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 17:57:25 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,8 @@ namespace irc
 class irc::ProtocolErrorException : public std::exception
 {
 	public:
-		explicit ProtocolErrorException(const struct s_replyContent &content);
+		explicit ProtocolErrorException(const uint16_t code, const std::string *params = NULL, const std::string &custom_msg = "");
+		explicit ProtocolErrorException(const uint16_t code, const std::string params, const std::string &custom_msg = "");
 		~ProtocolErrorException(void) throw();
 
 		const struct s_replyContent	&getContent(void) const;

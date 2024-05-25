@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 12:58:50 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 18:34:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 #include "irc/Client.hpp"
 #include "irc/ChannelOperator.hpp"
 #include "irc/utils.hpp"
-#include "irc/Message.hpp"
 #include "irc/EventHandler.hpp"
 #include "irc/Exceptions.hpp"
 #include "irc/ReplyCodes.hpp"
@@ -88,7 +87,7 @@ namespace irc
 	const string &Channel::getTopic(void) const
 	{
 		if (_topic.empty())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", RPL_NOTOPIC, _name.c_str()));
+			throw ProtocolErrorException(RPL_NOTOPIC, _name);
 		return _topic;
 	}
 
@@ -97,9 +96,12 @@ namespace irc
 		const string &nickname = setter.getNickname();
 
 		if (_modes[MODE_T] && isOperator(&setter))
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_CHANOPRIVSNEEDED, nickname.c_str(), _name.c_str()));
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, params);	
+		}
 		if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
-			throw ProtocolErrorException(EventHandler::buildReplyContent(new_topic + " is too long", RPL_NOTOPIC, _name.c_str()));
+			throw ProtocolErrorException(RPL_NOTOPIC, _name, new_topic + " is too long");	
 		_topic = new_topic;
 	}
 
@@ -118,23 +120,29 @@ namespace irc
 		string	nickname = op.getNickname();
 
 		if (isOperator(nickname) == true)
-			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " is already an operator of " + _name, ERR_USERONCHANNEL, nickname.c_str(), _name.c_str()));
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already an operator of " + _name);
+		}
 		_members[nickname] = &op; //sovrascrivo il membro con l'operator (non posso avere due membri con lo stesso nickname)
 
-		const s_replyContent youreoper = EventHandler::buildReplyContent("", RPL_YOUREOPER, nickname.c_str());
+		const struct s_replyContent youreoper = EventHandler::buildReplyContent(RPL_YOUREOPER, nickname);
 		EventHandler::sendBufferedContent(op, &youreoper);
 	}
 
 	void Channel::removeOperator(ChannelOperator &op)
 	{
-		string							nickname = op.getNickname();
+		string	nickname = op.getNickname();
 
 		if (isOperator(nickname) == false)
-			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " is not an operator of " + _name, ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()));
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " is not an operator of " + _name);	
+		}
 		_members.erase(nickname);
 		addMember(op); //aggiungo l'operator come membro normale
 
-		const struct s_replyContent notoperanymore = EventHandler::buildReplyContent("", RPL_NOTOPERANYMORE);
+		const struct s_replyContent notoperanymore = EventHandler::buildReplyContent(RPL_NOTOPERANYMORE);
 		EventHandler::sendBufferedContent(op, &notoperanymore);
 	}
 
@@ -151,7 +159,10 @@ namespace irc
 	const Client &Channel::getMember(const string &nickname) const
 	{
 		if (_members.find(nickname) == _members.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()));
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+		}
 		return *(_members.at(nickname));
 	}
 
@@ -160,11 +171,11 @@ namespace irc
 		const string &nickname = user.getNickname();
 
 		if (_modes[MODE_I] && _pending_invitations.find(nickname) == _pending_invitations.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_INVITEONLYCHAN, _name.c_str()));
+			throw ProtocolErrorException(ERR_INVITEONLYCHAN, _name);
 		if (_members.find(nickname) != _members.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERONCHANNEL, nickname.c_str(), _name.c_str()));
+			throw ProtocolErrorException(ERR_USERONCHANNEL, _name);	
 		if (_members.size() >= _member_limit)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_CHANNELISFULL, _name.c_str()));
+			throw ProtocolErrorException(ERR_CHANNELISFULL, _name);
 		_members[nickname] = &user;
 	}
 
@@ -173,7 +184,10 @@ namespace irc
 		const string &nickname = user.getNickname();
 		
 		if (_members.find(nickname) == _members.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()));
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);	
+		}
 		_members.erase(nickname);
 	}
 
@@ -190,7 +204,10 @@ namespace irc
 	const Client &Channel::getPendingInvitation(const string &nickname) const
 	{
 		if (_pending_invitations.find(nickname) == _pending_invitations.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " was not invited to " + _name, ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()));
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " was not invited to " + _name);
+		}
 		return *(_pending_invitations.at(nickname));
 	}
 
@@ -199,7 +216,10 @@ namespace irc
 		const string &nickname = user->getNickname();
 
 		if (_pending_invitations.find(nickname) != _pending_invitations.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " is already invited to " + _name, ERR_USERONCHANNEL, nickname.c_str(), _name.c_str()));
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already invited to " + _name);
+		}
 		_pending_invitations[nickname] = user;
 	}
 
@@ -208,7 +228,10 @@ namespace irc
 		const string &nickname = user.getNickname();
 
 		if (_pending_invitations.find(nickname) == _pending_invitations.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " was not invited to " + _name, ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()));
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " was not invited to " + _name);
+		}
 		_pending_invitations.erase(nickname);
 	}
 
@@ -233,14 +256,10 @@ namespace irc
 		_modes[mode] = value;
 	}
 
-	void	Channel::receiveMessage(const Message &msg) const
+	void	Channel::receiveMessage(const struct s_commandContent &msg) const
 	{
-
 		for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
-		{
-			const struct s_commandContent msg_content = EventHandler::buildCommandContent(msg.getSender().getNickname(), msg.getText(), PRIVMSG, _name.c_str());
-			EventHandler::sendBufferedContent(*(receiver->second), &msg_content);
-		}
+			EventHandler::sendBufferedContent(*receiver->second, &msg);
 	}
 
 	bool	Channel::isOperator(const string &nickname) const
@@ -248,7 +267,10 @@ namespace irc
 		map<string, Client *>::const_iterator it = _members.find(nickname);
 
 		if (it == _members.end())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()));
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+		}
 		return (dynamic_cast<const ChannelOperator *>(it->second) != NULL);
 	}
 
@@ -279,12 +301,12 @@ namespace irc
 	void	Channel::checkName(const string &name) const
 	{
 		if (is_valid_channel_name(name) == false)
-			throw ProtocolErrorException(EventHandler::buildReplyContent(name + " is not a valid channel name", ERR_NOSUCHCHANNEL, name.c_str()));
+			throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name, name + " is not a valid channel name");
 	}
 
 	void	Channel::checkKey(const string &key) const
 	{
 		if (key != _key)
-			throw ProtocolErrorException(EventHandler::buildReplyContent(key + " is not a valid channel key", ERR_BADCHANNELKEY, _name.c_str()));
+			throw ProtocolErrorException(ERR_BADCHANNELKEY, _name, key + " is not a valid channel key");
 	}
 }

@@ -6,14 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 15:48:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 18:35:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc/EventHandler.hpp"
 #include "irc/Server.hpp"
-#include "irc/PrivateMessage.hpp"
-#include "irc/Message.hpp"
 #include "irc/Channel.hpp"
 #include "irc/ChannelOperator.hpp"
 #include "irc/Hasher.hpp"
@@ -84,24 +82,24 @@ namespace irc
 		s_commandContent input = parseInput(raw_input);
 
 		if (input.cmd < 0 || input.cmd >= N_COMMANDS)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_UNKNOWNCOMMAND, raw_input.c_str()));
+			throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, raw_input);	
 
 		(this->*(_handlers[input.cmd]))(input.params);
 	}
 
-	const struct s_replyContent	EventHandler::buildReplyContent(const string &custom_msg, const uint32_t code, ...)
+	const struct s_replyContent	EventHandler::buildReplyContent(const uint16_t code, const string *params, const string &custom_msg)
 	{
 		struct s_replyContent	content;
-		va_list					args;
-		const char				*arg;
 
-		va_start(args, code);
 		content.prefix = string(SERVER_NAME);
 		content.code = code;
-		while ((arg = va_arg(args, const char *)))
-			content.params.push_back(std::string(arg));
-		va_end(args);
+		if (params)
+		{
+			size_t n_params;
 
+			for (n_params = 0; params[n_params].empty() == false; n_params++);
+			content.params = vector<string>(params, params + n_params);
+		}
 		if (custom_msg.empty())
 		{
 			map<uint16_t, string>::const_iterator it = reply_codes.find(code);
@@ -114,25 +112,35 @@ namespace irc
 		return content;
 	}
 
-	const struct s_commandContent	EventHandler::buildCommandContent(const string &prefix, const string &custom_msg, const uint32_t cmd, ...)
+	const struct s_replyContent	EventHandler::buildReplyContent(const uint16_t code, const string param, const string &custom_msg)
+	{
+		const string params[] = { param };
+
+		return buildReplyContent(code, params, custom_msg);
+	}
+
+	const struct s_commandContent	EventHandler::buildCommandContent(const string &prefix, const e_cmd_type cmd, const string *params, const string &custom_msg)
 	{
 		struct s_commandContent	content;
-		string					param;
-		va_list					args;
 
-		va_start(args, cmd);
 		content.prefix = prefix;
 		content.cmd = static_cast<e_cmd_type>(cmd);
-		param = string(va_arg(args, const char *));
-		while (param.empty() == false)
+		if (params)
 		{
-			content.params.push_back(param);
-			param = string(va_arg(args, const char *));
-		}
-		va_end(args);
+			size_t n_params;
 
+			for (n_params = 0; params[n_params].empty() == false; n_params++);
+			content.params = vector<string>(params, params + n_params);
+		}
 		content.text = custom_msg;
 		return content;
+	}
+
+	const struct s_commandContent	EventHandler::buildCommandContent(const string &prefix, const e_cmd_type cmd, const string param, const string &custom_msg)
+	{
+		const string params[] = { param };
+
+		return buildCommandContent(prefix, cmd, params, custom_msg);
 	}
 
 	void	EventHandler::sendBufferedContent(const Client &receiver, const struct s_contentBase *message)
@@ -276,7 +284,7 @@ namespace irc
 		else
 			command = raw_input.substr(0, space_pos); //forse -1
 		if (_commands.find(command) == _commands.end()) //se il comando non esiste
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_UNKNOWNCOMMAND, command.c_str()));
+			throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, command);
 		input.cmd = _commands.at(command); //associo il comando all'enum
 		raw_input = raw_input.substr(space_pos + 1); //supero il comando
 
@@ -296,61 +304,57 @@ namespace irc
 		return input;
 	}
 
-	void EventHandler::handlePrivmsg(const vector<string> &params)
+	void EventHandler::handlePass(const vector<string> &args)
+	{
+		if (_client->getIsConnected())
+			throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+
+		if (args.size() < 1)
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PASS", "usage: PASS <password>");
+
+		if (Hasher::hash(args[0]) != _server->getPwdHash())
+			throw ProtocolErrorException(ERR_PASSWDMISMATCH);
+		_client->setIsConnected(true);
+	}
+
+	void EventHandler::handleNick(const vector<string> &args)
 	{
 		checkConnection(_client);
-		checkAuthentication(_client);
+		if (_client->getIsAuthenticated() || _client->getNickname().empty() == false)
+			throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+		if (args.size() < 1)
+			throw ProtocolErrorException(ERR_NONICKNAMEGIVEN);
+		checkNicknameValidity(args[0]);
+		_client->setNickname(args[0]);
+		if (_client->getUsername().empty() == false)
+			_client->setAuthenticated(true);
+	}
 
-		if (params.size() < 1)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("no recipient given (PRIVMSG)", ERR_NORECIPIENT, "PRIVMSG"));
-		if (params.size() < 2)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NOTEXTTOSEND));
-
-		if (is_channel_prefix(params[0][0])) //se il primo carattere e' #, &, + o !
-		{
-			//channel msg PRIVMSG <channel> :<message>
-
-			Channel channel = _server->getChannel(params[0]);
-			int		n_members = channel.getMembers().size();
-
-			if (n_members <= 2)
-			{
-				//promuovo il messaggio a private message
-				Client	*receiver;
-
-				receiver = channel.getMembers().begin()->second;
-				if (receiver->getNickname() == _client->getNickname())
-					receiver = channel.getMembers().rbegin()->second;
-				PrivateMessage *msg = new PrivateMessage(params[1], *_client, *receiver);
-				_client->sendMessage(*receiver, *msg);
-				delete msg;
-				return ;
-			}
-			Message *msg = new Message(params[1], *_client, channel);
-			_client->sendMessage(channel, *msg);
-			delete msg;
-		}
-		else
-		{
-			//private msg PRIVMSG <nickname> :<message>
-			Client receiver = _server->getClient(params[0]);
-
-			PrivateMessage *msg = new PrivateMessage(params[1], *_client, receiver);
-			_client->sendMessage(receiver, *msg);
-			delete msg;
-		}
+	void EventHandler::handleUser(const vector<string> &args)
+	{
+		checkConnection(_client);
+		if (_client->getIsAuthenticated() || _client->getUsername().empty() == false)
+			throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+		if (args.size() < 1)
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "USER", "usage: USER <username> <hostname> <servername> <realname>");
+		_client->setUsername(args[0]);
+		(void)args[1]; //args[1] = hostname
+		(void)args[2]; //args[2] = servername
+		_client->setRealname(args[3]);
+		if (_client->getNickname().empty() == false)
+			_client->setAuthenticated(true);
 	}
 
 	//JOIN <channel1,channel2,channel3> <key1,key2,key3>
-	void EventHandler::handleJoin(const vector<string> &params)
+	void EventHandler::handleJoin(const vector<string> &args)
 	{
 		checkConnection(_client);
 		checkAuthentication(_client);
-		if (params.size() < 1)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: JOIN <channel> <key>", ERR_NEEDMOREPARAMS, "JOIN"));
+		if (args.size() < 1)
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel> <key>");
 
-		vector<string> channels = split(params[0], ',');
-		vector<string> keys = split(params[1], ',');
+		vector<string> channels = split(args[0], ',');
+		vector<string> keys = split(args[1], ',');
 
 		for (size_t i = 0; i < channels.size(); i++)
 		{
@@ -387,98 +391,91 @@ namespace irc
 		};
 	}
 
-	void EventHandler::handlePass(const vector<string> &params)
+	void EventHandler::handlePart(const vector<string> &args)
 	{
-		if (_client->getIsConnected())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_ALREADYREGISTRED));
-
-		if (params.size() < 1)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: PASS <password>", ERR_NEEDMOREPARAMS, "PASS"));
-
-		if (Hasher::hash(params[0]) != _server->getPwdHash())
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_PASSWDMISMATCH));
-		_client->setIsConnected(true);
+		(void)args;
+		//TODO implement
 	}
 
-	void EventHandler::handleNick(const vector<string> &params)
+	void EventHandler::handlePrivmsg(const vector<string> &args)
 	{
 		checkConnection(_client);
-		if (_client->getIsAuthenticated() || _client->getNickname().empty() == false)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_ALREADYREGISTRED));
-		if (params.size() < 1)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NONICKNAMEGIVEN));
-		checkNicknameValidity(params[0]);
-		_client->setNickname(params[0]);
-		if (_client->getUsername().empty() == false)
-			_client->setAuthenticated(true);
+		checkAuthentication(_client);
+
+		if (args.size() < 1)
+			throw ProtocolErrorException(ERR_NORECIPIENT, "PRIVMSG", "no recipient given (PRIVMSG)");
+		if (args.size() < 2)
+			throw ProtocolErrorException(ERR_NOTEXTTOSEND);
+
+		const struct s_commandContent msg = EventHandler::buildCommandContent(_client->getNickname(), PRIVMSG, NULL, args[1]);
+		if (is_channel_prefix(args[0][0])) //se il primo carattere e' #, &, + o !
+		{
+			//channel msg PRIVMSG <channel> :<message>
+			Channel channel = _server->getChannel(args[0]);
+			_client->sendMessage(channel, msg);
+		}
+		else
+		{
+			//private msg PRIVMSG <nickname> :<message>
+			Client receiver = _server->getClient(args[0]);
+			_client->sendMessage(receiver, msg);
+		}
 	}
 
-	void EventHandler::handleUser(const vector<string> &params)
-	{
-		checkConnection(_client);
-		if (_client->getIsAuthenticated() || _client->getUsername().empty() == false)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_ALREADYREGISTRED));
-		if (params.size() < 1)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: USER <username> <hostname> <servername> <realname>", ERR_NEEDMOREPARAMS, "USER"));
-		_client->setUsername(params[0]);
-		(void)params[1]; //params[1] = hostname
-		(void)params[2]; //params[2] = servername
-		_client->setRealname(params[3]);
-		if (_client->getNickname().empty() == false)
-			_client->setAuthenticated(true);
-	}
 
-	void EventHandler::handleQuit(const vector<string> &params)
+	void EventHandler::handleQuit(const vector<string> &args)
 	{
-		(void)params;
+		(void)args;
 		_server->removeClient(*_client);
 	}
 
-	void EventHandler::handleKick(const vector<string> &params)
+	void EventHandler::handleKick(const vector<string> &args)
 	{
 		checkConnection(_client);
 		checkAuthentication(_client);
-		if (params.size() < 2)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: KICK <channel> <nickname> <reason>", ERR_NEEDMOREPARAMS, "KICK"));
 
-		Channel			channel = _server->getChannel(params[0]);
-		Client			target = _server->getClient(params[1]);
+		if (args.size() < 2)
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> <reason>");
+
+		Channel			channel = _server->getChannel(args[0]);
+		Client			target = _server->getClient(args[1]);
 		ChannelOperator	op(*_client);
 
-		if (params.size() < 3)
+		if (args.size() < 3)
 			op.kick(target, channel);
 		else
-			op.kick(target, channel, params[2]);
+			op.kick(target, channel, args[2]);
 	}
 
-	void EventHandler::handleInvite(const vector<string> &params)
+	void EventHandler::handleInvite(const vector<string> &args)
 	{
 		checkConnection(_client);
 		checkAuthentication(_client);
 
-		if (params.size() < 2)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: INVITE <nickname> <channel>", ERR_NEEDMOREPARAMS, "INVITE"));
+		if (args.size() < 2)
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>");
 
-		Client			target = _server->getClient(params[0]);
-		Channel			channel = _server->getChannel(params[1]);
+		Client			target = _server->getClient(args[0]);
+		Channel			channel = _server->getChannel(args[1]);
 		ChannelOperator	op(*_client);
 
 		op.invite(target, channel);
 	}
 
-	void EventHandler::handleTopic(const vector<string> &params)
+	void EventHandler::handleTopic(const vector<string> &args)
 	{
 		checkConnection(_client);
 		checkAuthentication(_client);
 
-		const size_t	n_params = params.size();
+		const size_t	n_args = args.size();
 
-		if (n_params < 1)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: TOPIC <channel> [<topic>]", ERR_NEEDMOREPARAMS, "TOPIC"));
-		Channel channel = _client->getChannel(params[0]);
-		if (n_params == 1)
+		if (n_args < 1)
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "TOPIC", "usage: TOPIC <channel> [<topic>]");
+		Channel channel = _client->getChannel(args[0]);
+		if (n_args == 1)
 		{
-			const struct s_replyContent topic = EventHandler::buildReplyContent(channel.getTopic(), RPL_TOPIC, _client->getNickname().c_str(), channel.getName().c_str());
+			const string params[] = { _client->getNickname(), channel.getName() };
+			const struct s_replyContent topic = EventHandler::buildReplyContent(RPL_TOPIC, params, channel.getTopic()); // TODO valutare se mettere qualcosa quando ik topic [ vuoto ]
 			EventHandler::sendBufferedContent(*_client, &topic);
 		}
 		else
@@ -486,34 +483,34 @@ namespace irc
 			if (channel.getMode(MODE_T))
 			{
 				ChannelOperator op(*_client);
-				op.topicSet(channel, params[1]);
+				op.topicSet(channel, args[1]);
 			}
 			else
-				channel.setTopic(params[1], *_client);
+				channel.setTopic(args[1], *_client);
 		}
 	}
 
-	void EventHandler::handleMode(const vector<string> &params)
+	void EventHandler::handleMode(const vector<string> &args)
 	{
 		checkConnection(_client);
 		checkAuthentication(_client);
 
-		if (params.size() < 2)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("usage: MODE <channel> <mode>", ERR_NEEDMOREPARAMS, "MODE"));
+		if (args.size() < 2)
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode>");
 		//TODO implementare
 		//(RPL_CHANNELMODEIS)
 		//(RPL_TOPIC_WHO_TIME)
 		//(RPL_TOPIC)
 		//(ERR_UNKNOWNMODE)
-		(void)params;
+		(void)args;
 	}
 
 	void	EventHandler::checkNicknameValidity(const string &nickname) const
 	{
 		if (is_valid_nickname(nickname) == false)
-			throw ProtocolErrorException(EventHandler::buildReplyContent("allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(MAX_NICKNAME_LEN), ERR_ERRONEOUSNICKNAME, nickname.c_str()));
+			throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname, "allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(MAX_NICKNAME_LEN));
 		if (_server->isClientConnected(nickname))
-			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_NICKNAMEINUSE, nickname.c_str()));
+			throw ProtocolErrorException(ERR_NICKNAMEINUSE, nickname);
 	}
 
 	const std::map<uint16_t, std::string> EventHandler::_command_strings = EventHandler::initCommandStrings();
@@ -522,11 +519,11 @@ namespace irc
 static void checkConnection(const Client *client)
 {
 	if (client->getIsConnected() == false)
-		throw ProtocolErrorException(EventHandler::buildReplyContent("you are not connected, use PASS <password> first", ERR_NOTREGISTERED));
+		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not connected, use PASS <password> first");
 }
 
 static void checkAuthentication(const Client *client)
 {
 	if (client->getIsAuthenticated() == false)
-		throw ProtocolErrorException(EventHandler::buildReplyContent("you are not registered, use NICK <nickname> and USER <username> first", ERR_NOTREGISTERED));
+		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not registered, use NICK <nickname> and USER <username> first");
 }
