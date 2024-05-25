@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 12:54:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 13:00:03 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ namespace irc
 		private:
 
 			std::string								_name;
-			std::string								_key; //TODO hashare
+			std::string								_key;
 			std::string								_topic;
 			uint32_t								_member_limit;
 			std::map<std::string, Client *>			_members;
