@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:08:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 12:54:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,55 +45,50 @@ namespace irc
 			~Channel(void);
 		
 			//TODO valutare quali metodi rendere private, non possono stare tutti public, e' una bad practice
-			const std::string								&getName(void) const;
-			void											setName(const std::string &new_name);
-			const std::string								&getKey(void) const;
-			void											setKey(const std::string &new_key);
-			const std::string								&getTopic(void) const;
-			void											setTopic(const std::string &new_topic, const Client &setter);
-			uint32_t										getMemberLimit(void) const;
-			void											setMemberLimit(const uint32_t new_limit);
-			const std::map<std::string, ChannelOperator *>	&getOperators(void) const;
-			// void											setOperators(const std::map<std::string, ChannelOperator *> &new_operators);
-			// const Client									&getOperator(const std::string &nickname) const;
-			void											addOperator(ChannelOperator &op);
-			void											removeOperator(ChannelOperator &op);
-			const std::map<std::string, Client *>			&getMembers(void) const;
-			void											setMembers(const std::map<std::string, Client *> &new_members);
-			const Client									&getMember(const std::string &nickname) const;
-			void											addMember(Client &user);
-			void											removeMember(const Client &user);
-			const std::map<std::string, Client *>			&getPendingInvitations(void) const;
-			void											setPendingInvitations(const std::map<std::string, Client *> &new_invitations);
-			const Client									&getPendingInvitation(const std::string &nickname) const;
-			void											addPendingInvitation(Client *user);
-			void											removePendingInvitation(const Client &user);
-			const bool										*getModes(void) const;
-			void											setModes(const bool new_modes[N_MODES]);
-			bool											getMode(const t_channel_modes &mode) const;
-			void											setMode(const t_channel_modes &mode, const bool value);
-			const std::string								&getMembersString(void) const;
-			void											setMembersString(const std::string new_members_string);
+			const std::string						&getName(void) const;
+			void									setName(const std::string &new_name);
+			const std::string						&getKey(void) const;
+			void									setKey(const std::string &new_key);
+			const std::string						&getTopic(void) const;
+			void									setTopic(const std::string &new_topic, const Client &setter);
+			uint32_t								getMemberLimit(void) const;
+			void									setMemberLimit(const uint32_t new_limit);
+			void									addOperator(ChannelOperator &op);
+			void									removeOperator(ChannelOperator &op);
+			const std::map<std::string, Client *>	&getMembers(void) const;
+			void									setMembers(const std::map<std::string, Client *> &new_members);
+			const Client							&getMember(const std::string &nickname) const;
+			void									addMember(Client &user);
+			void									removeMember(const Client &user);
+			const std::map<std::string, Client *>	&getPendingInvitations(void) const;
+			void									setPendingInvitations(const std::map<std::string, Client *> &new_invitations);
+			const Client							&getPendingInvitation(const std::string &nickname) const;
+			void									addPendingInvitation(Client *user);
+			void									removePendingInvitation(const Client &user);
+			const bool								*getModes(void) const;
+			void									setModes(const bool new_modes[N_MODES]);
+			bool									getMode(const t_channel_modes &mode) const;
+			void									setMode(const t_channel_modes &mode, const bool value);
 
-			void											receiveMessage(const Message &msg) const;
-			bool											isOperator(const std::string &nickname) const;
-			bool											isOperator(const Client *user) const;
+			void									receiveMessage(const Message &msg) const;
+			bool									isOperator(const std::string &nickname) const;
+			bool									isOperator(const Client *user) const;
+			std::string								getMembersString(void) const;
 
-			friend class 									ChannelOperator;
+			// friend class 									ChannelOperator;
 
-		protected:
+		private:
 
-			std::string										_name; //deve iniziare con # o & e contenere massimo 200 caratteri, caratteri vietati: (spazio, ^G, virgola)
-			std::string										_key; //la chiave del canale non viene hashata, si conserva quella raw
-			std::string										_topic;
-			uint32_t										_member_limit;
-			std::map<std::string, Client *>					_members; // {nickname, user} //TODO mettere al @ se e' operator
-			std::map<std::string, Client *>					_pending_invitations; // {nickname, user} (il channel operator puo fare /invite)
-			bool											_modes[N_MODES];
-			std::string										_members_string;
-			
-			void											checkName(const std::string &name) const;
-			void											checkKey(const std::string &key) const;
+			std::string								_name;
+			std::string								_key; //TODO hashare
+			std::string								_topic;
+			uint32_t								_member_limit;
+			std::map<std::string, Client *>			_members;
+			std::map<std::string, Client *>			_pending_invitations;
+			bool									_modes[N_MODES];
+
+			void									checkName(const std::string &name) const;
+			void									checkKey(const std::string &key) const;
 	};
 }
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:50:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 12:58:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ namespace irc
 
 	void Channel::addOperator(ChannelOperator &op)
 	{
-		string							nickname = op.getNickname();
+		string	nickname = op.getNickname();
 
 		if (isOperator(nickname) == true)
 			throw ProtocolErrorException(EventHandler::buildReplyContent(nickname + " is already an operator of " + _name, ERR_USERONCHANNEL, nickname.c_str(), _name.c_str()));
@@ -166,9 +166,6 @@ namespace irc
 		if (_members.size() >= _member_limit)
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_CHANNELISFULL, _name.c_str()));
 		_members[nickname] = &user;
-		if (_members_string.empty() == false)
-			_members_string += " ";
-		_members_string += nickname;
 	}
 
 	void Channel::removeMember(const Client &user)
@@ -178,7 +175,6 @@ namespace irc
 		if (_members.find(nickname) == _members.end())
 			throw ProtocolErrorException(EventHandler::buildReplyContent("", ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str()));
 		_members.erase(nickname);
-		_members_string.erase(_members_string.find(nickname), nickname.length() + 1);
 	}
 
 	const map<string, Client *> &Channel::getPendingInvitations(void) const
@@ -237,16 +233,6 @@ namespace irc
 		_modes[mode] = value;
 	}
 
-	const string &Channel::getMembersString(void) const
-	{
-		return _members_string;
-	}
-
-	void Channel::setMembersString(const string new_members_string)
-	{
-		_members_string = new_members_string;
-	}
-
 	void	Channel::receiveMessage(const Message &msg) const
 	{
 
@@ -269,6 +255,25 @@ namespace irc
 	bool	Channel::isOperator(const Client *user) const
 	{
 		return isOperator(user->getNickname());
+	}
+
+	string	Channel::getMembersString(void) const //TODO ottimizzare, mantenere una stringa aggiornata di operatori e membri
+	{
+		string	members_str;
+
+		members_str.reserve(_members.size() * 10);
+		for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
+		{
+			if (isOperator(it->first) == true)
+				members_str += "@" + it->first + ", ";
+		}
+		for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
+		{
+			if (isOperator(it->first) == false)
+				members_str += it->first + ", ";
+		}
+		members_str.erase(members_str.length() - 2);
+		return members_str;
 	}
 
 	void	Channel::checkName(const string &name) const

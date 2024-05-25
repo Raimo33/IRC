@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:59:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 11:53:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ namespace irc
 		{
 			map<uint16_t, string>::const_iterator it = reply_codes.find(code);
 			if (it == reply_codes.end())
-				throw InternalErrorException("ProtocolErrorException::ProtocolErrorException: Unknown reply code");
+				throw InternalErrorException("EventHandler::buildReplyContent: Unknown reply code");
 			content.text = it->second;
 		}
 		else
