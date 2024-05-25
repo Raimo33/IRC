@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/23 15:38:24 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/23 16:42:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 15:46:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ namespace irc
 		NICK,
 		USER,
 		JOIN,
+		PART,
 		PRIVMSG,
 		QUIT,
 		KICK,

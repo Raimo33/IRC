@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 11:53:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 15:47:59 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,6 +204,7 @@ namespace irc
 		commands["NICK"] = NICK;
 		commands["USER"] = USER;
 		commands["JOIN"] = JOIN;
+		commands["PART"] = PART;
 		commands["PRIVMSG"] = PRIVMSG;
 		commands["QUIT"] = QUIT;
 
@@ -219,10 +220,12 @@ namespace irc
 	{
 		vector<CommandHandler>	handlers(N_COMMANDS);
 
-		handlers[PRIVMSG] = &EventHandler::handlePrivmsg;
-		handlers[JOIN] = &EventHandler::handleJoin;
 		handlers[PASS] = &EventHandler::handlePass;
 		handlers[NICK] = &EventHandler::handleNick;
+		handlers[USER] = &EventHandler::handleUser;
+		handlers[JOIN] = &EventHandler::handleJoin;
+		handlers[PART] = &EventHandler::handlePart;
+		handlers[PRIVMSG] = &EventHandler::handlePrivmsg;
 		handlers[QUIT] = &EventHandler::handleQuit;
 
 		handlers[KICK] = &EventHandler::handleKick;
@@ -239,11 +242,12 @@ namespace irc
 
 		if (command_strings.empty())
 		{
-			command_strings[PRIVMSG] = "PRIVMSG";
-			command_strings[JOIN] = "JOIN";
 			command_strings[PASS] = "PASS";
 			command_strings[NICK] = "NICK";
 			command_strings[USER] = "USER";
+			command_strings[JOIN] = "JOIN";
+			command_strings[PART] = "PART";
+			command_strings[PRIVMSG] = "PRIVMSG";
 			command_strings[QUIT] = "QUIT";
 
 			command_strings[KICK] = "KICK";

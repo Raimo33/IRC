@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 18:24:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/25 15:46:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ namespace irc
 			struct s_commandContent							parseInput(std::string &raw_input) const;
 			void											handlePrivmsg(const std::vector<std::string> &params); //chiama sendMessage di User
 			void											handleJoin(const std::vector<std::string> &params);
+			void											handlePart(const std::vector<std::string> &params);
 			void											handlePass(const std::vector<std::string> &params);
 			void											handleNick(const std::vector<std::string> &params);
 			void											handleUser(const std::vector<std::string> &params);
