@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 19:34:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 19:40:59 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -428,21 +428,22 @@ namespace irc
 
 	void EventHandler::handleQuit(const vector<string> &args)
 	{
-		const string					&reason = args.size() > 0 ? args[0] : "Client quit";
-		const map<string, Client *>		&clients = _server->getClients();
-		const string					&quitting_nickname = _client->getNickname();
-		const struct s_commandContent	quit = EventHandler::buildCommandContent(quitting_nickname, QUIT, NULL, reason);
-
-		for (map<string, Client *>::const_iterator it = clients.begin(); it != clients.end(); it++)
+		const string						&reason = args.size() > 0 ? args[0] : "Client quit";
+		const string						&quitting_nickname = _client->getNickname();
+		const struct s_commandContent		quit = EventHandler::buildCommandContent(quitting_nickname, QUIT, NULL, reason);
+		const map<string, const Channel *>	&channels = _client->getChannels();
+		
+		for (map<string, const Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
 		{
-			if (it->second == _client)
-				continue;
-			const map<string, const Channel *> &channels = it->second->getChannels();
-			for (map<string, const Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
+			const Channel				*channel = it_channel->second;
+			const map<string, Client *>	&members = channel->getMembers();
+
+			for (map<string, Client *>::const_iterator it_member = members.begin(); it_member != members.end(); it_member++)
 			{
-				const map<string, Client *> &members = it_channel->second->getMembers();
-				if (members.find(quitting_nickname) != members.end())
-					it->second->sendMessage(*it_channel->second, quit);
+				const Client	*member = it_member->second;
+
+				if (member->getNickname() != quitting_nickname)
+					member->receiveMessage(quit);
 			}
 		}
 		_server->removeClient(*_client);
