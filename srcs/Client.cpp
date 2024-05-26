@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:16:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:59:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,14 +148,10 @@ namespace irc
 		}
 		_is_authenticated = is_authenticated;
 
-		{
-			const struct s_replyContent welcome = EventHandler::buildReplyContent(RPL_WELCOME, NULL, "Welcome to the Internet Relay Network" + _nickname + "!" + _username + "@" + _ip_addr);
-			EventHandler::sendBufferedContent(*this, &welcome);
-		}
-		{
-			const struct s_replyContent yourhost = EventHandler::buildReplyContent(RPL_YOURHOST, NULL, "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION);
-			EventHandler::sendBufferedContent(*this, &yourhost);
-		}
+		const struct s_replyContent welcome = EventHandler::buildReplyContent(RPL_WELCOME, NULL, "Welcome to the Internet Relay Network" + _nickname + "!" + _username + "@" + _ip_addr);
+		const struct s_replyContent yourhost = EventHandler::buildReplyContent(RPL_YOURHOST, NULL, "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION);
+		receiveMessage(welcome);
+		receiveMessage(yourhost);
 	}
 
 	uint16_t	Client::getPort(void) const
@@ -178,8 +174,13 @@ namespace irc
 		return *_server;
 	}
 
-	void	Client::joinChannel(Channel &channel)
+	void	Client::joinChannel(Channel &channel, const string &key)
 	{
+		if (!_is_authenticated)
+			throw ProtocolErrorException(ERR_NOTREGISTERED);
+		if (channel.getMode('k') && channel.getKey() != key)
+			throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
+
 		try
 		{
 			channel.addMember(*this); //se fallisce addMember la lascio catchare a chi sta su
@@ -192,15 +193,6 @@ namespace irc
 				channel.removeMember(*this);
 			throw e;
 		}
-	}
-
-	void	Client::joinChannel(Channel &channel, const string &key)
-	{
-		if (!_is_authenticated)
-			throw ProtocolErrorException(ERR_NOTREGISTERED);
-		if (channel.getMode('k') && channel.getKey() != key)
-			throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
-		joinChannel(channel);
 
 		struct s_replyContent	topic_reply;
 		const string			&channel_topic = channel.getTopic();
@@ -213,17 +205,20 @@ namespace irc
 		const string params[] = { "=", channel_name };
 		const struct s_replyContent namreply = EventHandler::buildReplyContent(RPL_NAMREPLY, params, channel.getMembersString());
 		const struct s_replyContent endofnames = EventHandler::buildReplyContent(RPL_ENDOFNAMES, channel_name);
-		EventHandler::sendBufferedContent(*this, &topic_reply);
-		EventHandler::sendBufferedContent(*this, &namreply);
-		EventHandler::sendBufferedContent(*this, &endofnames);
+		receiveMessage(topic_reply);
+		receiveMessage(namreply);
+		receiveMessage(endofnames);
 	}
 
-	void	Client::leaveChannel(Channel &channel)
+	void	Client::leaveChannel(Channel &channel, const string &reason)
 	{
 		if (!_is_authenticated)
 			throw ProtocolErrorException(ERR_NOTREGISTERED);
 		channel.removeMember(*this);
 		removeChannel(channel);
+
+		const struct s_commandContent part = EventHandler::buildCommandContent(_nickname, PART, channel.getName(), reason);
+		channel.receiveMessage(part);
 	}
 
 	void	Client::sendMessage(const Channel &channel, const struct s_commandContent &msg) const
@@ -239,6 +234,11 @@ namespace irc
 	{
 		if (!receiver.getIsAuthenticated())
 			throw ProtocolErrorException(ERR_NOLOGIN, receiver.getNickname());
-		EventHandler::sendBufferedContent(receiver, &msg);
+		receiver.receiveMessage(msg);
+	}
+
+	void	Client::receiveMessage(const struct s_contentBase &msg) const
+	{
+		EventHandler::sendBufferedContent(*this, &msg);
 	}
 }

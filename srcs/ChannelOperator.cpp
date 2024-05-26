@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:01:24 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:58:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,12 +61,12 @@ namespace irc
 		{
 			const string params[] = { nickname, channel.getName() };
 			const struct s_replyContent reply_to_issuer = EventHandler::buildReplyContent(RPL_INVITING, params);
-			EventHandler::sendBufferedContent(*this, &reply_to_issuer);
+			receiveMessage(reply_to_issuer);
 		}
 		{
 			const string params[] = { nickname, channel.getName() };
 			const struct s_commandContent message_to_target = EventHandler::buildCommandContent(_nickname, INVITE, params);
-			EventHandler::sendBufferedContent(user, &message_to_target);
+			user.receiveMessage(message_to_target);
 		}
 	}
 

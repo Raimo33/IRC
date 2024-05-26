@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 18:34:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 19:00:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,7 +282,7 @@ namespace irc
 		}
 		catch (const ProtocolErrorException &e)
 		{
-			EventHandler::sendBufferedContent(*client, &e.getContent());
+			client->receiveMessage(e.getContent());
 			//logger.log("Error: " + string(e.what()));
 		}
 		catch (const std::exception &e)

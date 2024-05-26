@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:12:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:59:39 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -351,7 +351,7 @@ namespace irc
 		checkConnection(_client);
 		checkAuthentication(_client);
 		if (args.size() < 1)
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel> <key>");
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]");
 
 		vector<string> channels = split(args[0], ',');
 		vector<string> keys = split(args[1], ',');
@@ -393,8 +393,19 @@ namespace irc
 
 	void EventHandler::handlePart(const vector<string> &args)
 	{
-		(void)args;
-		//TODO implement
+		const uint16_t n_args = args.size();
+		
+		if (n_args < 1)
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PART", "usage: PART <channel>{,<channel>} [<reason>]");
+
+		const string reason = (n_args > 1) ? args[1] : "";
+		const vector<string> channels = split(args[0], ',');
+
+		for (vector<string>::const_iterator it = channels.begin(); it != channels.end(); it++)
+		{
+			Channel channel = _server->getChannel(*it);
+			_client->leaveChannel(channel, reason);
+		}
 	}
 
 	void EventHandler::handlePrivmsg(const vector<string> &args)
@@ -402,9 +413,10 @@ namespace irc
 		checkConnection(_client);
 		checkAuthentication(_client);
 
-		if (args.size() < 1)
+		const uint16_t n_args = args.size();
+		if (n_args < 1)
 			throw ProtocolErrorException(ERR_NORECIPIENT, "PRIVMSG", "no recipient given (PRIVMSG)");
-		if (args.size() < 2)
+		if (n_args < 2)
 			throw ProtocolErrorException(ERR_NOTEXTTOSEND);
 
 		const struct s_commandContent msg = EventHandler::buildCommandContent(_client->getNickname(), PRIVMSG, NULL, args[1]);
@@ -422,10 +434,18 @@ namespace irc
 		}
 	}
 
-
 	void EventHandler::handleQuit(const vector<string> &args)
 	{
-		(void)args;
+		const string					&reason = args.size() > 0 ? args[0] : "Client quit";
+		const map<string, Client *>		&clients = _server->getClients();
+		const struct s_commandContent	quit = EventHandler::buildCommandContent(_client->getNickname(), QUIT, NULL, reason);
+
+		for (map<string, Client *>::const_iterator it = clients.begin(); it != clients.end(); it++)
+		{
+			if (it->second == _client)
+				continue;
+			it->second->receiveMessage(quit);
+		}
 		_server->removeClient(*_client);
 	}
 
@@ -434,17 +454,15 @@ namespace irc
 		checkConnection(_client);
 		checkAuthentication(_client);
 
-		if (args.size() < 2)
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> <reason>");
+		const uint16_t	n_args = args.size();
+		if (n_args < 2)
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: TOPIC <channel> [<topic>]");
 
 		Channel			channel = _server->getChannel(args[0]);
 		Client			target = _server->getClient(args[1]);
 		ChannelOperator	op(*_client);
 
-		if (args.size() < 3)
-			op.kick(target, channel);
-		else
-			op.kick(target, channel, args[2]);
+		args.size() > 2 ? op.kick(target, channel, args[2]) : op.kick(target, channel);
 	}
 
 	void EventHandler::handleInvite(const vector<string> &args)
@@ -484,7 +502,7 @@ namespace irc
 				const string params[] = { _client->getNickname(), channel.getName() };
 				topic_reply = EventHandler::buildReplyContent(RPL_TOPIC, params, topic);
 			}
-			EventHandler::sendBufferedContent(*_client, &topic_reply);
+			_client->receiveMessage(topic_reply);
 		}
 		else
 		{
@@ -503,8 +521,9 @@ namespace irc
 		checkConnection(_client);
 		checkAuthentication(_client);
 
-		if (args.size() < 2 || (args[1][0] != '+' && args[1][0] != '-'))
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode> [<param>]");
+		const uint16_t	n_args = args.size();
+		if (n_args < 2 || (args[1][0] != '+' && args[1][0] != '-'))
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}");
 
 		Channel				channel = _server->getChannel(args[0]);
 		bool				status;
@@ -514,7 +533,7 @@ namespace irc
 		vector<string>		params;
 		uint32_t			j = 2;
 
-		params.reserve(args.size() - 2);
+		params.reserve(n_args - 2);
 		for (uint32_t i = 0; i < args[1].size(); i++)
 		{
 			if (args[1][i] == '+' || args[1][i] == '-')
@@ -524,7 +543,7 @@ namespace irc
 				throw ProtocolErrorException(ERR_UNKNOWNMODE, string(1, mode));
 			if (channel_mode_requires_param(mode))
 			{
-				if (j >= args.size())
+				if (j >= n_args)
 					throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode> [<param>]");
 				params.push_back(args[j++]);
 			}

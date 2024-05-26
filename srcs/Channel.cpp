@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:00:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:57:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,7 @@ namespace irc
 		_members[nickname] = &op; //sovrascrivo il membro con l'operator (non posso avere due membri con lo stesso nickname)
 
 		const struct s_replyContent youreoper = EventHandler::buildReplyContent(RPL_YOUREOPER, nickname);
-		EventHandler::sendBufferedContent(op, &youreoper);
+		op.receiveMessage(youreoper);
 	}
 
 	void Channel::removeOperator(ChannelOperator &op)
@@ -141,7 +141,7 @@ namespace irc
 		addMember(op); //aggiungo l'operator come membro normale
 
 		const struct s_replyContent notoperanymore = EventHandler::buildReplyContent(RPL_NOTOPERANYMORE);
-		EventHandler::sendBufferedContent(op, &notoperanymore);
+		op.receiveMessage(notoperanymore);
 	}
 
 	const map<string, Client *> &Channel::getMembers(void) const
@@ -290,7 +290,10 @@ namespace irc
 	void	Channel::receiveMessage(const struct s_commandContent &msg) const
 	{
 		for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
-			EventHandler::sendBufferedContent(*receiver->second, &msg);
+		{
+			if (receiver->first != msg.prefix)
+				receiver->second->receiveMessage(msg);
+		}
 	}
 
 	bool	Channel::isOperator(const string &nickname) const
