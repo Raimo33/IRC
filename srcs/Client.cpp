@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 18:35:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 17:14:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,9 +196,9 @@ namespace irc
 
 	void	Client::joinChannel(Channel &channel, const string &key)
 	{
-		if (_is_authenticated == false)
+		if (!_is_authenticated)
 			throw ProtocolErrorException(ERR_NOTREGISTERED);
-		if (channel.getMode(MODE_K) && channel.getKey() != key)
+		if (channel.getMode('k') && channel.getKey() != key)
 			throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
 		joinChannel(channel);
 
@@ -214,7 +214,7 @@ namespace irc
 
 	void	Client::leaveChannel(Channel &channel)
 	{
-		if (_is_authenticated == false)
+		if (!_is_authenticated)
 			throw ProtocolErrorException(ERR_NOTREGISTERED);
 		channel.removeMember(*this);
 		removeChannel(channel);
@@ -231,7 +231,7 @@ namespace irc
 
 	void	Client::sendMessage(const Client &receiver, const struct s_commandContent &msg) const
 	{
-		if (receiver.getIsAuthenticated() == false)
+		if (!receiver.getIsAuthenticated())
 			throw ProtocolErrorException(ERR_NOLOGIN, receiver.getNickname());
 		EventHandler::sendBufferedContent(receiver, &msg);
 	}

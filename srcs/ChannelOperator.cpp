@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:00:22 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 17:59:26 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:01:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 using std::map;
 using std::string;
+using std::vector;
 
 namespace irc
 {
@@ -76,12 +77,16 @@ namespace irc
 	}
 
 	//MODE #channel +n params
-	void ChannelOperator::modeChange(Channel &channel, const t_channel_modes &mode, const bool status) const
+	void ChannelOperator::modeChange(Channel &channel, const char mode, const bool status, const string &param) const
 	{
-		//TODO implementare
-		(void)channel;
-		(void)mode;
-		(void)status;
+		checkPrivilege(channel);
+		channel.setMode(mode, status, param);
+	}
+
+	void ChannelOperator::modesChange(Channel &channel, const vector<bool> &modes, const vector<string> &params) const
+	{
+		checkPrivilege(channel);
+		channel.setModes(modes, params);
 	}
 
 	void ChannelOperator::promoteOperator(Channel &channel, const Client &user) const
@@ -99,7 +104,7 @@ namespace irc
 
 	void ChannelOperator::checkPrivilege(const Channel &channel) const
 	{
-		if (channel.isOperator(this) == false)
+		if (!channel.isOperator(this))
 			throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, channel.getName());
 	}
 }

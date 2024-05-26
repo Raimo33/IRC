@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 18:35:13 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:05:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ namespace irc
 		{
 			size_t n_params;
 
-			for (n_params = 0; params[n_params].empty() == false; n_params++);
+			for (n_params = 0; !params[n_params].empty(); n_params++);
 			content.params = vector<string>(params, params + n_params);
 		}
 		if (custom_msg.empty())
@@ -129,7 +129,7 @@ namespace irc
 		{
 			size_t n_params;
 
-			for (n_params = 0; params[n_params].empty() == false; n_params++);
+			for (n_params = 0; !params[n_params].empty(); n_params++);
 			content.params = vector<string>(params, params + n_params);
 		}
 		content.text = custom_msg;
@@ -171,12 +171,12 @@ namespace irc
 			to_send = first_part + second_part.substr(0, send_length) + "\r\n";
 			second_part = second_part.substr(send_length); // Update second_part correctly
 			send_p(receiver.getSocket(), to_send.c_str(), to_send.length(), 0);
-		} while (second_part.empty() == false);
+		} while (!second_part.empty());
 	}
 
 	void	EventHandler::getRawReplyMessage(const Client &receiver, const struct s_replyContent *reply, string *first_part, string *second_part)
 	{
-		if (reply->prefix.empty() == false)
+		if (!reply->prefix.empty())
 			*first_part += ":" + reply->prefix + " ";
 		*first_part += irc::to_string(reply->code);
 		*first_part += " " + receiver.getNickname() + " ";
@@ -189,7 +189,7 @@ namespace irc
 
 	void	EventHandler::getRawCommandMessage(const struct s_commandContent *command, string *first_part, string *second_part)
 	{
-		if (command->prefix.empty() == false)
+		if (!command->prefix.empty())
 			*first_part += ":" + command->prefix + " ";
 		*first_part += _command_strings.at(command->cmd);
 		*first_part += " ";
@@ -201,7 +201,7 @@ namespace irc
 	{
 		static map<string, e_cmd_type>	commands;
 
-		if (commands.empty() == false) //se il map e' gia' stato inizializzato
+		if (!commands.empty()) //se il map e' gia' stato inizializzato
 			return commands;
 
 		commands["PASS"] = PASS;
@@ -320,20 +320,20 @@ namespace irc
 	void EventHandler::handleNick(const vector<string> &args)
 	{
 		checkConnection(_client);
-		if (_client->getIsAuthenticated() || _client->getNickname().empty() == false)
+		if (_client->getIsAuthenticated() || !_client->getNickname().empty())
 			throw ProtocolErrorException(ERR_ALREADYREGISTRED);
 		if (args.size() < 1)
 			throw ProtocolErrorException(ERR_NONICKNAMEGIVEN);
 		checkNicknameValidity(args[0]);
 		_client->setNickname(args[0]);
-		if (_client->getUsername().empty() == false)
+		if (!_client->getUsername().empty())
 			_client->setAuthenticated(true);
 	}
 
 	void EventHandler::handleUser(const vector<string> &args)
 	{
 		checkConnection(_client);
-		if (_client->getIsAuthenticated() || _client->getUsername().empty() == false)
+		if (_client->getIsAuthenticated() || !_client->getUsername().empty())
 			throw ProtocolErrorException(ERR_ALREADYREGISTRED);
 		if (args.size() < 1)
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "USER", "usage: USER <username> <hostname> <servername> <realname>");
@@ -341,7 +341,7 @@ namespace irc
 		(void)args[1]; //args[1] = hostname
 		(void)args[2]; //args[2] = servername
 		_client->setRealname(args[3]);
-		if (_client->getNickname().empty() == false)
+		if (!_client->getNickname().empty())
 			_client->setAuthenticated(true);
 	}
 
@@ -480,7 +480,7 @@ namespace irc
 		}
 		else
 		{
-			if (channel.getMode(MODE_T))
+			if (channel.getMode('t'))
 			{
 				ChannelOperator op(*_client);
 				op.topicSet(channel, args[1]);
@@ -495,19 +495,41 @@ namespace irc
 		checkConnection(_client);
 		checkAuthentication(_client);
 
-		if (args.size() < 2)
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode>");
-		//TODO implementare
-		//(RPL_CHANNELMODEIS)
-		//(RPL_TOPIC_WHO_TIME)
-		//(RPL_TOPIC)
-		//(ERR_UNKNOWNMODE)
-		(void)args;
+		if (args.size() < 2 || (args[1][0] != '+' && args[1][0] != '-'))
+			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode> [<param>]");
+
+		Channel				channel = _server->getChannel(args[0]);
+		bool				status;
+		unsigned char		mode;
+		const vector<bool>	&current_modes = channel.getModes();
+		vector<bool>		new_modes(current_modes);
+		vector<string>		params;
+		uint32_t			j = 2;
+
+		params.reserve(args.size() - 2);
+		for (uint32_t i = 0; i < args[1].size(); i++)
+		{
+			if (args[1][i] == '+' || args[1][i] == '-')
+				status = (args[1][i++] == '+');
+			mode = args[1][i];
+			if (string(SUPPORTED_CHANNEL_MODES).find(mode) == string::npos)
+				throw ProtocolErrorException(ERR_UNKNOWNMODE, string(1, mode));
+			if (channel_mode_requires_param(mode))
+			{
+				if (j >= args.size())
+					throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode> [<param>]");
+				params.push_back(args[j++]);
+			}
+			new_modes[mode] = status;
+		}
+
+		ChannelOperator op(*_client);
+		op.modesChange(channel, new_modes, params);
 	}
 
 	void	EventHandler::checkNicknameValidity(const string &nickname) const
 	{
-		if (is_valid_nickname(nickname) == false)
+		if (!is_valid_nickname(nickname))
 			throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname, "allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(MAX_NICKNAME_LEN));
 		if (_server->isClientConnected(nickname))
 			throw ProtocolErrorException(ERR_NICKNAMEINUSE, nickname);
@@ -518,12 +540,12 @@ namespace irc
 
 static void checkConnection(const Client *client)
 {
-	if (client->getIsConnected() == false)
+	if (!client->getIsConnected())
 		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not connected, use PASS <password> first");
 }
 
 static void checkAuthentication(const Client *client)
 {
-	if (client->getIsAuthenticated() == false)
+	if (!client->getIsAuthenticated())
 		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not registered, use NICK <nickname> and USER <username> first");
 }

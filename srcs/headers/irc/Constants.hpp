@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 03:05:20 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 15:46:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 17:05:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ namespace irc
     const uint16_t		MAX_MSG_LENGTH = 512;
     const uint16_t		BUFFER_SIZE = 1024;
     const uint8_t		MAX_SERVER_PASSWORD_LEN = 64;
-    const uint8_t		N_MODES = 5;
     const uint8_t		N_COMMANDS = 11;
+	const char *const	SUPPORTED_CHANNEL_MODES = "itkol";
 }
 
 #endif

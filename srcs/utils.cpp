@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:15:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 17:18:09 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,12 @@ namespace irc
 	{
 		if (name.empty() || name.length() > MAX_NICKNAME_LEN)
 			return false;
-		if (isalpha(name[0]) == false)
+		if (!isalpha(name[0]))
 			return false;
 		for (size_t i = 1; i < name.length(); i++)
 		{
 			char c = name[i];
-			if (isalnum(c) == false && c != '-' && !((c >= 91 && c <= 96) || c == '{' || c == '}' || c == '|'))
+			if (!isalnum(c) && c != '-' && !((c >= 91 && c <= 96) || c == '{' || c == '}' || c == '|'))
 				return false;
 		}
 		return true;
@@ -61,6 +61,19 @@ namespace irc
 		uint32_t	len = s.length();
 
 		return (s[len - 2] == '\r' && s[len - 1] == '\n');
+	}
+
+	bool	channel_mode_requires_param(const char mode)
+	{
+		switch (mode)
+		{
+			case 'k':
+			case 'l':
+			case 'o':
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	vector<string>	split(const string &s, char delim)

@@ -6,13 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 16:13:54 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 15:18:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO classe logger di sistema su piu livelli. azioni degli utenti, errori di sistema, errori di protocollo
 //TODO implementare scambio di file (ERR_FILEERROR)
-//TODO togliere == false
 
 #ifndef SERVER_HPP
 # define SERVER_HPP

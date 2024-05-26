@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:57:54 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 17:13:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 15:18:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ namespace irc
 
 	string Hasher::hexdigest(void) const
 	{
-		if (finalized == false)
+		if (!finalized)
 			return "";
 
 		char buf[33];

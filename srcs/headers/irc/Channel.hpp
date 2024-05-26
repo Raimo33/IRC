@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 17:06:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 17:56:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,15 +25,6 @@ namespace irc
 {
 	class ChannelOperator;
 	class Client;
-
-	typedef enum e_channel_modes
-	{
-		MODE_I = 0,
-		MODE_T = 1,
-		MODE_K = 2,
-		MODE_O = 3,
-		MODE_L = 4
-	}	t_channel_modes;
 
 	class Channel //TODO valutare se renderlo una interfaccia e renderlo la base di PublicChannel, PrivateChannel e SecretChannel
 	{
@@ -64,10 +55,10 @@ namespace irc
 			const Client							&getPendingInvitation(const std::string &nickname) const;
 			void									addPendingInvitation(Client *user);
 			void									removePendingInvitation(const Client &user);
-			const bool								*getModes(void) const;
-			void									setModes(const bool new_modes[N_MODES]);
-			bool									getMode(const t_channel_modes &mode) const;
-			void									setMode(const t_channel_modes &mode, const bool value);
+			const std::vector<bool>					&getModes(void) const;
+			void									setModes(const std::vector<bool> &modes, const std::vector<std::string> &params);
+			bool									getMode(const char mode) const;
+			void									setMode(const char mode, const bool status, const std::string &param = "");
 
 			void									receiveMessage(const struct s_commandContent &message) const;
 			bool									isOperator(const std::string &nickname) const;
@@ -84,7 +75,7 @@ namespace irc
 			uint32_t								_member_limit;
 			std::map<std::string, Client *>			_members;
 			std::map<std::string, Client *>			_pending_invitations;
-			bool									_modes[N_MODES];
+			std::vector<bool>						_modes;
 
 			void									checkName(const std::string &name) const;
 			void									checkKey(const std::string &key) const;

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 18:34:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:00:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,45 +20,43 @@
 #include "irc/Constants.hpp"
 #include "irc/Content.hpp"
 
+#include <sstream>
+
 using std::string;
 using std::map;
+using std::vector;
+using std::stringstream;
 
 namespace irc
 {
 	Channel::Channel(const string &name, ChannelOperator &op) :
 		_name(name),
-		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT)
+		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),
+		_modes(256, false)
 	{
 		checkName(name);
-		//_operators[op.getNickname()] = &op;
 		_members[op.getNickname()] = &op;
-		for (int i = 0; i < N_MODES; i++)
-			_modes[i] = false;
 	}
 
 	Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
 		_name(name),
 		_key(key),
-		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT)
+		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),
+		_modes(256, false)
 	{
 		checkName(name);
-		//_operators[op.getNickname()] = &op;
 		_members[op.getNickname()] = &op;
-		for (int i = 0; i < N_MODES; i++)
-			_modes[i] = false;
-		_modes[MODE_K] = true;
+		_modes['k'] = true;
 	}
 
 	Channel::Channel(const Channel &copy) :
 		_name(copy._name),
+		_key(copy._key),
 		_topic(copy._topic),
-		//_operators(copy._operators),
+		_member_limit(copy._member_limit),
 		_members(copy._members),
-		_pending_invitations(copy._pending_invitations)
-	{
-		for (int i = 0; i < N_MODES; i++)
-			_modes[i] = copy._modes[i];
-	}
+		_pending_invitations(copy._pending_invitations),
+		_modes(copy._modes) {}
 
 	Channel::~Channel(void) {}
 
@@ -95,7 +93,7 @@ namespace irc
 	{
 		const string &nickname = setter.getNickname();
 
-		if (_modes[MODE_T] && isOperator(&setter))
+		if (_modes['t'] && isOperator(&setter))
 		{
 			const string params[] = { nickname, _name };
 			throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, params);	
@@ -134,7 +132,7 @@ namespace irc
 	{
 		string	nickname = op.getNickname();
 
-		if (isOperator(nickname) == false)
+		if (!isOperator(nickname))
 		{
 			const string params[] = { nickname, _name };
 			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " is not an operator of " + _name);	
@@ -170,7 +168,7 @@ namespace irc
 	{
 		const string &nickname = user.getNickname();
 
-		if (_modes[MODE_I] && _pending_invitations.find(nickname) == _pending_invitations.end())
+		if (_modes['i'] && _pending_invitations.find(nickname) == _pending_invitations.end())
 			throw ProtocolErrorException(ERR_INVITEONLYCHAN, _name);
 		if (_members.find(nickname) != _members.end())
 			throw ProtocolErrorException(ERR_USERONCHANNEL, _name);	
@@ -235,25 +233,58 @@ namespace irc
 		_pending_invitations.erase(nickname);
 	}
 
-	const bool *Channel::getModes(void) const
+	const vector<bool> &Channel::getModes(void) const
 	{
 		return _modes;
 	}
 
-	void Channel::setModes(const bool new_modes[N_MODES])
+	void Channel::setModes(const vector<bool> &modes, const vector<string> &params)
 	{
-		for (int i = 0; i < N_MODES; i++)
-			_modes[i] = new_modes[i];
+		uint16_t	j = 0;
+
+		for (uint8_t i = 0; i < (sizeof(_modes) / sizeof(_modes[0])); i++)
+		{
+			if (channel_mode_requires_param(i))
+			{
+				if (params.size() < j + 1)
+					throw InternalErrorException("Channel::setModes: missing parameter for mode");
+				setMode(i, modes[i], params[j++]);
+			}
+			else
+				setMode(i, modes[i]);
+		}
 	}
 
-	bool Channel::getMode(const t_channel_modes &mode) const
+	bool Channel::getMode(const char mode) const
 	{
 		return _modes[mode];
 	}
 
-	void Channel::setMode(const t_channel_modes &mode, const bool value)
+	void Channel::setMode(const char mode, const bool status, const string &param)
 	{
-		_modes[mode] = value;
+		if (channel_mode_requires_param(mode) && param.empty())
+			throw InternalErrorException("Channel::setMode: missing parameter for mode");
+		_modes[mode] = status;
+		if (mode == 'k')
+			setKey(param);
+		else if (mode == 'l')
+		{
+			stringstream	ss(param);
+
+			if (!(ss >> _member_limit))
+				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name, "Invalid parameter for mode 'l'");
+		}
+		else if (mode == 'o')
+		{
+			ChannelOperator	op(getMember(param));
+
+			status ? addOperator(op) : removeOperator(op);
+		}
+
+		string mode_str = (status ? "+" : "-") + mode;
+		const string params[] = { _name, mode_str, param };		
+		const struct s_commandContent mode_change = EventHandler::buildCommandContent(SERVER_NAME, MODE, params);
+		receiveMessage(mode_change);
 	}
 
 	void	Channel::receiveMessage(const struct s_commandContent &msg) const
@@ -291,7 +322,7 @@ namespace irc
 		}
 		for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
 		{
-			if (isOperator(it->first) == false)
+			if (!isOperator(it->first))
 				members_str += it->first + ", ";
 		}
 		members_str.erase(members_str.length() - 2);
@@ -300,7 +331,7 @@ namespace irc
 
 	void	Channel::checkName(const string &name) const
 	{
-		if (is_valid_channel_name(name) == false)
+		if (!is_valid_channel_name(name))
 			throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name, name + " is not a valid channel name");
 	}
 
