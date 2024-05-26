@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 02:55:58 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:02:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:09:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ namespace irc
 		reply_codes.insert(std::make_pair(RPL_LISTEND, "List end"));
 		reply_codes.insert(std::make_pair(RPL_CHANNELMODEIS, "Channel mode is"));
 		reply_codes.insert(std::make_pair(RPL_UNIQOPIS, "Unique op is"));
-		reply_codes.insert(std::make_pair(RPL_NOTOPIC, "No topic"));
+		reply_codes.insert(std::make_pair(RPL_NOTOPIC, "No topic is set"));
 		reply_codes.insert(std::make_pair(RPL_TOPIC, "Topic"));
 		reply_codes.insert(std::make_pair(RPL_TOPIC_WHO_TIME, "Topic who time"));
 		reply_codes.insert(std::make_pair(RPL_INVITING, "Inviting"));

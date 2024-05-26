@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 17:14:24 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:16:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,12 +202,18 @@ namespace irc
 			throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
 		joinChannel(channel);
 
+		struct s_replyContent	topic_reply;
+		const string			&channel_topic = channel.getTopic();
+		const string			&channel_name = channel.getName();
+		if (channel_topic.empty())
+			topic_reply = EventHandler::buildReplyContent(RPL_NOTOPIC, channel_name);
+		else
+			topic_reply = EventHandler::buildReplyContent(RPL_TOPIC, channel_name, channel_topic);
 		//TODO in futuro mettere channel.getType() al posto di "="
-		const struct s_replyContent topic = EventHandler::buildReplyContent(RPL_TOPIC, channel.getName(), channel.getTopic()); // TODO valutare se mettere qualcosa quando ik topic [ vuoto ]
-		const string params[] = { "=", channel.getName() };
+		const string params[] = { "=", channel_name };
 		const struct s_replyContent namreply = EventHandler::buildReplyContent(RPL_NAMREPLY, params, channel.getMembersString());
-		const struct s_replyContent endofnames = EventHandler::buildReplyContent(RPL_ENDOFNAMES, channel.getName());
-		EventHandler::sendBufferedContent(*this, &topic);
+		const struct s_replyContent endofnames = EventHandler::buildReplyContent(RPL_ENDOFNAMES, channel_name);
+		EventHandler::sendBufferedContent(*this, &topic_reply);
 		EventHandler::sendBufferedContent(*this, &namreply);
 		EventHandler::sendBufferedContent(*this, &endofnames);
 	}

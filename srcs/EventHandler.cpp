@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:05:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:12:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -474,9 +474,17 @@ namespace irc
 		Channel channel = _client->getChannel(args[0]);
 		if (n_args == 1)
 		{
-			const string params[] = { _client->getNickname(), channel.getName() };
-			const struct s_replyContent topic = EventHandler::buildReplyContent(RPL_TOPIC, params, channel.getTopic()); // TODO valutare se mettere qualcosa quando ik topic [ vuoto ]
-			EventHandler::sendBufferedContent(*_client, &topic);
+			const string &topic = channel.getTopic();
+			struct s_replyContent topic_reply;
+
+			if (topic.empty())
+				topic_reply = EventHandler::buildReplyContent(RPL_NOTOPIC, channel.getName());
+			else
+			{
+				const string params[] = { _client->getNickname(), channel.getName() };
+				topic_reply = EventHandler::buildReplyContent(RPL_TOPIC, params, topic);
+			}
+			EventHandler::sendBufferedContent(*_client, &topic_reply);
 		}
 		else
 		{
