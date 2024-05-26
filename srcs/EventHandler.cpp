@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:59:39 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 19:10:40 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,6 +161,8 @@ namespace irc
 		if (reply && reply_codes.find(reply->code) == reply_codes.end())
 			throw InternalErrorException("EventHandler::sendBufferedContent: Invalid reply code");
 
+		const int receiver_socket = receiver.getSocket();
+
 		if (reply)
 			getRawReplyMessage(receiver, reply, &first_part, &second_part);
 		else
@@ -170,7 +172,7 @@ namespace irc
 			send_length = min(block_size, second_part.size());
 			to_send = first_part + second_part.substr(0, send_length) + "\r\n";
 			second_part = second_part.substr(send_length); // Update second_part correctly
-			send_p(receiver.getSocket(), to_send.c_str(), to_send.length(), 0);
+			send_p(receiver_socket, to_send.c_str(), to_send.length(), 0);
 		} while (!second_part.empty());
 	}
 
@@ -438,13 +440,20 @@ namespace irc
 	{
 		const string					&reason = args.size() > 0 ? args[0] : "Client quit";
 		const map<string, Client *>		&clients = _server->getClients();
-		const struct s_commandContent	quit = EventHandler::buildCommandContent(_client->getNickname(), QUIT, NULL, reason);
+		const string					&quitting_nickname = _client->getNickname();
+		const struct s_commandContent	quit = EventHandler::buildCommandContent(quitting_nickname, QUIT, NULL, reason);
 
 		for (map<string, Client *>::const_iterator it = clients.begin(); it != clients.end(); it++)
 		{
 			if (it->second == _client)
 				continue;
-			it->second->receiveMessage(quit);
+			const map<string, const Channel *> &channels = it->second->getChannels();
+			for (map<string, const Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
+			{
+				const map<string, Client *> &members = it_channel->second->getMembers();
+				if (members.find(quitting_nickname) != members.end())
+					it->second->sendMessage(*it_channel->second, quit);
+			}
 		}
 		_server->removeClient(*_client);
 	}

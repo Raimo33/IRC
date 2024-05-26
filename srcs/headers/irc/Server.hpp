@@ -6,13 +6,15 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:44:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 19:05:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO classe logger di sistema su piu livelli. azioni degli utenti, errori di sistema, errori di protocollo
 //TODO implementare scambio di file (ERR_FILEERROR)
 //TODO capire la differenza tra <nick>!<user>@<host> e <nick>
+//TODO forse togliere il namespace
+//TODO utilizzare SET al posto di map dove possibile
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
