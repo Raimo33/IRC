@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 19:10:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 19:34:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,40 +355,30 @@ namespace irc
 		if (args.size() < 1)
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]");
 
-		vector<string> channels = split(args[0], ',');
-		vector<string> keys = split(args[1], ',');
+		const vector<string> 			channels_to_join = split(args[0], ',');
+		const vector<string> 			keys = split(args[1], ',');
+		const map<string, Channel *>	&channels = _server->getChannels();
 
-		for (size_t i = 0; i < channels.size(); i++)
+		for (size_t i = 0; i < channels_to_join.size(); i++)
 		{
-			try
+			if (channels.find(channels_to_join[i]) == channels.end())
 			{
-				Channel	channel = _server->getChannel(channels[i]);
+				ChannelOperator op(*_client);
+				Channel			*new_channel;
+
+				if (i < keys.size())
+					new_channel = new Channel(channels_to_join[i], keys[i], op);	
+				else
+					new_channel = new Channel(channels_to_join[i], op);
+				_server->addChannel(new_channel);
+			}
+			else
+			{
+				Channel channel = _server->getChannel(channels_to_join[i]);
 				if (i < keys.size())
 					_client->joinChannel(channel, keys[i]);
 				else
 					_client->joinChannel(channel);
-			}
-			catch (ProtocolErrorException &e)
-			{
-				if (e.getContent().code == ERR_NOSUCHCHANNEL)
-				{
-					ChannelOperator op(*_client);
-					Channel			*new_channel;
-
-					if (i < keys.size())
-					{
-						new_channel = new Channel(channels[i], keys[i], op);	
-						_server->addChannel(new_channel);
-					}
-					else
-					{
-						new_channel = new Channel(channels[i], op);
-						_server->addChannel(new_channel);
-					}
-					_client->joinChannel(*new_channel);
-				}
-				else
-					throw e;
 			}
 		};
 	}
