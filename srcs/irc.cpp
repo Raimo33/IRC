@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/24 12:02:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 19:45:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,11 @@ int main(const int argc, const char **argv)
 	catch (const InternalErrorException &e)
 	{
 		//logger.log("Internal error: " + string(e.what()));
+		return (EXIT_FAILURE);
+	}
+	catch (const SystemErrorException &e)
+	{
+		//logger.log("System error: " + string(e.what()));
 		return (EXIT_FAILURE);
 	}
 	catch (const std::exception &e)

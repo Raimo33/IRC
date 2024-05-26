@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 19:00:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/26 19:44:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,13 +266,13 @@ namespace irc
 				_handler.setClient(*client);
 				_handler.processInput(buffer); // se tutto va bene esegue il comando
 			}
-			else if (bytes_read <= 0)
+			else
 			{
 				// Connection closed
 				removeClient(*client);
 				(*i)--;
 				// Error
-				if (bytes_read < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
+				if (bytes_read < 0)
 					throw SystemErrorException(strerror(errno));
 			}
 		}
