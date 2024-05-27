@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 17:18:09 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 14:32:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,6 @@ namespace irc
 		return (a < b ? a : b);
 	}
 
-
 	template <typename T>
 	string to_string(T value)
 	{
@@ -104,13 +103,13 @@ namespace irc
 	template <>
     std::string to_string<uint16_t>(uint16_t value)
 	{
-        return irc::to_string(value);
+        return irc::to_string(static_cast<uint32_t>(value));
     }
 
 	template <>
 	std::string to_string<uint8_t>(uint8_t value)
 	{
-		return irc::to_string(value);
+		return irc::to_string(static_cast<uint32_t>(value));
 	}
 
 	template<typename T>
@@ -130,6 +129,6 @@ namespace irc
 	template <>
 	std::string join<std::string>(const std::vector<std::string>& elements, const std::string& delimiter)
 	{
-		return irc::join<std::string>(elements, delimiter);
+		return irc::join(elements, delimiter);
 	}
 }

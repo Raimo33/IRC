@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:38:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 14:38:09 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,15 @@ int main(const int argc, const char **argv)
 
 		server.run();
 	}
+	catch (const std::invalid_argument &e)
+	{
+		cerr << "Invalid argument: " << e.what() << endl;
+	}
 	catch (const exception &e)
 	{
-		cerr << "Shutting down: " << e.what() << endl;
-		return (1);
+		cerr << "Shutting down" << endl; //il messaggio di errore e' gia stato stampato dal logger
 	}
+	return (1);
 }
 
 static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv)

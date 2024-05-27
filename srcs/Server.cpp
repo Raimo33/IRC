@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:36:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 14:34:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,11 @@ namespace irc
 		_handler(EventHandler(logger, *this)),
 		_logger(logger)
 	{
-		struct sockaddr_in server_addr;
-		pollfd server_poll_fd;
-
 		try
 		{
+			struct sockaddr_in server_addr;
+			pollfd server_poll_fd;
+
 			memset(&server_addr, 0, sizeof(server_addr));
 			configureNonBlocking(_socket);
 			server_addr.sin_family = AF_INET;
@@ -119,7 +119,6 @@ namespace irc
 							client_poll_fd.fd = client_socket;
 							client_poll_fd.events = POLLIN;
 							addPollfd(client_poll_fd);
-							_logger.logEvent("Connection established with " + client->getIpAddr());
 						}
 						else
 						{
