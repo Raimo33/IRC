@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 22:10:54 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 22:28:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,10 @@ namespace irc
 		if (_modes['i'] && _pending_invitations.find(&user) == _pending_invitations.end())
 			throw ProtocolErrorException(ERR_INVITEONLYCHAN, _name);
 		if (_members.find(nickname) != _members.end())
-			throw ProtocolErrorException(ERR_USERONCHANNEL, _name);	
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERONCHANNEL, params);
+		}
 		if (_members.size() >= _member_limit)
 			throw ProtocolErrorException(ERR_CHANNELISFULL, _name);
 		_members[nickname] = &user;
@@ -226,10 +229,10 @@ namespace irc
 	{
 		const string &nickname = user.getNickname();
 
-		if (_members.find(nickname) != _members.end()) //TODO tutte queste helper metterle a parte
+		if (_members.find(nickname) != _members.end())
 		{
 			const string params[] = { nickname, _name };
-			throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already a member of " + _name);
+			throw ProtocolErrorException(ERR_USERONCHANNEL, params);
 		}
 		if (_pending_invitations.find(&user) != _pending_invitations.end())
 		{
@@ -266,7 +269,7 @@ namespace irc
 		{
 			if (channel_mode_requires_param(i))
 			{
-				if (params.size() < static_cast<size_t>(j + 1)) //TODO togliere, capire cosa e' static_assert
+				if (params.size() - 1 < j)
 					throw InternalErrorException("Channel::setModes: missing parameter for mode");
 				setMode(i, modes[i], params[j++]);
 			}
@@ -325,13 +328,13 @@ namespace irc
 		return _operators.find(const_cast<Client *>(&user)) != _operators.end();
 	}
 
-	string	Channel::getMembersString(void) const //TODO ottimizzare, mantenere una stringa aggiornata di operatori e membri
+	string	Channel::getMembersString(void) const
 	{
 		string	members_str;
 
 		members_str.reserve(_members.size() * 10);
 		for (set<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); it++)
-			members_str += (*it)->getNickname() + ", ";
+			members_str += "@" + (*it)->getNickname() + ", ";
 		for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
 		{
 			if (!isOperator(*it->second))
