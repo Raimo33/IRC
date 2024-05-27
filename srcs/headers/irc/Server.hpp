@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:26:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 15:33:09 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,7 @@ namespace irc
 			void									handshake(const int client_socket) const;
 			void									configureNonBlocking(const int client_socket) const;
 			void									run(void);
+			void									stop(void);
 
 		private:
 					

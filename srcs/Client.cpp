@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:32:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 16:52:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ namespace irc
 		if (_channels.size() >= MAX_CHANNELS_PER_USER)
 			throw ProtocolErrorException(ERR_TOOMANYCHANNELS, channel.getName());
 		_channels[channel.getName()] = &channel;
+		_logger.logEvent("Client " + _nickname + ", channel added: " + channel.getName());
 	}
 
 	void	Client::removeChannel(const Channel &channel)
@@ -85,6 +86,7 @@ namespace irc
 		if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
 			throw ProtocolErrorException(ERR_NOTONCHANNEL, channel_name);
 		_channels.erase(it);
+		_logger.logEvent("Client " + _nickname + ", channel removed: " + channel_name);
 	}
 
 	const string	&Client::getNickname(void) const
@@ -95,6 +97,7 @@ namespace irc
 	void	Client::setNickname(const string &nickname)
 	{
 		_nickname = nickname;
+		_logger.logEvent("Client " + _ip_addr + " has set nickname to " + nickname);
 	}
 
 	const string	&Client::getUsername(void) const
@@ -105,6 +108,7 @@ namespace irc
 	void	Client::setUsername(const string &username)
 	{
 		_username = username;
+		_logger.logEvent("Client " + _ip_addr + " has set username to " + username);
 	}
 
 	const string	&Client::getRealname(void) const
@@ -115,6 +119,7 @@ namespace irc
 	void	Client::setRealname(const string &realname)
 	{
 		_realname = realname;
+		_logger.logEvent("Client " + _ip_addr + " has set realname to " + realname);
 	}
 
 	bool	Client::getIsConnected(void) const
@@ -152,7 +157,7 @@ namespace irc
 		_is_authenticated = is_authenticated;
 		_logger.logEvent("Client " + _ip_addr + " is " + (is_authenticated ? "authenticated" : "not authenticated anymore"));
 
-		const struct s_replyContent welcome = EventHandler::buildReplyContent(RPL_WELCOME, NULL, "Welcome to the Internet Relay Network" + _nickname + "!" + _username + "@" + _ip_addr);
+		const struct s_replyContent welcome = EventHandler::buildReplyContent(RPL_WELCOME, NULL, "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr);
 		const struct s_replyContent yourhost = EventHandler::buildReplyContent(RPL_YOURHOST, NULL, "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION);
 		receiveMessage(welcome);
 		receiveMessage(yourhost);

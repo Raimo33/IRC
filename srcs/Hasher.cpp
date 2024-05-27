@@ -6,13 +6,15 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 16:57:54 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 15:18:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 16:40:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc/Hasher.hpp"
 
 using std::string;
+
+#include <iostream>
 
 namespace irc
 {

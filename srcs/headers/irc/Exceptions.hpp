@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 12:40:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 17:10:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,8 @@ namespace irc
 class irc::ProtocolErrorException : public std::exception
 {
 	public:
-		explicit ProtocolErrorException(const uint16_t code, const std::string *params = NULL, const std::string &custom_msg = "");
-		explicit ProtocolErrorException(const uint16_t code, const std::string param, const std::string &custom_msg = "");
+		explicit ProtocolErrorException(const uint16_t code, const std::string params[] = NULL, const std::string &custom_msg = "");
+		explicit ProtocolErrorException(const uint16_t code, const std::string &param, const std::string &custom_msg = "");
 		const char *what(void) const throw();
 		~ProtocolErrorException(void) throw();
 
@@ -41,6 +41,7 @@ class irc::ProtocolErrorException : public std::exception
 
 	private:
 		const struct s_replyContent	_content;
+		const std::string			_formatted_msg;
 };
 
 class irc::InternalErrorException : public std::runtime_error

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:46:06 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 17:19:28 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 16:18:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,10 @@ namespace irc
 	template <typename T>
 	std::string					to_string(T value);
 	template<typename T>
-	std::string join(const std::vector<T>& elements, const std::string& delimiter);
+	std::string					join(const std::vector<T>& elements, const std::string& delimiter);
+	
 }
+
+#include "utils.tpp"
 
 #endif

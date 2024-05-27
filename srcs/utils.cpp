@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 14:32:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 16:10:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,43 +92,4 @@ namespace irc
 		return (a < b ? a : b);
 	}
 
-	template <typename T>
-	string to_string(T value)
-	{
-		ostringstream oss;
-		oss << value;
-		return oss.str();
-	}
-
-	template <>
-    std::string to_string<uint16_t>(uint16_t value)
-	{
-        return irc::to_string(static_cast<uint32_t>(value));
-    }
-
-	template <>
-	std::string to_string<uint8_t>(uint8_t value)
-	{
-		return irc::to_string(static_cast<uint32_t>(value));
-	}
-
-	template<typename T>
-	std::string join(const std::vector<T>& elements, const std::string& delimiter)
-	{
-		std::ostringstream oss;
-
-		for (typename std::vector<T>::const_iterator it = elements.begin(); it != elements.end(); ++it)
-		{
-			if (it != elements.begin())
-				oss << delimiter;
-			oss << *it;
-		}
-		return oss.str();
-	}
-
-	template <>
-	std::string join<std::string>(const std::vector<std::string>& elements, const std::string& delimiter)
-	{
-		return irc::join(elements, delimiter);
-	}
 }

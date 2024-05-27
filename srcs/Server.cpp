@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 15:22:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 17:08:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,8 @@ namespace irc
 							client_poll_fd.fd = client_socket;
 							client_poll_fd.events = POLLIN;
 							addPollfd(client_poll_fd);
+
+							_logger.logEvent("Incoming connection from " + client_ip_addr);
 						}
 						else
 						{
@@ -142,6 +144,11 @@ namespace irc
 		{
 			_logger.logError(&e);
 		}
+	}
+
+	void	Server::stop(void)
+	{
+		Server::~Server();
 	}
 
 	uint16_t	Server::getPort(void) const

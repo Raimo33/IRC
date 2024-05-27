@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 15:27:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 17:28:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ namespace irc
 
 	const struct s_replyContent	EventHandler::buildReplyContent(const uint16_t code, const string &param, const string &custom_msg)
 	{
-		const string params[] = { param };
+		const string params[] = { param , "" };
 
 		return buildReplyContent(code, params, custom_msg);
 	}
@@ -249,44 +249,81 @@ namespace irc
 	}
 
 	//input: ":<prefix> <command> <params> <crlf>"
-	s_commandContent	EventHandler::parseInput(string &raw_input) const
+	//TODO refactor
+	s_commandContent EventHandler::parseInput(string &raw_input) const
 	{
-		s_commandContent	input;
-		string				command;
-		size_t				space_pos;
+		s_commandContent input;
+		string command;
+		size_t space_pos;
 
-		raw_input = raw_input.substr(0, MAX_MSG_LENGTH); //limito la lunghezza dell'input (per evitare buffer overflow
-		if (raw_input.size() >= 2 && has_crlf(raw_input))
-			raw_input.resize(raw_input.size() - 2);
-		if (raw_input[0] == ':')
+		raw_input = raw_input.substr(0, MAX_MSG_LENGTH); // Limit the length of the input to prevent buffer overflow
+		if (raw_input.size() >= 2) // \r\n
+		{
+			if (raw_input[raw_input.size() - 1] == '\n') // Remove \n
+			{
+				raw_input.resize(raw_input.size() - 1);
+				if (raw_input[raw_input.size() - 1] == '\r') // Remove \r
+					raw_input.resize(raw_input.size() - 1);
+			}
+		}
+		
+		if (!raw_input.empty() && raw_input[0] == ':')
 		{
 			space_pos = raw_input.find(' ');
-			input.prefix = raw_input.substr(1, space_pos - 1); //prendo il prefix
-			raw_input = raw_input.substr(space_pos + 1); //supero il prefix
+			if (space_pos != string::npos)
+			{
+				input.prefix = raw_input.substr(1, space_pos - 1); // Extract the prefix
+				raw_input = raw_input.substr(space_pos + 1); // Skip the prefix
+			}
+			else
+			{
+				input.prefix = raw_input.substr(1); // Extract the rest if no space is found
+				raw_input.clear(); // Clear raw_input as there's nothing left to process
+			}
 		}
+
 		space_pos = raw_input.find(' ');
 		if (space_pos == string::npos)
-			command = raw_input;
+			command = raw_input; // If there is no space, the command is the whole input
 		else
-			command = raw_input.substr(0, space_pos); //forse -1
-		if (_commands.find(command) == _commands.end()) //se il comando non esiste
+			command = raw_input.substr(0, space_pos); // Extract the command
+
+		if (_commands.find(command) == _commands.end()) // If the command does not exist
 			throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, command);
-		input.cmd = _commands.at(command); //associo il comando all'enum
-		raw_input = raw_input.substr(space_pos + 1); //supero il comando
+
+		input.cmd = _commands.at(command); // Associate the command with the enum
+
+		if (space_pos != string::npos)
+			raw_input = raw_input.substr(space_pos + 1); // Skip the command
+		else
+		{
+			raw_input.clear(); // Clear raw_input if there is no space
+			return input; // Return early as there's no more input to process
+		}
 
 		string param;
 
-		while ((space_pos = raw_input.find(' ')) != string::npos) //finchè ci sono parametri
-		{
-			if (raw_input[0] == ':') //se il parametro inizia con ':' allora tutto ciò che segue è il parametro (anche spazi, caratteri speciali)
-			{
-				input.text = raw_input.substr(1); //prendo tutto il resto apparte il ':'
+		do {
+			space_pos = raw_input.find(' ');
+			if (!raw_input.empty() && raw_input[0] == ':')
+			{ // If the parameter starts with ':'
+				input.text = raw_input.substr(1); // Extract everything except the ':'
 				break;
 			}
-			param = raw_input.substr(0, space_pos); //prendo il parametro
-			input.params.push_back(param); //aggiungo il parametro al vettore
-			raw_input = raw_input.substr(space_pos + 1); //supero il parametro
-		}
+			if (space_pos == string::npos)
+			{
+				param = raw_input; // Extract the rest as the parameter
+				input.params.push_back(param);
+				raw_input.clear(); // Clear raw_input as there's nothing left to process
+			}
+			else
+			{
+				param = raw_input.substr(0, space_pos); // Extract the parameter
+				input.params.push_back(param); // Add the parameter to the vector
+				raw_input = raw_input.substr(space_pos + 1); // Skip the parameter
+			}
+		} while (!raw_input.empty());
+
 		return input;
 	}
 
@@ -321,7 +358,7 @@ namespace irc
 		checkConnection(_client);
 		if (_client->getIsAuthenticated() || !_client->getUsername().empty())
 			throw ProtocolErrorException(ERR_ALREADYREGISTRED);
-		if (args.size() < 1)
+		if (args.size() < 4)
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "USER", "usage: USER <username> <hostname> <servername> <realname>");
 		_client->setUsername(args[0]);
 		(void)args[1]; //args[1] = hostname
