@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:33:38 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 15:27:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ namespace irc
 			void 											processInput(std::string raw_input);
 
 			static const struct s_replyContent				buildReplyContent(const uint16_t code, const std::string *params = NULL, const std::string &custom_msg = "");
-			static const struct s_replyContent				buildReplyContent(const uint16_t code, const std::string param, const std::string &custom_msg = "");
+			static const struct s_replyContent				buildReplyContent(const uint16_t code, const std::string &param, const std::string &custom_msg = "");
 			static const struct s_commandContent			buildCommandContent(const std::string &prefix, const e_cmd_type cmd, const std::string *params = NULL, const std::string &custom_msg = "");
 			static const struct s_commandContent			buildCommandContent(const std::string &prefix, const e_cmd_type cmd, const std::string param, const std::string &custom_msg = "");
 			static void										sendBufferedContent(const Client &receiver, const struct s_contentBase *message);

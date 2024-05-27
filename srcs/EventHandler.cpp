@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:35:00 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 15:27:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,10 +66,8 @@ namespace irc
 	void	EventHandler::processInput(string raw_input)
 	{
 		s_commandContent input = parseInput(raw_input);
-
 		if (input.cmd < 0 || input.cmd >= N_COMMANDS)
 			throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, raw_input);	
-
 		(this->*(_handlers[input.cmd]))(input.params);
 	}
 
@@ -98,7 +96,7 @@ namespace irc
 		return content;
 	}
 
-	const struct s_replyContent	EventHandler::buildReplyContent(const uint16_t code, const string param, const string &custom_msg)
+	const struct s_replyContent	EventHandler::buildReplyContent(const uint16_t code, const string &param, const string &custom_msg)
 	{
 		const string params[] = { param };
 

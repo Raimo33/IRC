@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 14:34:24 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 15:22:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,6 @@ namespace irc
 
 							client = new Client(_logger, this, client_socket, client_ip_addr, client_port);
 							addClient(client);
-							client->setIsConnected(true);
 
 							pollfd client_poll_fd;
 
