@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:33:28 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 18:16:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ namespace irc
 		_logger(logger)
 	{
 		checkName(name);
-		_members[op.getNickname()] = &op;
+		op.joinChannel(*this);
 		_logger.logEvent("Channel created: " + name);
 	}
 
@@ -49,7 +49,7 @@ namespace irc
 		_logger(logger)
 	{
 		checkName(name);
-		_members[op.getNickname()] = &op;
+		op.joinChannel(*this);
 		_modes['k'] = true;
 		_logger.logEvent("Channel created: " + name);
 	}
@@ -98,8 +98,6 @@ namespace irc
 
 	const string &Channel::getTopic(void) const
 	{
-		if (_topic.empty())
-			throw ProtocolErrorException(RPL_NOTOPIC, _name);
 		return _topic;
 	}
 

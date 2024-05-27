@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 17:28:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 18:48:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,12 +252,12 @@ namespace irc
 	//TODO refactor
 	s_commandContent EventHandler::parseInput(string &raw_input) const
 	{
-		s_commandContent input;
-		string command;
-		size_t space_pos;
+		s_commandContent	input;
+		string 				command;
+		size_t 				space_pos;
 
 		raw_input = raw_input.substr(0, MAX_MSG_LENGTH); // Limit the length of the input to prevent buffer overflow
-		if (raw_input.size() >= 2) // \r\n
+		if (raw_input.size() >= 2)
 		{
 			if (raw_input[raw_input.size() - 1] == '\n') // Remove \n
 			{
@@ -303,6 +303,7 @@ namespace irc
 
 		string param;
 
+		//TODO non funziona PRIVMSG #channel :ciao mondo
 		do {
 			space_pos = raw_input.find(' ');
 			if (!raw_input.empty() && raw_input[0] == ':')
@@ -377,8 +378,11 @@ namespace irc
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]");
 
 		const vector<string> 			channels_to_join = split(args[0], ',');
-		const vector<string> 			keys = split(args[1], ',');
 		const map<string, Channel *>	&channels = _server->getChannels();
+		vector<string> 					keys;
+		
+		if (args.size() > 1)
+			keys = split(args[1], ',');
 
 		for (size_t i = 0; i < channels_to_join.size(); i++)
 		{
@@ -391,15 +395,15 @@ namespace irc
 					new_channel = new Channel(_logger, channels_to_join[i], keys[i], op);	
 				else
 					new_channel = new Channel(_logger, channels_to_join[i], op);
-				_server->addChannel(new_channel);
+				_server->addChannel(*new_channel);
 			}
 			else
 			{
-				Channel channel = _server->getChannel(channels_to_join[i]);
+				Channel *channel = _server->getChannel(channels_to_join[i]);
 				if (i < keys.size())
-					_client->joinChannel(channel, keys[i]);
+					_client->joinChannel(*channel, keys[i]);
 				else
-					_client->joinChannel(channel);
+					_client->joinChannel(*channel);
 			}
 		};
 	}
@@ -416,8 +420,8 @@ namespace irc
 
 		for (vector<string>::const_iterator it = channels.begin(); it != channels.end(); it++)
 		{
-			Channel channel = _server->getChannel(*it);
-			_client->leaveChannel(channel, reason);
+			Channel *channel = _server->getChannel(*it);
+			_client->leaveChannel(*channel, reason);
 		}
 	}
 
@@ -436,14 +440,14 @@ namespace irc
 		if (is_channel_prefix(args[0][0])) //se il primo carattere e' #, &, + o !
 		{
 			//channel msg PRIVMSG <channel> :<message>
-			Channel channel = _server->getChannel(args[0]);
-			_client->sendMessage(channel, msg);
+			Channel *channel = _server->getChannel(args[0]);
+			_client->sendMessage(*channel, msg);
 		}
 		else
 		{
 			//private msg PRIVMSG <nickname> :<message>
-			Client receiver = _server->getClient(args[0]);
-			_client->sendMessage(receiver, msg);
+			Client *receiver = _server->getClient(args[0]);
+			_client->sendMessage(*receiver, msg);
 		}
 	}
 
@@ -479,11 +483,11 @@ namespace irc
 		if (n_args < 2)
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: TOPIC <channel> [<topic>]");
 
-		Channel			channel = _server->getChannel(args[0]);
-		Client			target = _server->getClient(args[1]);
+		Channel			*channel = _server->getChannel(args[0]);
+		Client			*target = _server->getClient(args[1]);
 		ChannelOperator	op(*_client);
 
-		args.size() > 2 ? op.kick(target, channel, args[2]) : op.kick(target, channel);
+		args.size() > 2 ? op.kick(*target, *channel, args[2]) : op.kick(*target, *channel);
 	}
 
 	void EventHandler::handleInvite(const vector<string> &args)
@@ -494,11 +498,11 @@ namespace irc
 		if (args.size() < 2)
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>");
 
-		Client			target = _server->getClient(args[0]);
-		Channel			channel = _server->getChannel(args[1]);
+		Client			*target = _server->getClient(args[0]);
+		Channel			*channel = _server->getChannel(args[1]);
 		ChannelOperator	op(*_client);
 
-		op.invite(target, channel);
+		op.invite(*target, *channel);
 	}
 
 	void EventHandler::handleTopic(const vector<string> &args)
@@ -546,10 +550,10 @@ namespace irc
 		if (n_args < 2 || (args[1][0] != '+' && args[1][0] != '-'))
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}");
 
-		Channel				channel = _server->getChannel(args[0]);
+		Channel				*channel = _server->getChannel(args[0]);
 		bool				status;
 		unsigned char		mode;
-		const vector<bool>	&current_modes = channel.getModes();
+		const vector<bool>	&current_modes = channel->getModes();
 		vector<bool>		new_modes(current_modes);
 		vector<string>		params;
 		uint32_t			j = 2;
@@ -572,7 +576,7 @@ namespace irc
 		}
 
 		ChannelOperator op(*_client);
-		op.modesChange(channel, new_modes, params);
+		op.modesChange(*channel, new_modes, params);
 	}
 
 	void	EventHandler::checkNicknameValidity(const string &nickname) const

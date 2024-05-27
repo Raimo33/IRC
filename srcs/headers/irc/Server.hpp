@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 15:33:09 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 18:47:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,14 +56,14 @@ namespace irc
 			const std::string						&getPwdHash(void) const;
 			const std::map<std::string, Client *>	&getClients(void) const;
 			void									setClients(const std::map<std::string, Client *> &clients);
-			const Client							&getClient(const int socket) const;
-			const Client							&getClient(const std::string &nickname) const;
+			Client									*getClient(const int socket) const; //TODO forse non serve
+			Client									*getClient(const std::string &nickname) const;
 			void									addClient(Client *client);
 			void									removeClient(const Client &client);
 			const std::map<std::string, Channel *>	&getChannels(void) const;
 			void									setChannels(const std::map<std::string, Channel *> &channels);
-			const Channel							&getChannel(const std::string &name) const;
-			void									addChannel(Channel *channel);
+			Channel									*getChannel(const std::string &name) const;
+			void									addChannel(Channel &channel);
 			void									removeChannel(const Channel &channel);
 			const std::vector<pollfd>				&getPollfds(void);
 			void									setPollfds(const std::vector<pollfd> &pollfds);

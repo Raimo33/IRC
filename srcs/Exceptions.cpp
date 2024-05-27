@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 17:32:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 17:37:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,18 +41,16 @@ namespace irc
 	}
 
 	ProtocolErrorException::ProtocolErrorException(const uint16_t code, const string params[], const string &custom_msg) :
-		_content(EventHandler::buildReplyContent(code, params, custom_msg)),
-		_formatted_msg("(" + _content.prefix + ") " + _content.text) {}
+		_content(EventHandler::buildReplyContent(code, params, custom_msg)) {}
 
 	ProtocolErrorException::ProtocolErrorException(const uint16_t code, const string &param, const string &custom_msg) :
-		_content(EventHandler::buildReplyContent(code, param, custom_msg)),
-		_formatted_msg("(" + _content.prefix + ") " + _content.text) {}
+		_content(EventHandler::buildReplyContent(code, param, custom_msg)) {}
 
 	ProtocolErrorException::~ProtocolErrorException(void) throw() {}
 
 	const char *ProtocolErrorException::what(void) const throw()
 	{
-		return _formatted_msg.c_str();
+		return _content.text.c_str();
 	}
 
 	const struct s_replyContent	&ProtocolErrorException::getContent(void) const

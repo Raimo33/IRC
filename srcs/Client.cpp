@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 16:52:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 18:24:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,7 +190,7 @@ namespace irc
 		if (channel.getMode('k') && channel.getKey() != key)
 			throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
 
-		//TODO rifare senza try catch
+		//TODO rifare senza try catch e provare test case: creare due canali con lo stesso nome
 		try
 		{
 			channel.addMember(*this); //se fallisce addMember la lascio catchare a chi sta su

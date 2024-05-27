@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 17:08:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 18:49:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ namespace irc
 		//TODO delete di tutto
 	}
 
+	//TODO refactor
 	void	Server::run(void)
 	{
 		try
@@ -171,11 +172,13 @@ namespace irc
 		_clients = clients;
 	}
 
-	const Client &Server::getClient(const string &nickname) const
+	Client *Server::getClient(const string &nickname) const
 	{
-		if (_clients.find(nickname) == _clients.end())
+		map<string, Client *>::const_iterator it = _clients.find(nickname);
+
+		if (it == _clients.end())
 			throw ProtocolErrorException(ERR_NOSUCHNICK, nickname);
-		return *(_clients.at(nickname));
+		return it->second;
 	}
 
 	void Server::addClient(Client *client)
@@ -202,18 +205,22 @@ namespace irc
 		_channels = channels;
 	}
 
-	const Channel	&Server::getChannel(const string &name) const
+	Channel	*Server::getChannel(const string &name) const
 	{
-		if (_channels.find(name) == _channels.end())
+		map<string, Channel *>::const_iterator it = _channels.find(name);
+
+		if (it == _channels.end())
 			throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name);
-		return *(_channels.at(name));
+		return it->second;
 	}
 
-	void	Server::addChannel(Channel *channel)
+	void	Server::addChannel(Channel &channel)
 	{
-		if (_channels.find(channel->getName()) != _channels.end())
+		const string &channel_name = channel.getName();
+
+		if (_channels.find(channel_name) != _channels.end())
 			throw InternalErrorException("Server::addChannel: Channel already exists");
-		_channels[channel->getName()] = channel;
+		_channels[channel_name] = &channel;
 	}
 
 	void	Server::removeChannel(const Channel &channel)
