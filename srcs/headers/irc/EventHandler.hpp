@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 18:30:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:33:38 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,20 +25,18 @@ namespace irc
 {
 	class Client;
 	class Server;
+	class Logger;
 
 	class EventHandler
 	{
 		public:
-			EventHandler(void);
-			EventHandler(Server &server);
+			explicit EventHandler(Logger &logger, Server &server);
 			EventHandler(const EventHandler &copy);
 			~EventHandler(void);
 
 			const std::map<std::string, e_cmd_type>			&getCommands(void) const;
 			const Client									&getClient(void) const;
 			void											setClient(Client &client);
-			const Server									&getServer(void) const;
-			void											setServer(Server &server);
 
 			void 											processInput(std::string raw_input);
 
@@ -77,6 +75,7 @@ namespace irc
 			const std::map<std::string, e_cmd_type>			_commands;
 			const std::vector<CommandHandler>				_handlers;
 			static const std::map<uint16_t, std::string>	_command_strings;
+			Logger											&_logger;
 	};
 }
 	

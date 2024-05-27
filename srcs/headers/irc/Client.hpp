@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:56:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:27:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,12 @@ namespace irc
 	class Channel;
 	class Message;
 	class PrivateMessage;
+	class Logger;
 	
 	class Client
 	{
 		public:
-			explicit Client(Server *server, const int socket, const std::string &ip_addr, const uint16_t port);
+			explicit Client(Logger &logger, Server *server, const int socket, const std::string &ip_addr, const uint16_t port);
 			Client(const Client &copy);
 			virtual ~Client(void);
 
@@ -71,6 +72,7 @@ namespace irc
 			const std::string								_ip_addr; //aka hostname
 			const int										_socket;
 			Server											*_server;
+			Logger											&_logger;
 	};
 }
 

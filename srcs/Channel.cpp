@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:57:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:33:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include "irc/ReplyCodes.hpp"
 #include "irc/Constants.hpp"
 #include "irc/Content.hpp"
+#include "irc/Logger.hpp"
 
 #include <sstream>
 
@@ -29,24 +30,28 @@ using std::stringstream;
 
 namespace irc
 {
-	Channel::Channel(const string &name, ChannelOperator &op) :
+	Channel::Channel(Logger &logger, const string &name, ChannelOperator &op) :
 		_name(name),
 		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),
-		_modes(256, false)
+		_modes(256, false),
+		_logger(logger)
 	{
 		checkName(name);
 		_members[op.getNickname()] = &op;
+		_logger.logEvent("Channel created: " + name);
 	}
 
-	Channel::Channel(const string &name, const string &key, ChannelOperator &op) :
+	Channel::Channel(Logger &logger, const string &name, const string &key, ChannelOperator &op) :
 		_name(name),
 		_key(key),
 		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),
-		_modes(256, false)
+		_modes(256, false),
+		_logger(logger)
 	{
 		checkName(name);
 		_members[op.getNickname()] = &op;
 		_modes['k'] = true;
+		_logger.logEvent("Channel created: " + name);
 	}
 
 	Channel::Channel(const Channel &copy) :
@@ -56,9 +61,16 @@ namespace irc
 		_member_limit(copy._member_limit),
 		_members(copy._members),
 		_pending_invitations(copy._pending_invitations),
-		_modes(copy._modes) {}
+		_modes(copy._modes),
+		_logger(copy._logger)
+	{
+		_logger.logEvent("Channel created: " + _name);
+	}
 
-	Channel::~Channel(void) {}
+	Channel::~Channel(void)
+	{
+		_logger.logEvent("Channel deleted: " + _name);
+	}
 
 	const string &Channel::getName(void) const
 	{
@@ -68,6 +80,7 @@ namespace irc
 	void Channel::setName(const string &new_name)
 	{
 		checkName(new_name);
+		_logger.logEvent("Channel " + _name + " renamed to " + new_name);
 		_name = new_name;
 	}
 
@@ -80,6 +93,7 @@ namespace irc
 	{
 		checkKey(new_key);
 		_key = new_key;
+		_logger.logEvent("Channel " + _name + " key set to " + new_key);
 	}
 
 	const string &Channel::getTopic(void) const
@@ -101,6 +115,7 @@ namespace irc
 		if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
 			throw ProtocolErrorException(RPL_NOTOPIC, _name, new_topic + " is too long");	
 		_topic = new_topic;
+		_logger.logEvent("Channel " + _name + " topic set to " + new_topic);
 	}
 
 	uint32_t Channel::getMemberLimit(void) const
@@ -124,6 +139,7 @@ namespace irc
 		}
 		_members[nickname] = &op; //sovrascrivo il membro con l'operator (non posso avere due membri con lo stesso nickname)
 
+		_logger.logEvent("Channel " + _name + ", operator added: " + nickname);
 		const struct s_replyContent youreoper = EventHandler::buildReplyContent(RPL_YOUREOPER, nickname);
 		op.receiveMessage(youreoper);
 	}
@@ -138,8 +154,9 @@ namespace irc
 			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " is not an operator of " + _name);	
 		}
 		_members.erase(nickname);
-		addMember(op); //aggiungo l'operator come membro normale
+		_members[nickname] = &op;
 
+		_logger.logEvent("Channel " + _name + ", operator removed: " + nickname);
 		const struct s_replyContent notoperanymore = EventHandler::buildReplyContent(RPL_NOTOPERANYMORE);
 		op.receiveMessage(notoperanymore);
 	}
@@ -175,6 +192,7 @@ namespace irc
 		if (_members.size() >= _member_limit)
 			throw ProtocolErrorException(ERR_CHANNELISFULL, _name);
 		_members[nickname] = &user;
+		_logger.logEvent("Channel " + _name + ", member added: " + nickname);
 	}
 
 	void Channel::removeMember(const Client &user)
@@ -187,6 +205,7 @@ namespace irc
 			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);	
 		}
 		_members.erase(nickname);
+		_logger.logEvent("Channel " + _name + ", member removed: " + nickname);
 	}
 
 	const map<string, Client *> &Channel::getPendingInvitations(void) const
@@ -219,6 +238,7 @@ namespace irc
 			throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already invited to " + _name);
 		}
 		_pending_invitations[nickname] = user;
+		_logger.logEvent("Channel " + _name + ", invitation sent to: " + nickname);
 	}
 
 	void Channel::removePendingInvitation(const Client &user)
@@ -231,6 +251,7 @@ namespace irc
 			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " was not invited to " + _name);
 		}
 		_pending_invitations.erase(nickname);
+		_logger.logEvent("Channel " + _name + ", invitation to " + nickname + " removed");
 	}
 
 	const vector<bool> &Channel::getModes(void) const
@@ -270,9 +291,11 @@ namespace irc
 		else if (mode == 'l')
 		{
 			stringstream	ss(param);
+			uint32_t		new_limit;
 
-			if (!(ss >> _member_limit))
+			if (!(ss >> new_limit) || !ss.eof())
 				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name, "Invalid parameter for mode 'l'");
+			setMemberLimit(new_limit);
 		}
 		else if (mode == 'o')
 		{
@@ -280,6 +303,8 @@ namespace irc
 
 			status ? addOperator(op) : removeOperator(op);
 		}
+		else
+			_logger.logEvent("Channel " + _name + ", mode " + mode + " is now " + (status ? "on" : "off"));
 
 		string mode_str = (status ? "+" : "-") + mode;
 		const string params[] = { _name, mode_str, param };		

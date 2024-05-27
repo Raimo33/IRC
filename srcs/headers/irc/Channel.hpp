@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 17:56:55 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:28:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,13 @@ namespace irc
 {
 	class ChannelOperator;
 	class Client;
+	class Logger;
 
 	class Channel //TODO valutare se renderlo una interfaccia e renderlo la base di PublicChannel, PrivateChannel e SecretChannel
 	{
 		public:
-			explicit Channel(const std::string &name, ChannelOperator &op); //on creation there must be at least one operator
-			Channel(const std::string &name, const std::string &key, ChannelOperator &op);
+			explicit Channel(Logger &logger, const std::string &name, ChannelOperator &op); //on creation there must be at least one operator
+			Channel(Logger &logger, const std::string &name, const std::string &key, ChannelOperator &op);
 			Channel(const Channel &copy);
 			~Channel(void);
 		
@@ -76,6 +77,7 @@ namespace irc
 			std::map<std::string, Client *>			_members;
 			std::map<std::string, Client *>			_pending_invitations;
 			std::vector<bool>						_modes;
+			Logger									&_logger;
 
 			void									checkName(const std::string &name) const;
 			void									checkKey(const std::string &key) const;

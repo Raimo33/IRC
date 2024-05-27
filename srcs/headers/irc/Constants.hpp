@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 03:05:20 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 17:05:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:26:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ namespace irc
     const uint8_t		MAX_SERVER_PASSWORD_LEN = 64;
     const uint8_t		N_COMMANDS = 11;
 	const char *const	SUPPORTED_CHANNEL_MODES = "itkol";
+	const char *const	LOG_FILENAME = "IRCServer.log";
 }
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 19:40:59 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:35:00 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,23 +31,19 @@ static void checkAuthentication(const Client *client);
 
 namespace irc
 {
-	EventHandler::EventHandler(void) :
-		_server(NULL),
-		_client(NULL),
-		_commands(initCommands()),
-		_handlers(initHandlers()) {}
-
-	EventHandler::EventHandler(Server &server) :
+	EventHandler::EventHandler(Logger &logger, Server &server) :
 		_server(&server),
 		_client(NULL),
 		_commands(initCommands()),
-		_handlers(initHandlers()) {}
+		_handlers(initHandlers()),
+		_logger(logger) {}
 
 	EventHandler::EventHandler(const EventHandler &copy) :
 		_server(copy._server),
 		_client(copy._client),
 		_commands(copy._commands),
-		_handlers(copy._handlers) {}
+		_handlers(copy._handlers),
+		_logger(copy._logger) {}
 		
 	EventHandler::~EventHandler(void) {}
 
@@ -64,16 +60,6 @@ namespace irc
 	void	EventHandler::setClient(Client &client)
 	{
 		_client = &client;
-	}
-
-	const Server	&EventHandler::getServer(void) const
-	{
-		return *_server;
-	}
-
-	void	EventHandler::setServer(Server &server)
-	{
-		_server = &server;
 	}
 
 	//JOIN #channel1,#channel2,#channel3 key1,key2,key3
@@ -367,9 +353,9 @@ namespace irc
 				Channel			*new_channel;
 
 				if (i < keys.size())
-					new_channel = new Channel(channels_to_join[i], keys[i], op);	
+					new_channel = new Channel(_logger, channels_to_join[i], keys[i], op);	
 				else
-					new_channel = new Channel(channels_to_join[i], op);
+					new_channel = new Channel(_logger, channels_to_join[i], op);
 				_server->addChannel(new_channel);
 			}
 			else

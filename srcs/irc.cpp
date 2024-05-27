@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 19:45:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:38:40 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,9 @@
 using std::string;
 using std::istringstream;
 using std::ostringstream;
+using std::exception;
+using std::cerr;
+using std::endl;
 
 using namespace irc;
 
@@ -31,29 +34,15 @@ int main(const int argc, const char **argv)
 
 		get_args(&port_nbr, &password, argc, argv);
 
-		Server	server(port_nbr, password);
+		Logger	logger(LOG_FILENAME);
+		Server	server(logger, port_nbr, password);
 
 		server.run();
 	}
-	catch (const std::invalid_argument &e)
+	catch (const exception &e)
 	{
-		//logger.log("Invalid argument: " + string(e.what()));
-		return (EXIT_FAILURE);
-	}
-	catch (const InternalErrorException &e)
-	{
-		//logger.log("Internal error: " + string(e.what()));
-		return (EXIT_FAILURE);
-	}
-	catch (const SystemErrorException &e)
-	{
-		//logger.log("System error: " + string(e.what()));
-		return (EXIT_FAILURE);
-	}
-	catch (const std::exception &e)
-	{
-		//logger.log("Unknown error: " + string(e.what()));
-		return (EXIT_FAILURE);
+		cerr << "Shutting down: " << e.what() << endl;
+		return (1);
 	}
 }
 

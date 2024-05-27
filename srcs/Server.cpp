@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 19:44:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:36:03 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,38 +24,48 @@
 using std::string;
 using std::map;
 using std::vector;
+using std::exception;
 using std::cout;
 using std::endl;
 
 namespace irc
 {
-	Server::Server(const uint16_t port_no, const string &password) :
+	Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 		_port(port_no),
 		_pwd_hash(Hasher::hash(password)),
 		_clients(map<string, Client *>()),
 		_channels(map<string, Channel *>()),
 		_pollfds(vector<pollfd>()),
 		_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
-		_handler(EventHandler(*this))
+		_handler(EventHandler(logger, *this)),
+		_logger(logger)
 	{
 		struct sockaddr_in server_addr;
 		pollfd server_poll_fd;
 
-		memset(&server_addr, 0, sizeof(server_addr));
-		configureNonBlocking(_socket);
-		server_addr.sin_family = AF_INET;
-		server_addr.sin_addr.s_addr = INADDR_ANY;
-		server_addr.sin_port = htons(_port);
-		bind_p(_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
-		listen_p(_socket, 5);
-		cout << "Server waiting for connections on port: " << _port << endl;
-		//TODO printare l'IP del server
-		server_poll_fd.fd = _socket;
-		server_poll_fd.events = POLLIN;
-		_pollfds.push_back(server_poll_fd);
-		_pollfds[0].fd = _socket;
-		_pollfds[0].events = POLLIN;
-		_pollfds[0].revents = 0;
+		try
+		{
+			memset(&server_addr, 0, sizeof(server_addr));
+			configureNonBlocking(_socket);
+			server_addr.sin_family = AF_INET;
+			server_addr.sin_addr.s_addr = INADDR_ANY;
+			server_addr.sin_port = htons(_port);
+			bind_p(_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+			listen_p(_socket, 5);
+			_logger.logEvent("Server started on port " + irc::to_string(_port));
+			//TODO printare l'IP del server
+			server_poll_fd.fd = _socket;
+			server_poll_fd.events = POLLIN;
+			_pollfds.push_back(server_poll_fd);
+			_pollfds[0].fd = _socket;
+			_pollfds[0].events = POLLIN;
+			_pollfds[0].revents = 0;
+		}
+		catch (const SystemErrorException &e)
+		{
+			_logger.logError(&e);
+			throw;
+		}
 	}
 
 	Server::Server(const Server &copy) :
@@ -65,8 +75,8 @@ namespace irc
 		_channels(copy._channels),
 		_pollfds(copy._pollfds),
 		_socket(copy._socket),
-		_handler(copy._handler) {}
-
+		_handler(copy._handler),
+		_logger(copy._logger) {}
 
 	Server::~Server(void)
 	{
@@ -75,57 +85,64 @@ namespace irc
 
 	void	Server::run(void)
 	{
-		while (true)
+		try
 		{
-			poll_p(&_pollfds[0], _pollfds.size(), -1);
-			for (size_t i = 0; i < _pollfds.size(); i++)
+			while (true)
 			{
-				if (_pollfds[i].revents & POLLIN)
+				poll_p(&_pollfds[0], _pollfds.size(), -1);
+				for (size_t i = 0; i < _pollfds.size(); i++)
 				{
-					//new connection
-					if (_pollfds[i].fd == _socket)
+					if (_pollfds[i].revents & POLLIN)
 					{
-						Client				*client;
-						struct sockaddr_in	client_addr;
-						socklen_t			client_addr_len;
-						int 				client_socket;
-
-						// TCP connection
-						client_addr_len = sizeof(client_addr);
-						client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
-						configureNonBlocking(client_socket);
-
-						const string client_ip_addr = string(inet_ntoa(client_addr.sin_addr));
-						uint16_t client_port = ntohs(client_addr.sin_port);
-
-						client = new Client(this, client_socket, client_ip_addr, client_port);
-						addClient(client);
-						client->setIsConnected(true);
-
-						pollfd client_poll_fd;
-
-						client_poll_fd.fd = client_socket;
-						client_poll_fd.events = POLLIN;
-						addPollfd(client_poll_fd);
-						cout << "Connection established with " << client->getIpAddr() << endl;
-					}
-					else
-					{
-						//client already exists
-						Client *client = NULL;
-
-						for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
+						//new connection
+						if (_pollfds[i].fd == _socket)
 						{
-							if (it->second->getSocket() == _pollfds[i].fd)
-							{
-								client = it->second;
-								break;
-							}
+							Client				*client;
+							struct sockaddr_in	client_addr;
+							socklen_t			client_addr_len;
+							int 				client_socket;
+
+							// TCP connection
+							client_addr_len = sizeof(client_addr);
+							client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
+							configureNonBlocking(client_socket);
+
+							const string client_ip_addr = string(inet_ntoa(client_addr.sin_addr));
+							uint16_t client_port = ntohs(client_addr.sin_port);
+
+							client = new Client(_logger, this, client_socket, client_ip_addr, client_port);
+							addClient(client);
+							client->setIsConnected(true);
+
+							pollfd client_poll_fd;
+
+							client_poll_fd.fd = client_socket;
+							client_poll_fd.events = POLLIN;
+							addPollfd(client_poll_fd);
+							_logger.logEvent("Connection established with " + client->getIpAddr());
 						}
-						handleClient(client, &i);
+						else
+						{
+							//client already exists
+							Client *client = NULL;
+
+							for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
+							{
+								if (it->second->getSocket() == _pollfds[i].fd)
+								{
+									client = it->second;
+									break;
+								}
+							}
+							handleClient(client, &i);
+						}
 					}
 				}
 			}
+		}
+		catch (const exception &e)
+		{
+			_logger.logError(&e);
 		}
 	}
 
@@ -268,26 +285,16 @@ namespace irc
 			}
 			else
 			{
-				// Connection closed
 				removeClient(*client);
 				(*i)--;
-				// Error
-				if (bytes_read < 0)
+				if (bytes_read < 0) // Error
 					throw SystemErrorException(strerror(errno));
 			}
 		}
-		catch (const InternalErrorException &e)
-		{
-			throw;
-		}
 		catch (const ProtocolErrorException &e)
-		{
+		{			
 			client->receiveMessage(e.getContent());
-			//logger.log("Error: " + string(e.what()));
-		}
-		catch (const std::exception &e)
-		{
-			//logger.log("Unknown error: " + string(e.what()));
+			_logger.logError(&e);
 		}
 	}
 
@@ -308,9 +315,9 @@ namespace irc
 
 		flags = fcntl(socket, F_GETFL); //TODO aggiungere fcntl a SystemCalls (probabilmente variadic function)
 		if (flags == -1)
-			throw std::runtime_error(strerror(errno));
+			throw SystemErrorException(strerror(errno));
 		fcntl(socket, F_SETFL, flags | O_NONBLOCK);
 		if (flags == -1)
-			throw std::runtime_error(strerror(errno));
+			throw SystemErrorException(strerror(errno));
 	}
 }

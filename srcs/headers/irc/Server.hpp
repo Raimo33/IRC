@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 19:05:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:26:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,16 +37,18 @@
 # include "SystemCalls.hpp"
 # include "Constants.hpp"
 # include "EventHandler.hpp"
+# include "Logger.hpp"
 
 namespace irc
 {
 	class Client;
 	class Channel;
+	class Logger;
 
 	class Server
 	{
 		public:
-			explicit Server(const uint16_t port_no, const std::string &password);
+			explicit Server(Logger &logger, const uint16_t port_no, const std::string &password);
 			Server(const Server &copy);
 			~Server(void);
 
@@ -88,7 +90,7 @@ namespace irc
 			std::vector<pollfd>						_pollfds; //TODO usare map invece che std::vector, mapparli con il socket
 			const int								_socket;
 			EventHandler							_handler;
-			
+			Logger									&_logger;
 	};
 }
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/26 18:59:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 13:32:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ using std::map;
 
 namespace irc
 {
-	Client::Client(Server *server, const int socket, const string &ip_addr, const uint16_t port) :
+	Client::Client(Logger &logger, Server *server, const int socket, const string &ip_addr, const uint16_t port) :
 		_channels(),
 		_nickname(),
 		_username(),
@@ -33,7 +33,8 @@ namespace irc
 		_port(port),
 		_ip_addr(ip_addr),
 		_socket(socket),
-		_server(server) {}
+		_server(server),
+		_logger(logger) {}
 
 	Client::Client(const Client &copy) :
 		_channels(copy._channels),
@@ -45,7 +46,8 @@ namespace irc
 		_port(copy._port),
 		_ip_addr(copy._ip_addr),
 		_socket(copy._socket),
-		_server(copy._server) {}
+		_server(copy._server),
+		_logger(copy._logger) {}
 
 	Client::~Client(void) {}
 
@@ -130,6 +132,7 @@ namespace irc
 				throw InternalErrorException("Client is already disconnected");
 		}
 		_is_connected = is_connected;
+		_logger.logEvent("Client " + _ip_addr + " has " + (is_connected ? "connected" : "disconnected"));
 	}
 
 	bool	Client::getIsAuthenticated(void) const
@@ -147,6 +150,7 @@ namespace irc
 				throw InternalErrorException("Client is already unauthenticated");
 		}
 		_is_authenticated = is_authenticated;
+		_logger.logEvent("Client " + _ip_addr + " is " + (is_authenticated ? "authenticated" : "not authenticated anymore"));
 
 		const struct s_replyContent welcome = EventHandler::buildReplyContent(RPL_WELCOME, NULL, "Welcome to the Internet Relay Network" + _nickname + "!" + _username + "@" + _ip_addr);
 		const struct s_replyContent yourhost = EventHandler::buildReplyContent(RPL_YOURHOST, NULL, "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION);
@@ -181,6 +185,7 @@ namespace irc
 		if (channel.getMode('k') && channel.getKey() != key)
 			throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
 
+		//TODO rifare senza try catch
 		try
 		{
 			channel.addMember(*this); //se fallisce addMember la lascio catchare a chi sta su
@@ -228,6 +233,7 @@ namespace irc
 		if (_channels.find(channel_name) == _channels.end())
 			throw ProtocolErrorException(ERR_NOTONCHANNEL, channel_name);
 		channel.receiveMessage(msg);
+		_logger.logEvent("Client " + _nickname + " sent message to channel " + channel_name);
 	}
 
 	void	Client::sendMessage(const Client &receiver, const struct s_commandContent &msg) const
@@ -235,6 +241,7 @@ namespace irc
 		if (!receiver.getIsAuthenticated())
 			throw ProtocolErrorException(ERR_NOLOGIN, receiver.getNickname());
 		receiver.receiveMessage(msg);
+		_logger.logEvent("Client " + _nickname + " sent message to client " + receiver.getNickname());
 	}
 
 	void	Client::receiveMessage(const struct s_contentBase &msg) const
