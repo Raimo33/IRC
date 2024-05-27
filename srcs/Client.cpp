@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 18:24:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 22:11:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,26 +51,26 @@ namespace irc
 
 	Client::~Client(void) {}
 
-	const map<string, const Channel *>	&Client::getChannels(void) const
+	const map<string, Channel *>	&Client::getChannels(void) const
 	{
 		return _channels;
 	}
 
-	void	Client::setChannels(const map<string, const Channel *> &channels)
+	void	Client::setChannels(const map<string, Channel *> &channels)
 	{
 		_channels = channels;
 	}
 
 	const Channel	&Client::getChannel(const string &channel_name) const
 	{
-		map<string, const Channel *>::const_iterator it = _channels.find(channel_name);
+		map<string, Channel *>::const_iterator it = _channels.find(channel_name);
 
 		if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
 			throw ProtocolErrorException(ERR_NOTONCHANNEL, channel_name);
 		return *it->second;
 	}
 
-	void	Client::addChannel(const Channel &channel)
+	void	Client::addChannel(Channel &channel)
 	{
 		if (_channels.size() >= MAX_CHANNELS_PER_USER)
 			throw ProtocolErrorException(ERR_TOOMANYCHANNELS, channel.getName());
@@ -81,7 +81,7 @@ namespace irc
 	void	Client::removeChannel(const Channel &channel)
 	{
 		const string &channel_name = channel.getName();
-		map<string, const Channel *>::iterator it = _channels.find(channel_name);
+		map<string, Channel *>::iterator it = _channels.find(channel_name);
 
 		if (it == _channels.end()) //se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
 			throw ProtocolErrorException(ERR_NOTONCHANNEL, channel_name);
@@ -222,8 +222,6 @@ namespace irc
 
 	void	Client::leaveChannel(Channel &channel, const string &reason)
 	{
-		if (!_is_authenticated)
-			throw ProtocolErrorException(ERR_NOTREGISTERED);
 		channel.removeMember(*this);
 		removeChannel(channel);
 
@@ -253,4 +251,91 @@ namespace irc
 	{
 		EventHandler::sendBufferedContent(*this, &msg);
 	}
+
+	void	Client::kick(Client &user, Channel &channel, const string &reason) const
+	{
+		checkPrivilege(channel);
+
+		const string &channel_name = channel.getName();
+
+		_logger.logEvent("Client " + _nickname + " tries to kick " + user.getNickname() + " from channel " + channel_name);
+		channel.removeMember(user);
+		user.removeChannel(channel);
+
+		const string params[] = { channel_name, _nickname };
+		const struct s_commandContent message_to_channel = EventHandler::buildCommandContent("", KICK, params, reason);
+		channel.receiveMessage(message_to_channel);
+	}
+
+	void	Client::invite(Client &user, Channel &channel) const
+	{
+		checkPrivilege(channel);
+
+		const string &nickname = user.getNickname();
+		const string &channel_name = channel.getName();
+
+		_logger.logEvent("Client " + _nickname + " tries to invite " + user.getNickname() + " to channel " + channel.getName());
+		channel.addPendingInvitation(user);
+
+		channel.addPendingInvitation(user);
+		{
+			const string params[] = { nickname, channel_name };
+			const struct s_replyContent reply_to_issuer = EventHandler::buildReplyContent(RPL_INVITING, params);
+			receiveMessage(reply_to_issuer);
+		}
+		{
+			const string params[] = { nickname, channel_name };
+			const struct s_commandContent message_to_target = EventHandler::buildCommandContent(_nickname, INVITE, params);
+			user.receiveMessage(message_to_target);
+		}
+	}
+
+	void	Client::topicSet(Channel &channel, const string &new_topic) const
+	{
+		if (channel.getMode('t') && !channel.isOperator(*this))
+		{
+			const string params[] = { _nickname, channel.getName() };
+			throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, params);	
+		}
+		_logger.logEvent("Client " + _nickname + " tries to set topic of channel " + channel.getName() + " to " + new_topic);
+		channel.setTopic(new_topic);
+
+		const struct s_commandContent topic = EventHandler::buildCommandContent(_nickname, TOPIC, channel.getName(), new_topic);
+		channel.receiveMessage(topic);
+	}
+
+	void	Client::modeChange(Channel &channel, const char mode, const bool status, const string &param) const
+	{
+		checkPrivilege(channel);
+		_logger.logEvent("Client " + _nickname + " tries to change mode of channel " + channel.getName() + " to " + mode + (status ? "+" : "-") + param);
+		channel.setMode(mode, status, param);
+	}
+
+	void	Client::modesChange(Channel &channel, const vector<bool> &modes, const vector<string> &params) const
+	{
+		checkPrivilege(channel);
+		_logger.logEvent("Client " + _nickname + " tries to change modes of channel " + channel.getName());
+		channel.setModes(modes, params);
+	}
+
+	void	Client::promoteOperator(Channel &channel, Client &user)
+	{
+		checkPrivilege(channel);
+		_logger.logEvent("Client " + _nickname + " tries to promote operator " + user.getNickname() + " in channel " + channel.getName());
+		channel.addOperator(user);
+	}
+
+	void	Client::demoteOperator(Channel &channel, Client &op)
+	{
+		checkPrivilege(channel);
+		_logger.logEvent("Client " + _nickname + " tries to demote operator " + op.getNickname() + " in channel " + channel.getName());
+		channel.removeOperator(op);
+	}
+
+	void	Client::checkPrivilege(const Channel &channel) const
+	{
+		if (!channel.isOperator(*this))
+			throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, channel.getName());
+	}
+	
 }

@@ -6,14 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 19:13:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 22:19:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc/EventHandler.hpp"
 #include "irc/Server.hpp"
 #include "irc/Channel.hpp"
-#include "irc/ChannelOperator.hpp"
+#include "irc/Client.hpp"
 #include "irc/Hasher.hpp"
 #include "irc/Client.hpp"
 #include "irc/utils.hpp"
@@ -391,9 +391,9 @@ namespace irc
 				Channel			*new_channel;
 
 				if (i < keys.size())
-					new_channel = new Channel(_logger, channels_to_join[i], keys[i], _client);	
+					new_channel = new Channel(_logger, channels_to_join[i], keys[i], *_client);	
 				else
-					new_channel = new Channel(_logger, channels_to_join[i], _client);
+					new_channel = new Channel(_logger, channels_to_join[i], *_client);
 				_server->addChannel(*new_channel);
 			}
 			else
@@ -452,12 +452,12 @@ namespace irc
 
 	void EventHandler::handleQuit(const vector<string> &args)
 	{
-		const string						&reason = args.size() > 0 ? args[0] : "Client quit";
-		const string						&quitting_nickname = _client->getNickname();
-		const struct s_commandContent		quit = EventHandler::buildCommandContent(quitting_nickname, QUIT, NULL, reason);
-		const map<string, const Channel *>	&channels = _client->getChannels();
+		const string					&reason = args.size() > 0 ? args[0] : "Client quit";
+		const string					&quitting_nickname = _client->getNickname();
+		const struct s_commandContent	quit = EventHandler::buildCommandContent(quitting_nickname, QUIT, NULL, reason);
+		const map<string, Channel *>	&channels = _client->getChannels();
 		
-		for (map<string, const Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
+		for (map<string, Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
 		{
 			const Channel				*channel = it_channel->second;
 			const map<string, Client *>	&members = channel->getMembers();
@@ -482,11 +482,10 @@ namespace irc
 		if (n_args < 2)
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: TOPIC <channel> [<topic>]");
 
-		Channel			*channel = _server->getChannel(args[0]);
-		Client			*target = _server->getClient(args[1]);
-		ChannelOperator	op(*_client);
+		Channel	*channel = _server->getChannel(args[0]);
+		Client	*target = _server->getClient(args[1]);
 
-		args.size() > 2 ? op.kick(*target, *channel, args[2]) : op.kick(*target, *channel);
+		args.size() > 2 ? _client->kick(*target, *channel, args[2]) : _client->kick(*target, *channel);
 	}
 
 	void EventHandler::handleInvite(const vector<string> &args)
@@ -497,11 +496,10 @@ namespace irc
 		if (args.size() < 2)
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>");
 
-		Client			*target = _server->getClient(args[0]);
-		Channel			*channel = _server->getChannel(args[1]);
-		ChannelOperator	op(*_client);
+		Client	*target = _server->getClient(args[0]);
+		Channel	*channel = _server->getChannel(args[1]);
 
-		op.invite(*target, *channel);
+		_client->invite(*target, *channel);
 	}
 
 	void EventHandler::handleTopic(const vector<string> &args)
@@ -513,6 +511,7 @@ namespace irc
 
 		if (n_args < 1)
 			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "TOPIC", "usage: TOPIC <channel> [<topic>]");
+
 		Channel channel = _client->getChannel(args[0]);
 		if (n_args == 1)
 		{
@@ -529,15 +528,7 @@ namespace irc
 			_client->receiveMessage(topic_reply);
 		}
 		else
-		{
-			if (channel.getMode('t'))
-			{
-				ChannelOperator op(*_client);
-				op.topicSet(channel, args[1]);
-			}
-			else
-				channel.setTopic(args[1], *_client);
-		}
+			_client->topicSet(channel, args[1]);
 	}
 
 	void EventHandler::handleMode(const vector<string> &args)
@@ -573,9 +564,7 @@ namespace irc
 			}
 			new_modes[mode] = status;
 		}
-
-		ChannelOperator op(*_client);
-		op.modesChange(*channel, new_modes, params);
+		_client->modesChange(*channel, new_modes, params);
 	}
 
 	void	EventHandler::checkNicknameValidity(const string &nickname) const

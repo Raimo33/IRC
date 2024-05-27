@@ -6,13 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 19:13:55 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 22:10:54 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "irc/Channel.hpp"
 #include "irc/Client.hpp"
-#include "irc/ChannelOperator.hpp"
+#include "irc/Client.hpp"
 #include "irc/utils.hpp"
 #include "irc/EventHandler.hpp"
 #include "irc/Exceptions.hpp"
@@ -25,6 +25,7 @@
 
 using std::string;
 using std::map;
+using std::set;
 using std::vector;
 using std::stringstream;
 
@@ -37,7 +38,8 @@ namespace irc
 		_logger(logger)
 	{
 		checkName(name);
-		op.joinChannel(*this);
+		addMember(op);
+		addOperator(op);
 		_logger.logEvent("Channel created: " + name);
 	}
 
@@ -49,7 +51,8 @@ namespace irc
 		_logger(logger)
 	{
 		checkName(name);
-		op.joinChannel(*this);
+		addMember(op);
+		addOperator(op);
 		_modes['k'] = true;
 		_logger.logEvent("Channel created: " + name);
 	}
@@ -60,6 +63,7 @@ namespace irc
 		_topic(copy._topic),
 		_member_limit(copy._member_limit),
 		_members(copy._members),
+		_operators(copy._operators),
 		_pending_invitations(copy._pending_invitations),
 		_modes(copy._modes),
 		_logger(copy._logger)
@@ -101,15 +105,8 @@ namespace irc
 		return _topic;
 	}
 
-	void Channel::setTopic(const string &new_topic, const Client &setter)
+	void Channel::setTopic(const string &new_topic)
 	{
-		const string &nickname = setter.getNickname();
-
-		if (_modes['t'] && isOperator(&setter))
-		{
-			const string params[] = { nickname, _name };
-			throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, params);	
-		}
 		if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
 			throw ProtocolErrorException(RPL_NOTOPIC, _name, new_topic + " is too long");	
 		_topic = new_topic;
@@ -124,39 +121,6 @@ namespace irc
 	void Channel::setMemberLimit(const uint32_t new_limit)
 	{
 		_member_limit = new_limit;
-	}
-
-	void Channel::addOperator(ChannelOperator &op)
-	{
-		string	nickname = op.getNickname();
-
-		if (isOperator(nickname) == true)
-		{
-			const string params[] = { nickname, _name };
-			throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already an operator of " + _name);
-		}
-		_members[nickname] = &op; //sovrascrivo il membro con l'operator (non posso avere due membri con lo stesso nickname)
-
-		_logger.logEvent("Channel " + _name + ", operator added: " + nickname);
-		const struct s_replyContent youreoper = EventHandler::buildReplyContent(RPL_YOUREOPER, nickname);
-		op.receiveMessage(youreoper);
-	}
-
-	void Channel::removeOperator(ChannelOperator &op)
-	{
-		string	nickname = op.getNickname();
-
-		if (!isOperator(nickname))
-		{
-			const string params[] = { nickname, _name };
-			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " is not an operator of " + _name);	
-		}
-		_members.erase(nickname);
-		_members[nickname] = &op;
-
-		_logger.logEvent("Channel " + _name + ", operator removed: " + nickname);
-		const struct s_replyContent notoperanymore = EventHandler::buildReplyContent(RPL_NOTOPERANYMORE);
-		op.receiveMessage(notoperanymore);
 	}
 
 	const map<string, Client *> &Channel::getMembers(void) const
@@ -183,7 +147,7 @@ namespace irc
 	{
 		const string &nickname = user.getNickname();
 
-		if (_modes['i'] && _pending_invitations.find(nickname) == _pending_invitations.end())
+		if (_modes['i'] && _pending_invitations.find(&user) == _pending_invitations.end())
 			throw ProtocolErrorException(ERR_INVITEONLYCHAN, _name);
 		if (_members.find(nickname) != _members.end())
 			throw ProtocolErrorException(ERR_USERONCHANNEL, _name);	
@@ -206,49 +170,86 @@ namespace irc
 		_logger.logEvent("Channel " + _name + ", member removed: " + nickname);
 	}
 
-	const map<string, Client *> &Channel::getPendingInvitations(void) const
+	const set<Client *> &Channel::getOperators(void) const
+	{
+		return _operators;
+	}
+	
+	void Channel::setOperators(const set<Client *> &new_operators)
+	{
+		_operators = new_operators;
+	}
+
+	void Channel::addOperator(Client &op)
+	{
+		string	nickname = op.getNickname();
+
+		if (isOperator(op) == true)
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already an operator of " + _name);
+		}
+		_operators.insert(&op);
+
+		_logger.logEvent("Channel " + _name + ", operator added: " + nickname);
+		const struct s_replyContent youreoper = EventHandler::buildReplyContent(RPL_YOUREOPER, nickname);
+		op.receiveMessage(youreoper);
+	}
+
+	void Channel::removeOperator(Client &op)
+	{
+		string	nickname = op.getNickname();
+
+		if (!isOperator(op))
+		{
+			const string params[] = { nickname, _name };
+			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " is not an operator of " + _name);	
+		}
+		_operators.erase(&op);
+
+		_logger.logEvent("Channel " + _name + ", operator removed: " + nickname);
+		const struct s_replyContent notoperanymore = EventHandler::buildReplyContent(RPL_NOTOPERANYMORE);
+		op.receiveMessage(notoperanymore);
+	}
+
+	const set<Client *> &Channel::getPendingInvitations(void) const
 	{
 		return _pending_invitations;
 	}
 
-	void Channel::setPendingInvitations(const map<string, Client *> &new_invitations)
+	void Channel::setPendingInvitations(const set<Client *> &new_invitations)
 	{
 		_pending_invitations = new_invitations;
 	}
 
-	const Client &Channel::getPendingInvitation(const string &nickname) const
+	void Channel::addPendingInvitation(Client &user)
 	{
-		if (_pending_invitations.find(nickname) == _pending_invitations.end())
+		const string &nickname = user.getNickname();
+
+		if (_members.find(nickname) != _members.end()) //TODO tutte queste helper metterle a parte
 		{
 			const string params[] = { nickname, _name };
-			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " was not invited to " + _name);
+			throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already a member of " + _name);
 		}
-		return *(_pending_invitations.at(nickname));
-	}
-
-	void Channel::addPendingInvitation(Client *user)
-	{
-		const string &nickname = user->getNickname();
-
-		if (_pending_invitations.find(nickname) != _pending_invitations.end())
+		if (_pending_invitations.find(&user) != _pending_invitations.end())
 		{
 			const string params[] = { nickname, _name };
 			throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already invited to " + _name);
 		}
-		_pending_invitations[nickname] = user;
+		_pending_invitations.insert(&user);
 		_logger.logEvent("Channel " + _name + ", invitation sent to: " + nickname);
 	}
 
-	void Channel::removePendingInvitation(const Client &user)
+	void Channel::removePendingInvitation(Client &user)
 	{
 		const string &nickname = user.getNickname();
 
-		if (_pending_invitations.find(nickname) == _pending_invitations.end())
+		if (_pending_invitations.find(&user) == _pending_invitations.end())
 		{
 			const string params[] = { nickname, _name };
 			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " was not invited to " + _name);
 		}
-		_pending_invitations.erase(nickname);
+		_pending_invitations.erase(&user);
 		_logger.logEvent("Channel " + _name + ", invitation to " + nickname + " removed");
 	}
 
@@ -265,7 +266,7 @@ namespace irc
 		{
 			if (channel_mode_requires_param(i))
 			{
-				if (params.size() < j + 1)
+				if (params.size() < static_cast<size_t>(j + 1)) //TODO togliere, capire cosa e' static_assert
 					throw InternalErrorException("Channel::setModes: missing parameter for mode");
 				setMode(i, modes[i], params[j++]);
 			}
@@ -297,7 +298,7 @@ namespace irc
 		}
 		else if (mode == 'o')
 		{
-			ChannelOperator	op(getMember(param));
+			Client	op(getMember(param));
 
 			status ? addOperator(op) : removeOperator(op);
 		}
@@ -319,21 +320,9 @@ namespace irc
 		}
 	}
 
-	bool	Channel::isOperator(const string &nickname) const
+	bool	Channel::isOperator(const Client &user) const
 	{
-		map<string, Client *>::const_iterator it = _members.find(nickname);
-
-		if (it == _members.end())
-		{
-			const string params[] = { nickname, _name };
-			throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
-		}
-		return (dynamic_cast<const ChannelOperator *>(it->second) != NULL);
-	}
-
-	bool	Channel::isOperator(const Client *user) const
-	{
-		return isOperator(user->getNickname());
+		return _operators.find(const_cast<Client *>(&user)) != _operators.end();
 	}
 
 	string	Channel::getMembersString(void) const //TODO ottimizzare, mantenere una stringa aggiornata di operatori e membri
@@ -341,14 +330,11 @@ namespace irc
 		string	members_str;
 
 		members_str.reserve(_members.size() * 10);
+		for (set<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); it++)
+			members_str += (*it)->getNickname() + ", ";
 		for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
 		{
-			if (isOperator(it->first) == true)
-				members_str += "@" + it->first + ", ";
-		}
-		for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
-		{
-			if (!isOperator(it->first))
+			if (!isOperator(*it->second))
 				members_str += it->first + ", ";
 		}
 		members_str.erase(members_str.length() - 2);

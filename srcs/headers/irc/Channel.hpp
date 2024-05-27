@@ -6,24 +6,23 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 19:13:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 22:07:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CHANNEL_HPP
 # define CHANNEL_HPP
 
-# include <map>
 # include <string>
 # include <vector>
-# include <algorithm>
+# include <map>
+# include <set>
 # include <stdint.h>
 # include <stdexcept>
-# include "Constants.hpp"
 
 namespace irc
 {
-	class ChannelOperator;
+	class Client;
 	class Client;
 	class Logger;
 
@@ -41,32 +40,32 @@ namespace irc
 			const std::string						&getKey(void) const;
 			void									setKey(const std::string &new_key);
 			const std::string						&getTopic(void) const;
-			void									setTopic(const std::string &new_topic, const Client &setter);
+			void									setTopic(const std::string &new_topic);
 			uint32_t								getMemberLimit(void) const;
 			void									setMemberLimit(const uint32_t new_limit);
-			void									addOperator(ChannelOperator &op);
-			void									removeOperator(ChannelOperator &op);
 			const std::map<std::string, Client *>	&getMembers(void) const;
 			void									setMembers(const std::map<std::string, Client *> &new_members);
 			const Client							&getMember(const std::string &nickname) const;
 			void									addMember(Client &user);
 			void									removeMember(const Client &user);
-			const std::map<std::string, Client *>	&getPendingInvitations(void) const;
-			void									setPendingInvitations(const std::map<std::string, Client *> &new_invitations);
-			const Client							&getPendingInvitation(const std::string &nickname) const;
-			void									addPendingInvitation(Client *user);
-			void									removePendingInvitation(const Client &user);
+			const std::set<Client *>				&getOperators(void) const;
+			void									setOperators(const std::set<Client *> &new_operators);
+			void									addOperator(Client &op);
+			void									removeOperator(Client &op);
+			const std::set<Client *>				&getPendingInvitations(void) const;
+			void									setPendingInvitations(const std::set<Client *> &new_pending_invitations);
+			void									addPendingInvitation(Client &user);
+			void									removePendingInvitation(Client &user);
 			const std::vector<bool>					&getModes(void) const;
 			void									setModes(const std::vector<bool> &modes, const std::vector<std::string> &params);
 			bool									getMode(const char mode) const;
 			void									setMode(const char mode, const bool status, const std::string &param = "");
 
 			void									receiveMessage(const struct s_commandContent &message) const;
-			bool									isOperator(const std::string &nickname) const;
-			bool									isOperator(const Client *user) const;
+			bool									isOperator(const Client &user) const;
 			std::string								getMembersString(void) const;
 
-			// friend class 									ChannelOperator;
+			// friend class 									Client;
 
 		private:
 
@@ -75,7 +74,8 @@ namespace irc
 			std::string								_topic;
 			uint32_t								_member_limit;
 			std::map<std::string, Client *>			_members;
-			std::map<std::string, Client *>			_pending_invitations;
+			std::set<Client *>						_operators;
+			std::set<Client *>						_pending_invitations;
 			std::vector<bool>						_modes;
 			Logger									&_logger;
 

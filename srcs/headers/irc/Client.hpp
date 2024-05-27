@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:27:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 22:06:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,10 @@ namespace irc
 			Client(const Client &copy);
 			virtual ~Client(void);
 
-			const std::map<std::string, const Channel *>	&getChannels(void) const;
-			void											setChannels(const std::map<std::string, const Channel *> &channels);
+			const std::map<std::string, Channel *>			&getChannels(void) const;
+			void											setChannels(const std::map<std::string, Channel *> &channels);
 			const Channel									&getChannel(const std::string &channel_name) const;
-			void											addChannel(const Channel &channel);
+			void											addChannel(Channel &channel);
 			void											removeChannel(const Channel &channel);
 			const std::string								&getNickname(void) const;
 			void											setNickname(const std::string &nickname);
@@ -58,10 +58,20 @@ namespace irc
 			void											sendMessage(const Channel &channel, const struct s_commandContent &msg) const; //TODO valutare se passare direttamente il messaggio come testo
 			void											sendMessage(const Client &receiver, const struct s_commandContent &msg) const;
 			void											receiveMessage(const struct s_contentBase &msg) const;
+
+			void											kick(Client &user, Channel &channel, const std::string &reason = "") const; //chiama removeMember di Channel e removeChannel di Client
+			void											invite(Client &user, Channel &channel) const; //chiama addInvite di Channel
+			void											topicSet(Channel &channel, const std::string &new_topic) const; // chiama setTopic di Channel
+			void											modeChange(Channel &channel, const char mode, const bool status, const std::string &param = "") const; // chiama setMode di Channel
+			void											modesChange(Channel &channel, const std::vector<bool> &modes, const std::vector<std::string> &params) const; // chiama setModes di Channel
+			void											promoteOperator(Channel &channel, Client &user); // chiama addOperator di Channel
+			void											demoteOperator(Channel &channel, Client &op); // chiama removeOperator di Channel
 			
 		protected:
+		
+			void											checkPrivilege(const Channel &channel) const;
 
-			std::map<std::string, const Channel *>			_channels; // {channel_name, channel}
+			std::map<std::string, Channel *>				_channels; // {channel_name, channel}
 			std::string										_nickname;
 			std::string										_username;
 			std::string										_realname;  //usato solo da WHOIS e company
