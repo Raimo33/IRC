@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 18:48:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 19:13:40 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -388,13 +388,12 @@ namespace irc
 		{
 			if (channels.find(channels_to_join[i]) == channels.end())
 			{
-				ChannelOperator op(*_client);
 				Channel			*new_channel;
 
 				if (i < keys.size())
-					new_channel = new Channel(_logger, channels_to_join[i], keys[i], op);	
+					new_channel = new Channel(_logger, channels_to_join[i], keys[i], _client);	
 				else
-					new_channel = new Channel(_logger, channels_to_join[i], op);
+					new_channel = new Channel(_logger, channels_to_join[i], _client);
 				_server->addChannel(*new_channel);
 			}
 			else

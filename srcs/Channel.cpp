@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 18:16:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 19:13:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ using std::stringstream;
 
 namespace irc
 {
-	Channel::Channel(Logger &logger, const string &name, ChannelOperator &op) :
+	Channel::Channel(Logger &logger, const string &name, Client &op) :
 		_name(name),
 		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),
 		_modes(256, false),
@@ -41,7 +41,7 @@ namespace irc
 		_logger.logEvent("Channel created: " + name);
 	}
 
-	Channel::Channel(Logger &logger, const string &name, const string &key, ChannelOperator &op) :
+	Channel::Channel(Logger &logger, const string &name, const string &key, Client &op) :
 		_name(name),
 		_key(key),
 		_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),

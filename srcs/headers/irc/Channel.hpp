@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:28:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/27 19:13:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ namespace irc
 	class Channel //TODO valutare se renderlo una interfaccia e renderlo la base di PublicChannel, PrivateChannel e SecretChannel
 	{
 		public:
-			explicit Channel(Logger &logger, const std::string &name, ChannelOperator &op); //on creation there must be at least one operator
-			Channel(Logger &logger, const std::string &name, const std::string &key, ChannelOperator &op);
+			explicit Channel(Logger &logger, const std::string &name, Client &op); //on creation there must be at least one operator
+			Channel(Logger &logger, const std::string &name, const std::string &key, Client &op);
 			Channel(const Channel &copy);
 			~Channel(void);
 		
