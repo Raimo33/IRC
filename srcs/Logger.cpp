@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:16:50 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:45:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 13:24:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,11 @@ using std::exception;
 using std::ostringstream;
 using std::cout;
 using std::endl;
+
+Logger::Logger(void) :
+	_filename(),
+	_file(),
+	_timestamp() {}
 
 Logger::Logger(const string &filename) :
 	_filename(filename),
@@ -48,6 +53,14 @@ Logger::~Logger(void)
 const string	&Logger::getFilename(void) const
 {
 	return _filename;
+}
+
+void	Logger::init(const string &filename)
+{
+	_filename = filename;
+	_file.open(_filename.c_str());
+	if (!_file.is_open())
+		throw SystemErrorException("Failed to open log file");
 }
 
 void	Logger::logEvent(const string &message)

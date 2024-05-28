@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:49:59 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 13:34:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -475,7 +475,7 @@ void EventHandler::handleKick(const vector<string> &args)
 
 	const uint16_t	n_args = args.size();
 	if (n_args < 2)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: TOPIC <channel> [<topic>]");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> [<reason>]");
 
 	Channel	*channel = _server->getChannel(args[0]);
 	Client	*target = _server->getClient(args[1]);

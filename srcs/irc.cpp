@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:37:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 13:26:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,16 @@ static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, 
 
 int main(const int argc, const char **argv)
 {
+	Logger	logger;
+
 	try
 	{
 		uint16_t	port_nbr;
 		string		password;
 
 		get_args(&port_nbr, &password, argc, argv);
+		logger.init(LOG_FILENAME);
 
-		Logger	logger(LOG_FILENAME);
 		Server	server(logger, port_nbr, password);
 
 		server.run();
@@ -46,7 +48,8 @@ int main(const int argc, const char **argv)
 	}
 	catch (const exception &e)
 	{
-		cerr << "Shutting down" << endl; //il messaggio di errore e' gia stato stampato dal logger
+		logger.logError(&e);
+		logger.logEvent("Server shutting down");
 	}
 	return (1);
 }

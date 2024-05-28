@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:13:01 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 13:24:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,14 @@ const char *const RESET = "\033[0m";
 class Logger
 {
 	public:
+		Logger(void);
 		explicit Logger(const std::string &filename);
 		Logger(const Logger &copy);
 		~Logger(void);
 
 		const std::string	&getFilename(void) const;
 
+		void				init(const std::string &filename);
 		void				logEvent(const std::string &message);
 		void				logError(const std::exception *e);
 
@@ -45,7 +47,7 @@ class Logger
 		void				updateTimestamp(void);
 		const std::string	&getTimestamp(void) const;
 
-		const std::string	_filename;
+		std::string			_filename;
 		std::ofstream		_file;
 		std::string			_timestamp;
 };

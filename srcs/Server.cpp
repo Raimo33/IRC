@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 13:11:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 13:19:14 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,41 +37,33 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 	_handler(EventHandler(logger, *this)),
 	_logger(logger)
 {
-	try //TODO rivedere la struttura del try catch (socket_p nel costruttore non viene catchato dal logger)
-	{
-		struct sockaddr_in	server_addr;
-		pollfd				server_poll_fd;
+	struct sockaddr_in	server_addr;
+	pollfd				server_poll_fd;
+	char				hostname[256];
+	struct hostent		*host;
+	struct in_addr		**addr_list;
 
-		memset(&server_addr, 0, sizeof(server_addr));
-		configureNonBlocking(_socket);
-		server_addr.sin_family = AF_INET;
-		server_addr.sin_addr.s_addr = INADDR_ANY;
-		server_addr.sin_port = htons(_port);
-		bind_p(_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
-		listen_p(_socket, 5);
-
-		char hostname[256];
-        gethostname_p(hostname, sizeof(hostname));
-        struct hostent *host = gethostbyname_p(hostname);
-        struct in_addr **addr_list = (struct in_addr **)host->h_addr_list;
-        if (addr_list[0] != NULL)
-		{
-            char *ip = inet_ntoa(*addr_list[0]);
-            _logger.logEvent("Server started on " + string(ip) + ":" + ::to_string(_port));
-        }
-		
-		server_poll_fd.fd = _socket;
-		server_poll_fd.events = POLLIN;
-		_pollfds.push_back(server_poll_fd);
-		_pollfds[0].fd = _socket;
-		_pollfds[0].events = POLLIN;
-		_pollfds[0].revents = 0;
-	}
-	catch (const SystemErrorException &e)
+	memset(&server_addr, 0, sizeof(server_addr));
+	configureNonBlocking(_socket);
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = INADDR_ANY;
+	server_addr.sin_port = htons(_port);
+	bind_p(_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+	listen_p(_socket, 5);
+    gethostname_p(hostname, sizeof(hostname));
+    host = gethostbyname_p(hostname);
+    addr_list = (struct in_addr **)host->h_addr_list;
+    if (addr_list[0] != NULL)
 	{
-		_logger.logError(&e);
-		throw;
-	}
+        char *ip = inet_ntoa(*addr_list[0]);
+        _logger.logEvent("Server started on " + string(ip) + ":" + ::to_string(_port));
+    }
+	server_poll_fd.fd = _socket;
+	server_poll_fd.events = POLLIN;
+	_pollfds.push_back(server_poll_fd);
+	_pollfds[0].fd = _socket;
+	_pollfds[0].events = POLLIN;
+	_pollfds[0].revents = 0;
 }
 
 Server::Server(const Server &copy) :
@@ -92,64 +84,57 @@ Server::~Server(void)
 //TODO refactor
 void	Server::run(void)
 {
-	try
+	while (true)
 	{
-		while (true)
+		poll_p(&_pollfds[0], _pollfds.size(), -1);
+		for (size_t i = 0; i < _pollfds.size(); i++)
 		{
-			poll_p(&_pollfds[0], _pollfds.size(), -1);
-			for (size_t i = 0; i < _pollfds.size(); i++)
+			if (_pollfds[i].revents & POLLIN)
 			{
-				if (_pollfds[i].revents & POLLIN)
+				//new connection
+				if (_pollfds[i].fd == _socket)
 				{
-					//new connection
-					if (_pollfds[i].fd == _socket)
+					Client				*client;
+					struct sockaddr_in	client_addr;
+					socklen_t			client_addr_len;
+					int 				client_socket;
+
+					// TCP connection
+					client_addr_len = sizeof(client_addr);
+					client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
+					configureNonBlocking(client_socket);
+
+					const string client_ip_addr = string(inet_ntoa(client_addr.sin_addr));
+					uint16_t client_port = ntohs(client_addr.sin_port);
+
+					client = new Client(_logger, this, client_socket, client_ip_addr, client_port);
+					addClient(client);
+
+					pollfd client_poll_fd;
+
+					client_poll_fd.fd = client_socket;
+					client_poll_fd.events = POLLIN;
+					addPollfd(client_poll_fd);
+
+					_logger.logEvent("Incoming connection from " + client_ip_addr);
+				}
+				else
+				{
+					//client already exists
+					Client *client = NULL;
+
+					for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
 					{
-						Client				*client;
-						struct sockaddr_in	client_addr;
-						socklen_t			client_addr_len;
-						int 				client_socket;
-
-						// TCP connection
-						client_addr_len = sizeof(client_addr);
-						client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
-						configureNonBlocking(client_socket);
-
-						const string client_ip_addr = string(inet_ntoa(client_addr.sin_addr));
-						uint16_t client_port = ntohs(client_addr.sin_port);
-
-						client = new Client(_logger, this, client_socket, client_ip_addr, client_port);
-						addClient(client);
-
-						pollfd client_poll_fd;
-
-						client_poll_fd.fd = client_socket;
-						client_poll_fd.events = POLLIN;
-						addPollfd(client_poll_fd);
-
-						_logger.logEvent("Incoming connection from " + client_ip_addr);
-					}
-					else
-					{
-						//client already exists
-						Client *client = NULL;
-
-						for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
+						if (it->second->getSocket() == _pollfds[i].fd)
 						{
-							if (it->second->getSocket() == _pollfds[i].fd)
-							{
-								client = it->second;
-								break;
-							}
+							client = it->second;
+							break;
 						}
-						handleClient(client, &i);
 					}
+					handleClient(client, &i);
 				}
 			}
 		}
-	}
-	catch (const exception &e)
-	{
-		_logger.logError(&e);
 	}
 }
 
