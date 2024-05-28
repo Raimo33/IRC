@@ -60,15 +60,12 @@ void	EventHandler::setClient(Client &client)
 
 void	EventHandler::processInput(string raw_input)
 {
-	vector<string> cmds = split(raw_input, '\n');
+	vector<string> cmds = ::split(raw_input, '\n');
 	std::cout << "raw_input: " << raw_input << std::endl;
 	for(uint8_t i = 0; i < cmds.size(); i++)
 	{
 		std::cout << "cmds[i]: " << cmds[i] << std::endl;
 		s_commandMessage input = parseInput(cmds[i]);
-
-		if (input.cmd < 0 || input.cmd >= N_COMMANDS)
-			throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, raw_input);	
 		(this->*(_handlers[input.cmd]))(input.params);
 	}
 }
