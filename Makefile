@@ -6,7 +6,7 @@
 #    By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/26 15:33:59 by craimond          #+#    #+#              #
-#    Updated: 2024/05/28 12:48:45 by craimond         ###   ########.fr        #
+#    Updated: 2024/05/28 14:58:21 by craimond         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -54,7 +54,7 @@ fclean: clean
 	@echo "$(RED)removed *.log$(NC)"
 
 leaks: all
-	@valgrind $(VALGRIND_FLAGS) ./$(NAME) 8080 beetle 2> $(LEAK_REPORT)
+	@valgrind $(VALGRIND_FLAGS) ./$(NAME) 9999 beet 2> $(LEAK_REPORT)
 	@echo "$(GREEN)leak report generated$(NC)"
 
 re: fclean all

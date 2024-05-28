@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:44:51 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 15:56:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@
 class ProtocolErrorException : public std::exception //for IRC protocol errors (reply codes)
 {
 	public:
-		explicit ProtocolErrorException(const enum e_replyCodes code, const std::string params[] = NULL, const std::string &custom_msg = "");
-		explicit ProtocolErrorException(const enum e_replyCodes code, const std::string &param, const std::string &custom_msg = "");
+		explicit ProtocolErrorException(const enum e_replyCodes code, const std::vector<std::string> &params, const std::string &custom_msg = "");
+		explicit ProtocolErrorException(const enum e_replyCodes code, const std::string &param = "", const std::string &custom_msg = "");
 		const char *what(void) const throw();
 		~ProtocolErrorException(void) throw();
 

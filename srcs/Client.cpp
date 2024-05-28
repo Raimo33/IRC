@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:58:00 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 15:56:01 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 using std::string;
 using std::map;
 
-Client::Client(Logger &logger, Server *server, const int socket, const string &ip_addr, const uint16_t port) :
+Client::Client(Logger &logger, Server *server, const int socket, const pollfd &pollfd, const string &ip_addr, const uint16_t port) :
 	_channels(),
 	_nickname(),
 	_username(),
@@ -31,6 +31,7 @@ Client::Client(Logger &logger, Server *server, const int socket, const string &i
 	_port(port),
 	_ip_addr(ip_addr),
 	_socket(socket),
+	_pollfd(pollfd),
 	_server(server),
 	_logger(logger) {}
 
@@ -44,6 +45,7 @@ Client::Client(const Client &copy) :
 	_port(copy._port),
 	_ip_addr(copy._ip_addr),
 	_socket(copy._socket),
+	_pollfd(copy._pollfd),
 	_server(copy._server),
 	_logger(copy._logger) {}
 
@@ -59,7 +61,7 @@ void	Client::setChannels(const map<string, Channel *> &channels)
 	_channels = channels;
 }
 
-const Channel	&Client::getChannel(const string &channel_name) const
+Channel	&Client::getChannel(const string &channel_name) const
 {
 	map<string, Channel *>::const_iterator it = _channels.find(channel_name);
 
@@ -176,6 +178,11 @@ int	Client::getSocket(void) const
 	return _socket;
 }
 
+const pollfd	&Client::getPollfd(void) const
+{
+	return _pollfd;
+}
+
 Server	&Client::getServer(void) const
 {
 	return *_server;
@@ -195,18 +202,22 @@ void	Client::joinChannel(Channel &channel, const string &key)
 	channel.addMember(*this);
 	addChannel(channel);
 
-	struct s_replyMessage	topic_reply;
-	const string			&channel_topic = channel.getTopic();
-	const string			&channel_name = channel.getName();
+	const string					&channel_name = channel.getName();
+	const string					&channel_topic = channel.getTopic();
+	const struct s_commandMessage	join_acknowledgement = EventHandler::buildCommandContent(_nickname, JOIN, channel_name);
+	struct s_replyMessage			topic_reply;
 
 	if (channel_topic.empty())
 		topic_reply = EventHandler::buildReplyContent(RPL_NOTOPIC, channel_name);
 	else
 		topic_reply = EventHandler::buildReplyContent(RPL_TOPIC, channel_name, channel_topic);
 
-	const string params[] = { "=", channel_name };
+	vector<string> params;
+	params.push_back("=");
+	params.push_back(channel_name);
 	const struct s_replyMessage namreply = EventHandler::buildReplyContent(RPL_NAMREPLY, params, channel.getMembersString());
 	const struct s_replyMessage endofnames = EventHandler::buildReplyContent(RPL_ENDOFNAMES, channel_name);
+	receiveMessage(join_acknowledgement);
 	receiveMessage(topic_reply);
 	receiveMessage(namreply);
 	receiveMessage(endofnames);
@@ -254,7 +265,9 @@ void	Client::kick(Client &user, Channel &channel, const string &reason) const
 	channel.removeMember(user);
 	user.removeChannel(channel);
 
-	const string params[] = { channel_name, _nickname };
+	vector<string> params;
+	params.push_back(channel_name);
+	params.push_back(_nickname);
 	const struct s_commandMessage message_to_channel = EventHandler::buildCommandContent("", KICK, params, reason);
 	channel.receiveMessage(message_to_channel);
 }
@@ -269,14 +282,15 @@ void	Client::invite(Client &user, Channel &channel) const
 	_logger.logEvent("Client " + _nickname + " tries to invite " + user.getNickname() + " to channel " + channel.getName());
 	channel.addPendingInvitation(user);
 
+	vector<string> params;
+	params.push_back(nickname);
+	params.push_back(channel_name);
 	channel.addPendingInvitation(user);
 	{
-		const string params[] = { nickname, channel_name };
 		const struct s_replyMessage reply_to_issuer = EventHandler::buildReplyContent(RPL_INVITING, params);
 		receiveMessage(reply_to_issuer);
 	}
 	{
-		const string params[] = { nickname, channel_name };
 		const struct s_commandMessage message_to_target = EventHandler::buildCommandContent(_nickname, INVITE, params);
 		user.receiveMessage(message_to_target);
 	}
@@ -286,7 +300,9 @@ void	Client::topicSet(Channel &channel, const string &new_topic) const
 {
 	if (channel.getMode('t') && !channel.isOperator(*this))
 	{
-		const string params[] = { _nickname, channel.getName() };
+		vector<string> params;
+		params.push_back(_nickname);
+		params.push_back(channel.getName());
 		throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, params);	
 	}
 	_logger.logEvent("Client " + _nickname + " tries to set topic of channel " + channel.getName() + " to " + new_topic);

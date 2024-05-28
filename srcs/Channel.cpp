@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:54:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 15:55:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,29 +29,22 @@ using std::set;
 using std::vector;
 using std::stringstream;
 
-Channel::Channel(Logger &logger, const string &name, Client &op) :
-	_name(name),
-	_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),
-	_modes(256, false),
-	_logger(logger)
-{
-	checkName(name);
-	addMember(op);
-	addOperator(op);
-	_logger.logEvent("Channel created: " + name);
-}
-
-Channel::Channel(Logger &logger, const string &name, const string &key, Client &op) :
+Channel::Channel(Logger &logger, const string &name, Client &op, const string &key) :
 	_name(name),
 	_key(key),
+	_topic(""),
 	_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),
+	_members(map<string, Client *>()),
+	_operators(set<Client *>()),
+	_pending_invitations(set<Client *>()),
 	_modes(256, false),
 	_logger(logger)
 {
 	checkName(name);
-	addMember(op);
+	op.joinChannel(*this);
 	addOperator(op);
-	_modes['k'] = true;
+	if (!key.empty())
+		_modes['k'] = true;
 	_logger.logEvent("Channel created: " + name);
 }
 
@@ -135,7 +128,9 @@ const Client &Channel::getMember(const string &nickname) const
 {
 	if (_members.find(nickname) == _members.end())
 	{
-		const string params[] = { nickname, _name };
+		vector<string> params;
+		params.push_back(nickname);
+		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
 	}
 	return *(_members.at(nickname));
@@ -149,7 +144,9 @@ void Channel::addMember(Client &user)
 		throw ProtocolErrorException(ERR_INVITEONLYCHAN, _name);
 	if (_members.find(nickname) != _members.end())
 	{
-		const string params[] = { nickname, _name };
+		vector<string> params;
+		params.push_back(nickname);
+		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
 	}
 	if (_members.size() >= _member_limit)
@@ -164,7 +161,9 @@ void Channel::removeMember(const Client &user)
 	
 	if (_members.find(nickname) == _members.end())
 	{
-		const string params[] = { nickname, _name };
+		vector<string> params;
+		params.push_back(nickname);
+		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);	
 	}
 	_members.erase(nickname);
@@ -187,7 +186,9 @@ void Channel::addOperator(Client &op)
 
 	if (isOperator(op) == true)
 	{
-		const string params[] = { nickname, _name };
+		vector<string> params;
+		params.push_back(nickname);
+		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already an operator of " + _name);
 	}
 	_operators.insert(&op);
@@ -203,7 +204,9 @@ void Channel::removeOperator(Client &op)
 
 	if (!isOperator(op))
 	{
-		const string params[] = { nickname, _name };
+		vector<string> params;
+		params.push_back(nickname);
+		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " is not an operator of " + _name);	
 	}
 	_operators.erase(&op);
@@ -227,16 +230,13 @@ void Channel::addPendingInvitation(Client &user)
 {
 	const string &nickname = user.getNickname();
 
+	vector<string> params;
+	params.push_back(nickname);
+	params.push_back(_name);
 	if (_members.find(nickname) != _members.end())
-	{
-		const string params[] = { nickname, _name };
 		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
-	}
 	if (_pending_invitations.find(&user) != _pending_invitations.end())
-	{
-		const string params[] = { nickname, _name };
 		throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already invited to " + _name);
-	}
 	_pending_invitations.insert(&user);
 	_logger.logEvent("Channel " + _name + ", invitation sent to: " + nickname);
 }
@@ -247,7 +247,9 @@ void Channel::removePendingInvitation(Client &user)
 
 	if (_pending_invitations.find(&user) == _pending_invitations.end())
 	{
-		const string params[] = { nickname, _name };
+		vector<string> params;
+		params.push_back(nickname);
+		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " was not invited to " + _name);
 	}
 	_pending_invitations.erase(&user);
@@ -307,7 +309,10 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 		_logger.logEvent("Channel " + _name + ", mode " + mode + " is now " + (status ? "on" : "off"));
 
 	string mode_str = (status ? "+" : "-") + mode;
-	const string params[] = { _name, mode_str, param };		
+	vector<string> params;
+	params.push_back(_name);
+	params.push_back(mode_str);
+	params.push_back(param);
 	const struct s_commandMessage mode_change = EventHandler::buildCommandContent(SERVER_NAME, MODE, params);
 	receiveMessage(mode_change);
 }
@@ -341,7 +346,6 @@ string	Channel::getMembersString(void) const
 	members_str.erase(members_str.length() - 2);
 	return members_str;
 }
-
 
 void	Channel::checkName(const string &name) const
 {

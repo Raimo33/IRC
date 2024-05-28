@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:32:54 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 15:35:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <map>
 # include <string>
 # include <stdint.h>
+# include <poll.h>
 
 class Server;
 class Channel;
@@ -27,13 +28,13 @@ class Logger;
 class Client
 {
 	public:
-		explicit Client(Logger &logger, Server *server, const int socket, const std::string &ip_addr, const uint16_t port);
+		explicit Client(Logger &logger, Server *server, const int socket, const pollfd &pollfd, const std::string &ip_addr, const uint16_t port);
 		Client(const Client &copy);
 		virtual ~Client(void);
 
 		const std::map<std::string, Channel *>			&getChannels(void) const;
 		void											setChannels(const std::map<std::string, Channel *> &channels);
-		const Channel									&getChannel(const std::string &channel_name) const;
+		Channel											&getChannel(const std::string &channel_name) const;
 		void											addChannel(Channel &channel);
 		void											removeChannel(const Channel &channel);
 		const std::string								&getNickname(void) const;
@@ -49,11 +50,12 @@ class Client
 		uint16_t										getPort(void) const;
 		const std::string								&getIpAddr(void) const;
 		int												getSocket(void) const;
+		const pollfd									&getPollfd(void) const;
 		Server											&getServer(void) const;
 
 		void											joinChannel(Channel &channel, const std::string &key = "");
 		void											leaveChannel(Channel &channel, const std::string &reason = "");
-		void											sendMessage(const Channel &channel, const struct s_commandMessage &msg) const; //TODO valutare se passare direttamente il messaggio come testo
+		void											sendMessage(const Channel &channel, const struct s_commandMessage &msg) const;
 		void											sendMessage(const Client &receiver, const struct s_commandMessage &msg) const;
 		void											receiveMessage(const struct s_messageBase &msg) const;
 
@@ -79,6 +81,7 @@ class Client
 		const uint16_t									_port;
 		const std::string								_ip_addr; //aka hostname
 		const int										_socket;
+		const pollfd									&_pollfd;
 		Server											*_server;
 		Logger											&_logger;
 };

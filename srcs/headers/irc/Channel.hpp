@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:54:19 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 15:19:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,7 @@ class Logger;
 class Channel
 {
 	public:
-		explicit Channel(Logger &logger, const std::string &name, Client &op);
-		Channel(Logger &logger, const std::string &name, const std::string &key, Client &op);
+		explicit Channel(Logger &logger, const std::string &name, Client &op, const std::string &key = "");
 		Channel(const Channel &copy);
 		~Channel(void);
 	

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 13:34:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 15:52:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include "irc/utils.hpp"
 #include "irc/ReplyCodes.hpp"
 #include "irc/Exceptions.hpp"
+#include "irc/Constants.hpp"
 
 using std::string;
 using std::map;
@@ -66,24 +67,18 @@ void	EventHandler::processInput(string raw_input)
 	(this->*(_handlers[input.cmd]))(input.params);
 }
 
-const struct s_replyMessage	EventHandler::buildReplyContent(const enum e_replyCodes code, const string *params, const string &custom_msg)
+const struct s_replyMessage	EventHandler::buildReplyContent(const enum e_replyCodes code, const vector<string> &params, const string &custom_msg)
 {
 	struct s_replyMessage	content;
 
 	content.prefix = string(SERVER_NAME);
 	content.code = code;
-	if (params)
-	{
-		size_t n_params;
-
-		for (n_params = 0; !params[n_params].empty(); n_params++);
-		content.params = vector<string>(params, params + n_params);
-	}
+	content.params = params;
 	if (custom_msg.empty())
 	{
 		map<enum e_replyCodes, string>::const_iterator it = reply_codes.find(code);
 		if (it == reply_codes.end())
-			throw InternalErrorException("EventHandler::buildReplyContent: Unknown reply code");
+			throw InternalErrorException("EventHandler::buildReplyContent: reply code does not match any reply string");
 		content.text = it->second;
 	}
 	else
@@ -93,32 +88,26 @@ const struct s_replyMessage	EventHandler::buildReplyContent(const enum e_replyCo
 
 const struct s_replyMessage	EventHandler::buildReplyContent(const enum e_replyCodes code, const string &param, const string &custom_msg)
 {
-	const string params[] = { param , "" };
+	const vector<string>	params(1, param);
 
 	return buildReplyContent(code, params, custom_msg);
 }
 
-const struct s_commandMessage	EventHandler::buildCommandContent(const string &prefix, const e_cmd_type cmd, const string *params, const string &custom_msg)
+const struct s_commandMessage	EventHandler::buildCommandContent(const string &prefix, const e_cmd_type cmd, const vector<string> &params, const string &custom_msg)
 {
 	struct s_commandMessage	content;
 
 	content.prefix = prefix;
-	content.cmd = static_cast<e_cmd_type>(cmd);
-	if (params)
-	{
-		size_t n_params;
-
-		for (n_params = 0; !params[n_params].empty(); n_params++);
-		content.params = vector<string>(params, params + n_params);
-	}
+	content.cmd = cmd;
+	content.params = params;
 	content.text = custom_msg;
 	return content;
 }
 
 const struct s_commandMessage	EventHandler::buildCommandContent(const string &prefix, const e_cmd_type cmd, const string param, const string &custom_msg)
 {
-	const string params[] = { param };
-
+	const vector<string>	params(1, param);
+	
 	return buildCommandContent(prefix, cmd, params, custom_msg);
 }
 
@@ -251,6 +240,7 @@ s_commandMessage EventHandler::parseInput(string &raw_input) const
 	string 				command;
 	size_t 				space_pos;
 
+
 	raw_input = raw_input.substr(0, MAX_MSG_LENGTH); // Limit the length of the input to prevent buffer overflow
 	if (raw_input.size() >= 2)
 	{
@@ -262,6 +252,8 @@ s_commandMessage EventHandler::parseInput(string &raw_input) const
 		}
 	}
 	
+	//TODO splittare i comandi per \n
+
 	if (!raw_input.empty() && raw_input[0] == ':')
 	{
 		space_pos = raw_input.find(' ');
@@ -386,7 +378,7 @@ void EventHandler::handleJoin(const vector<string> &args)
 			Channel			*new_channel;
 
 			if (i < keys.size())
-				new_channel = new Channel(_logger, channels_to_join[i], keys[i], *_client);	
+				new_channel = new Channel(_logger, channels_to_join[i],  *_client, keys[i]);
 			else
 				new_channel = new Channel(_logger, channels_to_join[i], *_client);
 			_server->addChannel(*new_channel);
@@ -507,7 +499,7 @@ void EventHandler::handleTopic(const vector<string> &args)
 	if (n_args < 1)
 		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "TOPIC", "usage: TOPIC <channel> [<topic>]");
 
-	Channel channel = _client->getChannel(args[0]);
+	Channel &channel = _client->getChannel(args[0]);
 	if (n_args == 1)
 	{
 		const string &topic = channel.getTopic();
@@ -517,7 +509,9 @@ void EventHandler::handleTopic(const vector<string> &args)
 			topic_reply = EventHandler::buildReplyContent(RPL_NOTOPIC, channel.getName());
 		else
 		{
-			const string params[] = { _client->getNickname(), channel.getName() };
+			vector<string> params;
+			params.push_back(_client->getNickname());
+			params.push_back(channel.getName());
 			topic_reply = EventHandler::buildReplyContent(RPL_TOPIC, params, topic);
 		}
 		_client->receiveMessage(topic_reply);

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 13:19:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 14:40:51 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,9 @@
 #include "irc/SystemCalls.hpp"
 #include "irc/EventHandler.hpp"
 #include "irc/ReplyCodes.hpp"
-
 #include "irc/Exceptions.hpp"
+
+#include <algorithm>
 
 using std::string;
 using std::map;
@@ -81,7 +82,6 @@ Server::~Server(void)
 	//TODO delete di tutto
 }
 
-//TODO refactor
 void	Server::run(void)
 {
 	while (true)
@@ -91,48 +91,10 @@ void	Server::run(void)
 		{
 			if (_pollfds[i].revents & POLLIN)
 			{
-				//new connection
 				if (_pollfds[i].fd == _socket)
-				{
-					Client				*client;
-					struct sockaddr_in	client_addr;
-					socklen_t			client_addr_len;
-					int 				client_socket;
-
-					// TCP connection
-					client_addr_len = sizeof(client_addr);
-					client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
-					configureNonBlocking(client_socket);
-
-					const string client_ip_addr = string(inet_ntoa(client_addr.sin_addr));
-					uint16_t client_port = ntohs(client_addr.sin_port);
-
-					client = new Client(_logger, this, client_socket, client_ip_addr, client_port);
-					addClient(client);
-
-					pollfd client_poll_fd;
-
-					client_poll_fd.fd = client_socket;
-					client_poll_fd.events = POLLIN;
-					addPollfd(client_poll_fd);
-
-					_logger.logEvent("Incoming connection from " + client_ip_addr);
-				}
+					handleNewClient();
 				else
-				{
-					//client already exists
-					Client *client = NULL;
-
-					for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
-					{
-						if (it->second->getSocket() == _pollfds[i].fd)
-						{
-							client = it->second;
-							break;
-						}
-					}
-					handleClient(client, &i);
-				}
+					handleClient(&i);
 			}
 		}
 	}
@@ -174,16 +136,20 @@ Client *Server::getClient(const string &nickname) const
 
 void Server::addClient(Client *client)
 {
-	if (_clients.find(client->getNickname()) != _clients.end())
+	const string &nickname = client->getNickname();
+	
+	if (_clients.find(nickname) != _clients.end())
 		throw InternalErrorException("Server::addClient: Client already exists");
-	_clients[client->getNickname()] = client;
+	_clients[nickname] = client;
 }
 
 void Server::removeClient(const Client &client)
 {
-	if (_clients.find(client.getNickname()) == _clients.end())
+	map<string, Client *>::iterator it = _clients.find(client.getNickname());
+
+	if (it == _clients.end())
 		throw InternalErrorException("Server::removeClient: Client not found");
-	_clients.erase(client.getNickname());
+	_clients.erase(it);
 }
 
 const map<string, Channel *>	&Server::getChannels(void) const
@@ -219,7 +185,7 @@ void	Server::removeChannel(const Channel &channel)
 	_channels.erase(channel.getName());
 }
 
-const vector<pollfd>	&Server::getPollfds(void)
+const vector<pollfd>	&Server::getPollfds(void) const
 {
 	return _pollfds;
 }
@@ -229,36 +195,22 @@ void	Server::setPollfds(const vector<pollfd> &pollfds)
 	_pollfds = pollfds;
 }
 
-void	Server::addPollfd(const pollfd pollfd)
+void	Server::addPollfd(const pollfd &fd)
 {
-	_pollfds.push_back(pollfd);
-	_pollfds[_pollfds.size() - 1].fd = pollfd.fd;
-	_pollfds[_pollfds.size() - 1].events = POLLIN;
-	_pollfds[_pollfds.size() - 1].revents = 0;
+	vector<pollfd>::iterator it = std::find(_pollfds.begin(), _pollfds.end(), fd);
+
+	if (it != _pollfds.end())
+		throw InternalErrorException("Server::addPollfd: Pollfd already exists");
+	_pollfds.push_back(fd);
 }
 
-void	Server::removePollfd(const pollfd pollfd)
+void	Server::removePollfd(const pollfd &fd)
 {
-	for (size_t i = 0; i < _pollfds.size(); i++)
-	{
-		if (_pollfds[i].fd == pollfd.fd)
-		{
-			_pollfds.erase(_pollfds.begin() + i);
-			break;
-		}
-	}
-}
+	vector<pollfd>::iterator it = std::find(_pollfds.begin(), _pollfds.end(), fd);
 
-void Server::removePollfd(const int socket)
-{
-	for (size_t i = 0; i < _pollfds.size(); i++)
-	{
-		if (_pollfds[i].fd == socket)
-		{
-			_pollfds.erase(_pollfds.begin() + i);
-			break;
-		}
-	}
+	if (it == _pollfds.end())
+		throw InternalErrorException("Server::removePollfd: Pollfd not found");
+	_pollfds.erase(it);
 }
 
 int	Server::getSocket(void) const
@@ -271,16 +223,76 @@ bool Server::isClientConnected(const string &nickname) const
 	return _clients.find(nickname) != _clients.end();
 }
 
-void Server::handleClient(Client *client, size_t *i)
+void Server::disconnectClient(Client &client)
 {
-	char buffer[BUFFER_SIZE] = {0};
+	int socket = client.getSocket();
+
+	shutdown_p(socket, SHUT_RDWR);
+	close_p(socket);
+	removePollfd(client.getPollfd());
+	removeClient(client);
+	delete &client;
+}
+
+void Server::configureNonBlocking(const int socket) const
+{
+	int flags;
+
+	flags = fcntl(socket, F_GETFL); //TODO aggiungere fcntl a SystemCalls (probabilmente variadic function)
+	if (flags == -1)
+		throw SystemErrorException(strerror(errno));
+	fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+	if (flags == -1)
+		throw SystemErrorException(strerror(errno));
+}
+
+void	Server::handleNewClient(void)
+{
+	Client				*client;
+	struct sockaddr_in	client_addr;
+	socklen_t			client_addr_len;
+	int 				client_socket;
+
+	client_addr_len = sizeof(client_addr);
+	client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
+	configureNonBlocking(client_socket);
+
+	const string client_ip_addr = string(inet_ntoa(client_addr.sin_addr));
+	const uint16_t client_port = ntohs(client_addr.sin_port);
+
+	pollfd client_poll_fd;
+	client_poll_fd.fd = client_socket;
+	client_poll_fd.events = POLLIN;
+	client_poll_fd.revents = 0;
+	addPollfd(client_poll_fd);
+
+	client = new Client(_logger, this, client_socket, client_poll_fd, client_ip_addr, client_port);
+	addClient(client);
+
+	_logger.logEvent("Incoming connection from " + client_ip_addr);
+}
+
+void Server::handleClient(size_t *i)
+{
+	Client	*client = NULL;
+
+	for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->second->getSocket() == _pollfds[*i].fd)
+		{
+			client = it->second;
+			break;
+		}
+	}
 
 	if (!client)
 		throw InternalErrorException("Server::handleClient: Client not found");
 
 	try
 	{
-		int bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
+		char	buffer[BUFFER_SIZE] = {0};
+		int		bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
+
 		if (bytes_read > 0)
 		{
 			_handler.setClient(*client);
@@ -301,25 +313,7 @@ void Server::handleClient(Client *client, size_t *i)
 	}
 }
 
-void Server::disconnectClient(Client *client)
+bool operator==(const pollfd &lhs, const pollfd &rhs)
 {
-	int socket = client->getSocket();
-
-	shutdown_p(socket, SHUT_RDWR);
-	close_p(socket);
-	removePollfd(socket);
-	removeClient(*client);
-	delete client;
-}
-
-void Server::configureNonBlocking(const int socket) const
-{
-	int flags;
-
-	flags = fcntl(socket, F_GETFL); //TODO aggiungere fcntl a SystemCalls (probabilmente variadic function)
-	if (flags == -1)
-		throw SystemErrorException(strerror(errno));
-	fcntl(socket, F_SETFL, flags | O_NONBLOCK);
-	if (flags == -1)
-		throw SystemErrorException(strerror(errno));
+    return lhs.fd == rhs.fd && lhs.events == rhs.events && lhs.revents == rhs.revents;
 }
