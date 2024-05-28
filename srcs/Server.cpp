@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:50:08 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 13:11:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,10 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 	_handler(EventHandler(logger, *this)),
 	_logger(logger)
 {
-	try
+	try //TODO rivedere la struttura del try catch (socket_p nel costruttore non viene catchato dal logger)
 	{
-		struct sockaddr_in server_addr;
-		pollfd server_poll_fd;
+		struct sockaddr_in	server_addr;
+		pollfd				server_poll_fd;
 
 		memset(&server_addr, 0, sizeof(server_addr));
 		configureNonBlocking(_socket);
@@ -49,8 +49,17 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 		server_addr.sin_port = htons(_port);
 		bind_p(_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
 		listen_p(_socket, 5);
-		_logger.logEvent("Server started on port " + ::to_string(_port));
-		//TODO printare l'IP del server
+
+		char hostname[256];
+        gethostname_p(hostname, sizeof(hostname));
+        struct hostent *host = gethostbyname_p(hostname);
+        struct in_addr **addr_list = (struct in_addr **)host->h_addr_list;
+        if (addr_list[0] != NULL)
+		{
+            char *ip = inet_ntoa(*addr_list[0]);
+            _logger.logEvent("Server started on " + string(ip) + ":" + ::to_string(_port));
+        }
+		
 		server_poll_fd.fd = _socket;
 		server_poll_fd.events = POLLIN;
 		_pollfds.push_back(server_poll_fd);

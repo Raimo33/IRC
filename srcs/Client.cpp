@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:36:13 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:58:00 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,29 +187,23 @@ void	Client::joinChannel(Channel &channel, const string &key)
 		throw ProtocolErrorException(ERR_NOTREGISTERED);
 	if (channel.getMode('k') && channel.getKey() != key)
 		throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName());
+	if (channel.getMembers().size() >= channel.getMemberLimit())
+		throw ProtocolErrorException(ERR_CHANNELISFULL, channel.getName());
+	if (_channels.size() >= MAX_CHANNELS_PER_USER)
+		throw ProtocolErrorException(ERR_TOOMANYCHANNELS, channel.getName());
 
-	//TODO rifare senza try catch e provare test case: creare due canali con lo stesso nome
-	try
-	{
-		channel.addMember(*this); //se fallisce addMember la lascio catchare a chi sta su
-		addChannel(channel);
-	}
-	catch (const ProtocolErrorException &e) //catcho il fallimento di addChannel
-	{
-		//annullo il successo di addMember
-		if (e.getContent().code == ERR_TOOMANYCHANNELS)
-			channel.removeMember(*this);
-		throw e;
-	}
+	channel.addMember(*this);
+	addChannel(channel);
 
 	struct s_replyMessage	topic_reply;
 	const string			&channel_topic = channel.getTopic();
 	const string			&channel_name = channel.getName();
+
 	if (channel_topic.empty())
 		topic_reply = EventHandler::buildReplyContent(RPL_NOTOPIC, channel_name);
 	else
 		topic_reply = EventHandler::buildReplyContent(RPL_TOPIC, channel_name, channel_topic);
-	//TODO in futuro mettere channel.getType() al posto di "="
+
 	const string params[] = { "=", channel_name };
 	const struct s_replyMessage namreply = EventHandler::buildReplyContent(RPL_NAMREPLY, params, channel.getMembersString());
 	const struct s_replyMessage endofnames = EventHandler::buildReplyContent(RPL_ENDOFNAMES, channel_name);

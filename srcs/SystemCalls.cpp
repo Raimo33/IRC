@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:49:28 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 13:16:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,5 +104,25 @@ ssize_t	recv_p(int sockfd, void *buf, size_t len, int flags)
 	ret = recv(sockfd, buf, len, flags);
 	if (ret == -1)
 		throw SystemErrorException("recv: " + string(strerror(errno)));
+	return (ret);
+}
+
+int	gethostname_p(char *name, size_t len)
+{
+	int	ret;
+
+	ret = gethostname(name, len);
+	if (ret == -1)
+		throw SystemErrorException("gethostname: " + string(strerror(errno)));
+	return (ret);
+}
+
+struct hostent	*gethostbyname_p(const char *name)
+{
+	hostent	*ret;
+
+	ret = gethostbyname(name);
+	if (!ret)
+		throw SystemErrorException("gethostbyname: " + string(strerror(errno)));
 	return (ret);
 }

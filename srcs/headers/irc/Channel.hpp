@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:45:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:54:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,15 +24,14 @@ class Client;
 class Client;
 class Logger;
 
-class Channel //TODO valutare se renderlo una interfaccia e renderlo la base di PublicChannel, PrivateChannel e SecretChannel
+class Channel
 {
 	public:
-		explicit Channel(Logger &logger, const std::string &name, Client &op); //on creation there must be at least one operator
+		explicit Channel(Logger &logger, const std::string &name, Client &op);
 		Channel(Logger &logger, const std::string &name, const std::string &key, Client &op);
 		Channel(const Channel &copy);
 		~Channel(void);
 	
-		//TODO valutare quali metodi rendere private, non possono stare tutti public, e' una bad practice
 		const std::string						&getName(void) const;
 		void									setName(const std::string &new_name);
 		const std::string						&getKey(void) const;

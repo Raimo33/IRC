@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:33:56 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:54:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -341,6 +341,7 @@ string	Channel::getMembersString(void) const
 	members_str.erase(members_str.length() - 2);
 	return members_str;
 }
+
 
 void	Channel::checkName(const string &name) const
 {
