@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 00:27:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 00:58:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ const struct s_commandMessage	EventHandler::buildCommandMessage(const string &pr
 	return buildCommandMessage(prefix, cmd, params, custom_msg);
 }
 
-void	EventHandler::sendBufferedContent(const Client &receiver, const struct s_messageBase *message)
+void	EventHandler::sendBufferedContent(const Client &receiver, const struct s_messageBase *message) //TODO refactor con iterators
 {
 	string							first_part;
 	string							second_part;
@@ -263,7 +263,6 @@ struct s_commandMessage EventHandler::parseInput(string &raw_input) const
 			break;
 		}
 		param = get_next_token(it, raw_input.end(), ' '); // Extract the parameter
-
 		input.params.push_back(param); // Add the parameter to the vector
 	}
 	return input;	
@@ -479,13 +478,30 @@ void EventHandler::handleMode(const vector<string> &args)
 	checkConnection(_client);
 	checkAuthentication(_client);
 
-	//TODO gestire il caso di richiesta della mode (RPL_CHANNELMODEIS)
-
 	const uint16_t	n_args = args.size();
-	if (n_args < 2 || (args[1][0] != '+' && args[1][0] != '-'))
+
+	if (n_args < 1)
 		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}");
 
-	Channel				*channel = _server->getChannel(args[0]);
+	Channel			*channel = _server->getChannel(args[0]);
+
+	if (n_args == 1)
+	{
+		const vector<bool>	&modes = channel->getModes();
+		string				modes_str("+");
+
+		for (uint32_t i = 0; i < modes.size(); i++)
+			if (modes[i])
+				modes_str += static_cast<char>(i);
+
+		const struct s_replyMessage	reply = EventHandler::buildReplyMessage(RPL_CHANNELMODEIS, channel->getName(), modes_str);
+		_client->receiveMessage(reply);
+		return;
+	}
+
+	if (args[1][0] != '+' && args[1][0] != '-')
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}");
+
 	bool				status;
 	unsigned char		mode;
 	const vector<bool>	&current_modes = channel->getModes();
@@ -497,7 +513,10 @@ void EventHandler::handleMode(const vector<string> &args)
 	for (uint32_t i = 0; i < args[1].size(); i++)
 	{
 		if (args[1][i] == '+' || args[1][i] == '-')
-			status = (args[1][i++] == '+');
+		{
+			status = (args[1][i] == '+');
+			continue ;
+		}
 		mode = args[1][i];
 		if (string(SUPPORTED_CHANNEL_MODES).find(mode) == string::npos)
 			throw ProtocolErrorException(ERR_UNKNOWNMODE, string(1, mode));

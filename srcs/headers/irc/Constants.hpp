@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 03:05:20 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:11:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 01:05:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ const uint8_t		MAX_NICKNAME_LEN = 9;
 const uint16_t		MAX_CHANNEL_NAME_LEN = 200;
 const uint16_t		MAX_CHANNEL_TOPIC_LEN = 390;
 const uint8_t		MAX_CHANNEL_KEY_LEN = 50;
-const uint8_t		DEFAULT_CHANNEL_MEMBER_LIMIT = 50;
 const uint16_t		MAX_MSG_LENGTH = 512;
 const uint16_t		BUFFER_SIZE = 1024;
 const uint8_t		MAX_SERVER_PASSWORD_LEN = 64;

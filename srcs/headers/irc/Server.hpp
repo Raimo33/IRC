@@ -6,12 +6,11 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 16:42:13 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 00:31:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO implementare scambio di file (ERR_FILEERROR)
-//TODO capire la differenza tra <nick>!<user>@<host> e <nick>
 
 #ifndef SERVER_HPP
 # define SERVER_HPP

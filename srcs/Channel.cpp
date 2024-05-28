@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 16:28:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 01:22:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ using std::stringstream;
 Channel::Channel(Logger &logger, const string &name, Client &op, const string &key) :
 	_name(name),
 	_topic(""),
-	_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),
+	_member_limit(-1),
 	_members(map<string, Client *>()),
 	_operators(set<Client *>()),
 	_pending_invitations(set<Client *>()),
@@ -41,9 +41,10 @@ Channel::Channel(Logger &logger, const string &name, Client &op, const string &k
 {
 	checkName(name);
 	op.joinChannel(*this);
-	addOperator(op);
+	setMode('o', true, op.getNickname());
+	setMode('t', true);
 	if (!key.empty())
-		setKey(key);
+		setMode('k', true, key);
 	_logger.logEvent("Channel created: " + name);
 }
 
@@ -85,9 +86,10 @@ const string &Channel::getKey(void) const
 
 void Channel::setKey(const string &new_key)
 {
+	if (!_modes['k'])
+		throw InternalErrorException("Channel::setKey: trying to set a key on a channel without the 'k' mode");
 	checkKey(new_key);
 	_key = new_key;
-	_modes['k'] = true;
 	_logger.logEvent("Channel " + _name + " key set to " + new_key);
 }
 
@@ -196,12 +198,6 @@ void Channel::addOperator(Client &op)
 	_logger.logEvent("Channel " + _name + ", operator added: " + nickname);
 	const struct s_replyMessage youreoper = EventHandler::buildReplyMessage(RPL_YOUREOPER, nickname, "You are now an operator of " + _name);
 	op.receiveMessage(youreoper);
-	vector<string> params;
-	params.push_back(_name);
-	params.push_back("+o");
-	params.push_back(nickname);
-	const struct s_commandMessage mode_change = EventHandler::buildCommandMessage(SERVER_NAME, MODE, params);
-	receiveMessage(mode_change);
 }
 
 void Channel::removeOperator(Client &op)
@@ -317,12 +313,18 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 	else
 		_logger.logEvent("Channel " + _name + ", mode " + mode + " is now " + (status ? "on" : "off"));
 
-	string mode_str = (status ? "+" : "-") + mode;
+	string mode_str = (status ? "+" : "-") + string(1, mode);
 	vector<string> params;
 	params.push_back(_name);
 	params.push_back(mode_str);
 	params.push_back(param);
 	const struct s_commandMessage mode_change = EventHandler::buildCommandMessage(SERVER_NAME, MODE, params);
+	
+	
+	std::cout << "params[0]: " << params[0] << std::endl;
+	std::cout << "params[1]: " << params[1] << std::endl;
+	std::cout << "params[2]: " << params[2] << std::endl;
+	
 	receiveMessage(mode_change);
 }
 
