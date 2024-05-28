@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 17:37:28 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:44:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,37 +24,34 @@ using std::string;
 using std::map;
 using std::vector;
 
-namespace irc
+SystemErrorException::SystemErrorException(const string &msg) : runtime_error(msg) {}
+
+const char *SystemErrorException::what(void) const throw()
 {
-	SystemErrorException::SystemErrorException(const string &msg) : runtime_error(msg) {}
+	return runtime_error::what();
+}
 
-	const char *SystemErrorException::what(void) const throw()
-	{
-		return runtime_error::what();
-	}
+InternalErrorException::InternalErrorException(const string &msg) : runtime_error(msg) {}
 
-	InternalErrorException::InternalErrorException(const string &msg) : runtime_error(msg) {}
+const char *InternalErrorException::what(void) const throw()
+{
+	return runtime_error::what();
+}
 
-	const char *InternalErrorException::what(void) const throw()
-	{
-		return runtime_error::what();
-	}
+ProtocolErrorException::ProtocolErrorException(const enum e_replyCodes code, const string params[], const string &custom_msg) :
+	_content(EventHandler::buildReplyContent(code, params, custom_msg)) {}
 
-	ProtocolErrorException::ProtocolErrorException(const uint16_t code, const string params[], const string &custom_msg) :
-		_content(EventHandler::buildReplyContent(code, params, custom_msg)) {}
+ProtocolErrorException::ProtocolErrorException(const enum e_replyCodes code, const string &param, const string &custom_msg) :
+	_content(EventHandler::buildReplyContent(code, param, custom_msg)) {}
 
-	ProtocolErrorException::ProtocolErrorException(const uint16_t code, const string &param, const string &custom_msg) :
-		_content(EventHandler::buildReplyContent(code, param, custom_msg)) {}
+ProtocolErrorException::~ProtocolErrorException(void) throw() {}
 
-	ProtocolErrorException::~ProtocolErrorException(void) throw() {}
+const char *ProtocolErrorException::what(void) const throw()
+{
+	return _content.text.c_str();
+}
 
-	const char *ProtocolErrorException::what(void) const throw()
-	{
-		return _content.text.c_str();
-	}
-
-	const struct s_replyContent	&ProtocolErrorException::getContent(void) const
-	{
-		return _content;
-	}
+const struct s_replyMessage	&ProtocolErrorException::getContent(void) const
+{
+	return _content;
 }

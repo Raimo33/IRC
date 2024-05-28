@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 03:05:20 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 13:26:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:11:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,22 +15,19 @@
 
 # include <stdint.h>
 
-namespace irc
-{
-	const char *const	SERVER_NAME = "IRCServer";
-	const char *const	SERVER_VERSION = "1.0";
-    const uint8_t		MAX_CHANNELS_PER_USER = 10;
-    const uint8_t		MAX_NICKNAME_LEN = 9;
-    const uint16_t		MAX_CHANNEL_NAME_LEN = 200;
-    const uint16_t		MAX_CHANNEL_TOPIC_LEN = 390;
-    const uint8_t		MAX_CHANNEL_KEY_LEN = 50;
-    const uint8_t		DEFAULT_CHANNEL_MEMBER_LIMIT = 50;
-    const uint16_t		MAX_MSG_LENGTH = 512;
-    const uint16_t		BUFFER_SIZE = 1024;
-    const uint8_t		MAX_SERVER_PASSWORD_LEN = 64;
-    const uint8_t		N_COMMANDS = 11;
-	const char *const	SUPPORTED_CHANNEL_MODES = "itkol";
-	const char *const	LOG_FILENAME = "IRCServer.log";
-}
+const char *const	SERVER_NAME = "IRCServer";
+const char *const	SERVER_VERSION = "1.0";
+const uint8_t		MAX_CHANNELS_PER_USER = 10;
+const uint8_t		MAX_NICKNAME_LEN = 9;
+const uint16_t		MAX_CHANNEL_NAME_LEN = 200;
+const uint16_t		MAX_CHANNEL_TOPIC_LEN = 390;
+const uint8_t		MAX_CHANNEL_KEY_LEN = 50;
+const uint8_t		DEFAULT_CHANNEL_MEMBER_LIMIT = 50;
+const uint16_t		MAX_MSG_LENGTH = 512;
+const uint16_t		BUFFER_SIZE = 1024;
+const uint8_t		MAX_SERVER_PASSWORD_LEN = 64;
+const uint8_t		N_COMMANDS = 11;
+const char *const	SUPPORTED_CHANNEL_MODES = "itkol";
+const char *const	LOG_FILENAME = "IRCServer.log";
 
 #endif

@@ -6,13 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 16:37:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:37:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
-#include "irc/irc.hpp"
+#include "irc/Server.hpp"
+#include "irc/Logger.hpp"
 
 using std::string;
 using std::istringstream;
@@ -21,7 +22,7 @@ using std::exception;
 using std::cerr;
 using std::endl;
 
-using namespace irc;
+;
 
 static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv);
 

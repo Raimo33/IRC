@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 17:10:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:44:51 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,38 +20,31 @@
 # include <vector>
 # include <stdint.h>
 
-# include <irc/Content.hpp>
+# include <irc/Messages.hpp>
 
-namespace irc
-{
-	class SystemErrorException; //for system calls errors (unpredictable)
-	class InternalErrorException; //for internal programming errors such as null pointers, calling addClient 2 times on the same client, etc.
-	class ProtocolErrorException; //for IRC protocol errors (reply codes)
-}
-
-class irc::ProtocolErrorException : public std::exception
+class ProtocolErrorException : public std::exception //for IRC protocol errors (reply codes)
 {
 	public:
-		explicit ProtocolErrorException(const uint16_t code, const std::string params[] = NULL, const std::string &custom_msg = "");
-		explicit ProtocolErrorException(const uint16_t code, const std::string &param, const std::string &custom_msg = "");
+		explicit ProtocolErrorException(const enum e_replyCodes code, const std::string params[] = NULL, const std::string &custom_msg = "");
+		explicit ProtocolErrorException(const enum e_replyCodes code, const std::string &param, const std::string &custom_msg = "");
 		const char *what(void) const throw();
 		~ProtocolErrorException(void) throw();
 
-		const struct s_replyContent	&getContent(void) const;
+		const struct s_replyMessage	&getContent(void) const;
 
 	private:
-		const struct s_replyContent	_content;
+		const struct s_replyMessage	_content;
 		const std::string			_formatted_msg;
 };
 
-class irc::InternalErrorException : public std::runtime_error
+class InternalErrorException : public std::runtime_error //for internal programming errors such as null pointers, calling addClient 2 times on the same client, etc.
 {
 	public:
 		InternalErrorException(const std::string &msg);
 		virtual const char *what(void) const throw();
 };
 
-class irc::SystemErrorException : public std::runtime_error
+class SystemErrorException : public std::runtime_error //for system calls errors (unpredictable)
 {
 	public:
 		SystemErrorException(const std::string &msg);

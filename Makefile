@@ -6,14 +6,14 @@
 #    By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/26 15:33:59 by craimond          #+#    #+#              #
-#    Updated: 2024/05/27 22:09:06 by craimond         ###   ########.fr        #
+#    Updated: 2024/05/28 12:48:45 by craimond         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ircserv
 
-SRCS = $(addprefix srcs/, 				Channel.cpp Client.cpp EventHandler.cpp Server.cpp utils.cpp SystemCalls.cpp Hasher.cpp Exceptions.cpp irc.cpp Logger.cpp ReplyCodes.cpp)
-HDRS = $(addprefix srcs/headers/irc/,	Channel.hpp Client.hpp EventHandler.hpp Server.hpp utils.hpp SystemCalls.hpp Hasher.hpp Exceptions.hpp irc.hpp Logger.hpp ReplyCodes.hpp Content.hpp)
+SRCS = $(addprefix srcs/, irc.cpp	  Channel.cpp Client.cpp EventHandler.cpp Server.cpp utils.cpp			 SystemCalls.cpp Exceptions.cpp Logger.cpp ReplyCodes.cpp)
+HDRS = $(addprefix srcs/headers/irc/, Channel.hpp Client.hpp EventHandler.hpp Server.hpp utils.hpp utils.tpp SystemCalls.hpp Exceptions.hpp Logger.hpp ReplyCodes.hpp Messages.hpp)
 OBJS = $(SRCS:.cpp=.o)
 INCLUDES = srcs/headers
 
@@ -22,6 +22,7 @@ LEAK_REPORT = leaks.log
 CC = c++
 VERSION = 98
 CFLAGS = -g -Wall -Wextra -Werror -std=c++$(VERSION) -I$(INCLUDES)
+LDFLAGS = -lssl -lcrypto
 VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
 
 RM = rm -rf
@@ -33,7 +34,7 @@ NC = \033[0m
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS)
+	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LDFLAGS)
 	@echo "$(GREEN)compiled $(NAME)$(NC)"
 
 %.o: %.cpp $(HDRS)

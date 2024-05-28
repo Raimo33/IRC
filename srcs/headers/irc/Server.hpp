@@ -6,13 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/27 22:21:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:49:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO implementare scambio di file (ERR_FILEERROR)
 //TODO capire la differenza tra <nick>!<user>@<host> e <nick>
-//TODO forse togliere il namespace
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
@@ -37,60 +36,54 @@
 # include "EventHandler.hpp"
 # include "Logger.hpp"
 
-namespace irc
+class Client;
+class Channel;
+class Logger;
+
+class Server
 {
-	class Client;
-	class Channel;
-	class Logger;
+	public:
+		explicit Server(Logger &logger, const uint16_t port_no, const std::string &password);
+		Server(const Server &copy);
+		~Server(void);
 
-	class Server
-	{
-		public:
-			explicit Server(Logger &logger, const uint16_t port_no, const std::string &password);
-			Server(const Server &copy);
-			~Server(void);
+		uint16_t								getPort(void) const;
+		const std::string						&getPwdHash(void) const;
+		const std::map<std::string, Client *>	&getClients(void) const;
+		void									setClients(const std::map<std::string, Client *> &clients);
+		Client									*getClient(const std::string &nickname) const;
+		void									addClient(Client *client);
+		void									removeClient(const Client &client);
+		const std::map<std::string, Channel *>	&getChannels(void) const;
+		void									setChannels(const std::map<std::string, Channel *> &channels);
+		Channel									*getChannel(const std::string &name) const;
+		void									addChannel(Channel &channel);
+		void									removeChannel(const Channel &channel);
+		const std::vector<pollfd>				&getPollfds(void);
+		void									setPollfds(const std::vector<pollfd> &pollfds);
+		void									addPollfd(const pollfd pollfd);
+		void									removePollfd(const pollfd pollfd);
+		void									removePollfd(const int socket);
+		int										getSocket(void) const;
 
-			uint16_t								getPort(void) const;
-			const std::string						&getPwdHash(void) const;
-			const std::map<std::string, Client *>	&getClients(void) const;
-			void									setClients(const std::map<std::string, Client *> &clients);
-			Client									*getClient(const int socket) const; //TODO forse non serve
-			Client									*getClient(const std::string &nickname) const;
-			void									addClient(Client *client);
-			void									removeClient(const Client &client);
-			const std::map<std::string, Channel *>	&getChannels(void) const;
-			void									setChannels(const std::map<std::string, Channel *> &channels);
-			Channel									*getChannel(const std::string &name) const;
-			void									addChannel(Channel &channel);
-			void									removeChannel(const Channel &channel);
-			const std::vector<pollfd>				&getPollfds(void);
-			void									setPollfds(const std::vector<pollfd> &pollfds);
-			void									addPollfd(const pollfd pollfd);
-			void									removePollfd(const pollfd pollfd);
-			void									removePollfd(const int socket);
-			int										getSocket(void) const;
+		bool									isClientConnected(const std::string &nickname) const;
+		void									handleClient(Client *client, size_t *i);
+		void									disconnectClient(Client *client);
+		void									handshake(const int client_socket) const;
+		void									configureNonBlocking(const int client_socket) const;
+		void									run(void);
+		void									stop(void);
 
-			bool									isClientConnected(const std::string &nickname) const;
-			void									handleClient(Client *client, size_t *i);
-			void									disconnectClient(Client *client);
-			void									handshake(const int client_socket) const;
-			void									configureNonBlocking(const int client_socket) const;
-			void									run(void);
-			void									stop(void);
+	private:
 
-		private:
-					
-			// static const std::map<uint16_t, std::string>	initReplyCodes(void);
-
-			const uint16_t							_port; //la porta va da 0 a 65535 (2 bytes)
-			const std::string						_pwd_hash; //la password che serve a qualsiasi Client per accedere a questo server
-			std::map<std::string, Client *>			_clients; //{nickname, Client *}
-			std::map<std::string, Channel *>		_channels; // {channel_name, Channel *}
-			std::vector<pollfd>						_pollfds; //TODO usare map invece che std::vector, mapparli con il socket
-			const int								_socket;
-			EventHandler							_handler;
-			Logger									&_logger;
-	};
-}
+		const uint16_t							_port;
+		const std::string						_pwd_hash;
+		std::map<std::string, Client *>			_clients;
+		std::map<std::string, Channel *>		_channels;
+		std::vector<pollfd>						_pollfds; //TODO usare map invece che std::vector, mapparli con il socket
+		const int								_socket;
+		EventHandler							_handler;
+		Logger									&_logger;
+};
 
 #endif

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Content.hpp                                        :+:      :+:    :+:   */
+/*   Messages.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/23 15:38:24 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/25 15:46:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:33:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,42 +16,41 @@
 # include <string>
 # include <vector>
 
-namespace irc
+# include "irc/ReplyCodes.hpp"
+
+enum e_cmd_type
 {
-	enum e_cmd_type
-	{
-		PASS,
-		NICK,
-		USER,
-		JOIN,
-		PART,
-		PRIVMSG,
-		QUIT,
-		KICK,
-		INVITE,
-		TOPIC,
-		MODE,
-	};
+	PASS,
+	NICK,
+	USER,
+	JOIN,
+	PART,
+	PRIVMSG,
+	QUIT,
+	KICK,
+	INVITE,
+	TOPIC,
+	MODE,
+};
 
-	struct s_contentBase
-	{
-		std::string					prefix;
+struct s_messageBase
+{
+	std::string					prefix;
 
-		std::vector<std::string>	params;
-		std::string					text;
-		
-		virtual ~s_contentBase(void) {};
-	};
+	std::vector<std::string>	params;
+	std::string					text;
+	
+	virtual ~s_messageBase(void) {};
+};
 
-	struct s_commandContent : public s_contentBase //messaggio in arrivo (comando) oppure PRIVMSG in uscita
-	{
-		enum e_cmd_type	cmd;
-	};
+struct s_commandMessage : public s_messageBase //messaggio in arrivo (comando) oppure PRIVMSG in uscita
+{
+	enum e_cmd_type		cmd;
+};
 
-	struct s_replyContent : public s_contentBase //messaggio di output (reply)
-	{
-		uint16_t		code;
-	};
-}
+struct s_replyMessage : public s_messageBase //messaggio di output (reply)
+{
+	enum e_replyCodes	code;
+};
 
 #endif
