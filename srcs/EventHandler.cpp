@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 00:58:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 01:32:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -375,7 +375,7 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 	if (n_args < 2)
 		throw ProtocolErrorException(ERR_NOTEXTTOSEND);
 
-	const struct s_commandMessage msg = EventHandler::buildCommandMessage(_client->getNickname(), PRIVMSG, NULL, args[1]);
+	const struct s_commandMessage msg = EventHandler::buildCommandMessage(_client->getNickname(), PRIVMSG, "", args[1]);
 	if (is_channel_prefix(args[0][0])) //se il primo carattere e' #, &, + o !
 	{
 		//channel msg PRIVMSG <channel> :<message>
@@ -394,7 +394,7 @@ void EventHandler::handleQuit(const vector<string> &args)
 {
 	const string					&reason = args.size() > 0 ? args[0] : "Client quit";
 	const string					&quitting_nickname = _client->getNickname();
-	const struct s_commandMessage	quit = EventHandler::buildCommandMessage(quitting_nickname, QUIT, NULL, reason);
+	const struct s_commandMessage	quit = EventHandler::buildCommandMessage(quitting_nickname, QUIT, "", reason);
 	const map<string, Channel *>	&channels = _client->getChannels();
 	
 	for (map<string, Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
