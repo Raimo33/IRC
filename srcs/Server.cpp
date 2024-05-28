@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 14:40:51 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 16:42:01 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,16 +136,16 @@ Client *Server::getClient(const string &nickname) const
 
 void Server::addClient(Client *client)
 {
-	const string &nickname = client->getNickname();
+	const string &key = client->getPk();
 	
-	if (_clients.find(nickname) != _clients.end())
+	if (_clients.find(key) != _clients.end())
 		throw InternalErrorException("Server::addClient: Client already exists");
-	_clients[nickname] = client;
+	_clients[key] = client;
 }
 
 void Server::removeClient(const Client &client)
 {
-	map<string, Client *>::iterator it = _clients.find(client.getNickname());
+	map<string, Client *>::iterator it = _clients.find(client.getPk());
 
 	if (it == _clients.end())
 		throw InternalErrorException("Server::removeClient: Client not found");

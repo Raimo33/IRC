@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 15:55:42 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 16:28:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ using std::stringstream;
 
 Channel::Channel(Logger &logger, const string &name, Client &op, const string &key) :
 	_name(name),
-	_key(key),
 	_topic(""),
 	_member_limit(DEFAULT_CHANNEL_MEMBER_LIMIT),
 	_members(map<string, Client *>()),
@@ -44,7 +43,7 @@ Channel::Channel(Logger &logger, const string &name, Client &op, const string &k
 	op.joinChannel(*this);
 	addOperator(op);
 	if (!key.empty())
-		_modes['k'] = true;
+		setKey(key);
 	_logger.logEvent("Channel created: " + name);
 }
 
@@ -88,6 +87,7 @@ void Channel::setKey(const string &new_key)
 {
 	checkKey(new_key);
 	_key = new_key;
+	_modes['k'] = true;
 	_logger.logEvent("Channel " + _name + " key set to " + new_key);
 }
 
@@ -194,8 +194,14 @@ void Channel::addOperator(Client &op)
 	_operators.insert(&op);
 
 	_logger.logEvent("Channel " + _name + ", operator added: " + nickname);
-	const struct s_replyMessage youreoper = EventHandler::buildReplyContent(RPL_YOUREOPER, nickname, "You are now an operator of " + _name);
+	const struct s_replyMessage youreoper = EventHandler::buildReplyMessage(RPL_YOUREOPER, nickname, "You are now an operator of " + _name);
 	op.receiveMessage(youreoper);
+	vector<string> params;
+	params.push_back(_name);
+	params.push_back("+o");
+	params.push_back(nickname);
+	const struct s_commandMessage mode_change = EventHandler::buildCommandMessage(SERVER_NAME, MODE, params);
+	receiveMessage(mode_change);
 }
 
 void Channel::removeOperator(Client &op)
@@ -212,7 +218,7 @@ void Channel::removeOperator(Client &op)
 	_operators.erase(&op);
 
 	_logger.logEvent("Channel " + _name + ", operator removed: " + nickname);
-	const struct s_replyMessage notoperanymore = EventHandler::buildReplyContent(RPL_NOTOPERANYMORE);
+	const struct s_replyMessage notoperanymore = EventHandler::buildReplyMessage(RPL_NOTOPERANYMORE);
 	op.receiveMessage(notoperanymore);
 }
 
@@ -267,14 +273,17 @@ void Channel::setModes(const vector<bool> &modes, const vector<string> &params)
 
 	for (uint8_t i = 0; i < (sizeof(_modes) / sizeof(_modes[0])); i++)
 	{
-		if (channel_mode_requires_param(i))
+		if (modes[i] != _modes[i])
 		{
-			if (params.size() - 1 < j)
-				throw InternalErrorException("Channel::setModes: missing parameter for mode");
-			setMode(i, modes[i], params[j++]);
+			if (channel_mode_requires_param(i))
+			{
+				if (params.size() - 1 < j)
+					throw InternalErrorException("Channel::setModes: missing parameter for mode");
+				setMode(i, modes[i], params[j++]);
+			}
+			else
+				setMode(i, modes[i]);
 		}
-		else
-			setMode(i, modes[i]);
 	}
 }
 
@@ -313,7 +322,7 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 	params.push_back(_name);
 	params.push_back(mode_str);
 	params.push_back(param);
-	const struct s_commandMessage mode_change = EventHandler::buildCommandContent(SERVER_NAME, MODE, params);
+	const struct s_commandMessage mode_change = EventHandler::buildCommandMessage(SERVER_NAME, MODE, params);
 	receiveMessage(mode_change);
 }
 

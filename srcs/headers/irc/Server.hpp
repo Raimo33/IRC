@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 14:40:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 16:42:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ class Server
 
 		const uint16_t							_port;
 		const std::string						_pwd_hash;
-		std::map<std::string, Client *>			_clients;
+		std::map<std::string, Client *>			_clients; //{pk, client}
 		std::map<std::string, Channel *>		_channels;
 		std::vector<pollfd>						_pollfds;
 		const int								_socket;

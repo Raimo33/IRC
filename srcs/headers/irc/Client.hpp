@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 15:35:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 16:42:38 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ class Client
 		uint16_t										getPort(void) const;
 		const std::string								&getIpAddr(void) const;
 		int												getSocket(void) const;
+		std::string										getPk(void) const;
 		const pollfd									&getPollfd(void) const;
 		Server											&getServer(void) const;
 
@@ -81,6 +82,7 @@ class Client
 		const uint16_t									_port;
 		const std::string								_ip_addr; //aka hostname
 		const int										_socket;
+		const std::string								_pk; //ip_addr + port
 		const pollfd									&_pollfd;
 		Server											*_server;
 		Logger											&_logger;

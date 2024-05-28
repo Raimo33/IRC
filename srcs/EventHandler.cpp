@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 15:52:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 17:01:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,6 @@ void	EventHandler::setClient(Client &client)
 	_client = &client;
 }
 
-//JOIN #channel1,#channel2,#channel3 key1,key2,key3
 void	EventHandler::processInput(string raw_input)
 {
 	s_commandMessage input = parseInput(raw_input);
@@ -67,7 +66,7 @@ void	EventHandler::processInput(string raw_input)
 	(this->*(_handlers[input.cmd]))(input.params);
 }
 
-const struct s_replyMessage	EventHandler::buildReplyContent(const enum e_replyCodes code, const vector<string> &params, const string &custom_msg)
+const struct s_replyMessage	EventHandler::buildReplyMessage(const enum e_replyCodes code, const vector<string> &params, const string &custom_msg)
 {
 	struct s_replyMessage	content;
 
@@ -78,7 +77,7 @@ const struct s_replyMessage	EventHandler::buildReplyContent(const enum e_replyCo
 	{
 		map<enum e_replyCodes, string>::const_iterator it = reply_codes.find(code);
 		if (it == reply_codes.end())
-			throw InternalErrorException("EventHandler::buildReplyContent: reply code does not match any reply string");
+			throw InternalErrorException("EventHandler::buildReplyMessage: reply code does not match any reply string");
 		content.text = it->second;
 	}
 	else
@@ -86,14 +85,14 @@ const struct s_replyMessage	EventHandler::buildReplyContent(const enum e_replyCo
 	return content;
 }
 
-const struct s_replyMessage	EventHandler::buildReplyContent(const enum e_replyCodes code, const string &param, const string &custom_msg)
+const struct s_replyMessage	EventHandler::buildReplyMessage(const enum e_replyCodes code, const string &param, const string &custom_msg)
 {
 	const vector<string>	params(1, param);
 
-	return buildReplyContent(code, params, custom_msg);
+	return buildReplyMessage(code, params, custom_msg);
 }
 
-const struct s_commandMessage	EventHandler::buildCommandContent(const string &prefix, const e_cmd_type cmd, const vector<string> &params, const string &custom_msg)
+const struct s_commandMessage	EventHandler::buildCommandMessage(const string &prefix, const e_cmd_type cmd, const vector<string> &params, const string &custom_msg)
 {
 	struct s_commandMessage	content;
 
@@ -104,11 +103,11 @@ const struct s_commandMessage	EventHandler::buildCommandContent(const string &pr
 	return content;
 }
 
-const struct s_commandMessage	EventHandler::buildCommandContent(const string &prefix, const e_cmd_type cmd, const string param, const string &custom_msg)
+const struct s_commandMessage	EventHandler::buildCommandMessage(const string &prefix, const e_cmd_type cmd, const string param, const string &custom_msg)
 {
 	const vector<string>	params(1, param);
 	
-	return buildCommandContent(prefix, cmd, params, custom_msg);
+	return buildCommandMessage(prefix, cmd, params, custom_msg);
 }
 
 void	EventHandler::sendBufferedContent(const Client &receiver, const struct s_messageBase *message)
@@ -149,8 +148,9 @@ void	EventHandler::getRawReplyMessage(const Client &receiver, const struct s_rep
 	if (!reply->prefix.empty())
 		*first_part += ":" + reply->prefix + " ";
 	*first_part += ::to_string(reply->code);
-	*first_part += " " + receiver.getNickname() + " ";
-	*first_part += join(reply->params, " ");
+	*first_part += " " + receiver.getNickname();
+	if (!reply->params.empty() && !reply->params[0].empty())
+		*first_part += " " + join(reply->params, " ");
 	if (reply->text.empty())
 		*second_part += " :" + reply_codes.at(reply->code);
 	else
@@ -162,8 +162,8 @@ void	EventHandler::getRawCommandMessage(const struct s_commandMessage *command, 
 	if (!command->prefix.empty())
 		*first_part += ":" + command->prefix + " ";
 	*first_part += _command_strings.at(command->cmd);
-	*first_part += " ";
-	*first_part += join(command->params, " ");
+	if (!command->params.empty() && !command->params[0].empty())
+		*first_part += " " + join(command->params, " ");
 	*second_part += " :" + command->text;
 }
 
@@ -422,7 +422,7 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 	if (n_args < 2)
 		throw ProtocolErrorException(ERR_NOTEXTTOSEND);
 
-	const struct s_commandMessage msg = EventHandler::buildCommandContent(_client->getNickname(), PRIVMSG, NULL, args[1]);
+	const struct s_commandMessage msg = EventHandler::buildCommandMessage(_client->getNickname(), PRIVMSG, NULL, args[1]);
 	if (is_channel_prefix(args[0][0])) //se il primo carattere e' #, &, + o !
 	{
 		//channel msg PRIVMSG <channel> :<message>
@@ -441,7 +441,7 @@ void EventHandler::handleQuit(const vector<string> &args)
 {
 	const string					&reason = args.size() > 0 ? args[0] : "Client quit";
 	const string					&quitting_nickname = _client->getNickname();
-	const struct s_commandMessage	quit = EventHandler::buildCommandContent(quitting_nickname, QUIT, NULL, reason);
+	const struct s_commandMessage	quit = EventHandler::buildCommandMessage(quitting_nickname, QUIT, NULL, reason);
 	const map<string, Channel *>	&channels = _client->getChannels();
 	
 	for (map<string, Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
@@ -506,13 +506,13 @@ void EventHandler::handleTopic(const vector<string> &args)
 		struct s_replyMessage topic_reply;
 
 		if (topic.empty())
-			topic_reply = EventHandler::buildReplyContent(RPL_NOTOPIC, channel.getName());
+			topic_reply = EventHandler::buildReplyMessage(RPL_NOTOPIC, channel.getName());
 		else
 		{
 			vector<string> params;
 			params.push_back(_client->getNickname());
 			params.push_back(channel.getName());
-			topic_reply = EventHandler::buildReplyContent(RPL_TOPIC, params, topic);
+			topic_reply = EventHandler::buildReplyMessage(RPL_TOPIC, params, topic);
 		}
 		_client->receiveMessage(topic_reply);
 	}

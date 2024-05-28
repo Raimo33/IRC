@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 15:52:50 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 16:02:30 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,10 @@ const char *InternalErrorException::what(void) const throw()
 }
 
 ProtocolErrorException::ProtocolErrorException(const enum e_replyCodes code, const vector<string> &params, const string &custom_msg) :
-	_content(EventHandler::buildReplyContent(code, params, custom_msg)) {}
+	_content(EventHandler::buildReplyMessage(code, params, custom_msg)) {}
 
 ProtocolErrorException::ProtocolErrorException(const enum e_replyCodes code, const string &param, const string &custom_msg) :
-	_content(EventHandler::buildReplyContent(code, param, custom_msg)) {}
+	_content(EventHandler::buildReplyMessage(code, param, custom_msg)) {}
 
 ProtocolErrorException::~ProtocolErrorException(void) throw() {}
 

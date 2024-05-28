@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 15:56:01 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 16:42:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ Client::Client(Logger &logger, Server *server, const int socket, const pollfd &p
 	_port(port),
 	_ip_addr(ip_addr),
 	_socket(socket),
+	_pk(_ip_addr + ::to_string(_port)),
 	_pollfd(pollfd),
 	_server(server),
 	_logger(logger) {}
@@ -45,6 +46,7 @@ Client::Client(const Client &copy) :
 	_port(copy._port),
 	_ip_addr(copy._ip_addr),
 	_socket(copy._socket),
+	_pk(copy._pk),
 	_pollfd(copy._pollfd),
 	_server(copy._server),
 	_logger(copy._logger) {}
@@ -157,8 +159,8 @@ void	Client::setAuthenticated(bool is_authenticated)
 	_is_authenticated = is_authenticated;
 	_logger.logEvent("Client " + _ip_addr + " is " + (is_authenticated ? "authenticated" : "not authenticated anymore"));
 
-	const struct s_replyMessage welcome = EventHandler::buildReplyContent(RPL_WELCOME, NULL, "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr);
-	const struct s_replyMessage yourhost = EventHandler::buildReplyContent(RPL_YOURHOST, NULL, "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION);
+	const struct s_replyMessage welcome = EventHandler::buildReplyMessage(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr);
+	const struct s_replyMessage yourhost = EventHandler::buildReplyMessage(RPL_YOURHOST, "", "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION);
 	receiveMessage(welcome);
 	receiveMessage(yourhost);
 }
@@ -176,6 +178,11 @@ const string	&Client::getIpAddr(void) const
 int	Client::getSocket(void) const
 {
 	return _socket;
+}
+
+string	Client::getPk(void) const
+{
+	return _pk;
 }
 
 const pollfd	&Client::getPollfd(void) const
@@ -204,19 +211,19 @@ void	Client::joinChannel(Channel &channel, const string &key)
 
 	const string					&channel_name = channel.getName();
 	const string					&channel_topic = channel.getTopic();
-	const struct s_commandMessage	join_acknowledgement = EventHandler::buildCommandContent(_nickname, JOIN, channel_name);
+	const struct s_commandMessage	join_acknowledgement = EventHandler::buildCommandMessage(_nickname, JOIN, channel_name);
 	struct s_replyMessage			topic_reply;
 
 	if (channel_topic.empty())
-		topic_reply = EventHandler::buildReplyContent(RPL_NOTOPIC, channel_name);
+		topic_reply = EventHandler::buildReplyMessage(RPL_NOTOPIC, channel_name);
 	else
-		topic_reply = EventHandler::buildReplyContent(RPL_TOPIC, channel_name, channel_topic);
+		topic_reply = EventHandler::buildReplyMessage(RPL_TOPIC, channel_name, channel_topic);
 
 	vector<string> params;
 	params.push_back("=");
 	params.push_back(channel_name);
-	const struct s_replyMessage namreply = EventHandler::buildReplyContent(RPL_NAMREPLY, params, channel.getMembersString());
-	const struct s_replyMessage endofnames = EventHandler::buildReplyContent(RPL_ENDOFNAMES, channel_name);
+	const struct s_replyMessage namreply = EventHandler::buildReplyMessage(RPL_NAMREPLY, params, channel.getMembersString());
+	const struct s_replyMessage endofnames = EventHandler::buildReplyMessage(RPL_ENDOFNAMES, channel_name);
 	receiveMessage(join_acknowledgement);
 	receiveMessage(topic_reply);
 	receiveMessage(namreply);
@@ -228,7 +235,7 @@ void	Client::leaveChannel(Channel &channel, const string &reason)
 	channel.removeMember(*this);
 	removeChannel(channel);
 
-	const struct s_commandMessage part = EventHandler::buildCommandContent(_nickname, PART, channel.getName(), reason);
+	const struct s_commandMessage part = EventHandler::buildCommandMessage(_nickname, PART, channel.getName(), reason);
 	channel.receiveMessage(part);
 }
 
@@ -268,7 +275,7 @@ void	Client::kick(Client &user, Channel &channel, const string &reason) const
 	vector<string> params;
 	params.push_back(channel_name);
 	params.push_back(_nickname);
-	const struct s_commandMessage message_to_channel = EventHandler::buildCommandContent("", KICK, params, reason);
+	const struct s_commandMessage message_to_channel = EventHandler::buildCommandMessage("", KICK, params, reason);
 	channel.receiveMessage(message_to_channel);
 }
 
@@ -287,11 +294,11 @@ void	Client::invite(Client &user, Channel &channel) const
 	params.push_back(channel_name);
 	channel.addPendingInvitation(user);
 	{
-		const struct s_replyMessage reply_to_issuer = EventHandler::buildReplyContent(RPL_INVITING, params);
+		const struct s_replyMessage reply_to_issuer = EventHandler::buildReplyMessage(RPL_INVITING, params);
 		receiveMessage(reply_to_issuer);
 	}
 	{
-		const struct s_commandMessage message_to_target = EventHandler::buildCommandContent(_nickname, INVITE, params);
+		const struct s_commandMessage message_to_target = EventHandler::buildCommandMessage(_nickname, INVITE, params);
 		user.receiveMessage(message_to_target);
 	}
 }
@@ -308,7 +315,7 @@ void	Client::topicSet(Channel &channel, const string &new_topic) const
 	_logger.logEvent("Client " + _nickname + " tries to set topic of channel " + channel.getName() + " to " + new_topic);
 	channel.setTopic(new_topic);
 
-	const struct s_commandMessage topic = EventHandler::buildCommandContent(_nickname, TOPIC, channel.getName(), new_topic);
+	const struct s_commandMessage topic = EventHandler::buildCommandMessage(_nickname, TOPIC, channel.getName(), new_topic);
 	channel.receiveMessage(topic);
 }
 
