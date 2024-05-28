@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgaibazz <lgaibazz@student.42.fr>          +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 17:52:05 by lgaibazz         ###   ########.fr       */
+/*   Updated: 2024/05/29 00:27:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,9 @@ using std::string;
 using std::map;
 using std::vector;
 
-static void checkConnection(const Client *client);
-static void checkAuthentication(const Client *client);
+static void		checkConnection(const Client *client);
+static void		checkAuthentication(const Client *client);
+static string	get_next_token(string::iterator &it, const string::const_iterator &end, const char delim = ' ');
 
 EventHandler::EventHandler(Logger &logger, Server &server) :
 	_server(&server),
@@ -58,13 +59,12 @@ void	EventHandler::setClient(Client &client)
 	_client = &client;
 }
 
-void	EventHandler::processInput(string raw_input)
+void	EventHandler::processInput(const string raw_input)
 {
 	vector<string> cmds = ::split(raw_input, '\n');
-	std::cout << "raw_input: " << raw_input << std::endl;
+
 	for(uint8_t i = 0; i < cmds.size(); i++)
 	{
-		std::cout << "cmds[i]: " << cmds[i] << std::endl;
 		s_commandMessage input = parseInput(cmds[i]);
 		(this->*(_handlers[input.cmd]))(input.params);
 	}
@@ -236,86 +236,37 @@ std::map<uint16_t, std::string> EventHandler::initCommandStrings(void)
 	return command_strings;
 }
 
-//input: ":<prefix> <command> <params> <crlf>"
-//TODO refactor
-s_commandMessage EventHandler::parseInput(string &raw_input) const
+struct s_commandMessage EventHandler::parseInput(string &raw_input) const
 {
-	s_commandMessage	input;
-	string 				command;
-	size_t 				space_pos;
-
+	struct s_commandMessage	input;
+	string					command;
+	string					param;
+	string::iterator		it;
 
 	raw_input = raw_input.substr(0, MAX_MSG_LENGTH); // Limit the length of the input to prevent buffer overflow
-	if (raw_input.size() >= 2)
-	{
-		if (raw_input[raw_input.size() - 1] == '\n') // Remove \n
-		{
-			raw_input.resize(raw_input.size() - 1);
-			if (raw_input[raw_input.size() - 1] == '\r') // Remove \r
-				raw_input.resize(raw_input.size() - 1);
-		}
-	}
-	
-	//TODO splittare i comandi per \n
-	if (!raw_input.empty() && raw_input[0] == ':')
-	{
-		space_pos = raw_input.find(' ');
-		if (space_pos != string::npos)
-		{
-			input.prefix = raw_input.substr(1, space_pos - 1); // Extract the prefix
-			raw_input = raw_input.substr(space_pos + 1); // Skip the prefix
-		}
-		else
-		{
-			input.prefix = raw_input.substr(1); // Extract the rest if no space is found
-			raw_input.clear(); // Clear raw_input as there's nothing left to process
-		}
-	}
+	if (has_crlf(raw_input))
+		raw_input.resize(raw_input.size() - 2); // Remove \r\n
 
-	space_pos = raw_input.find(' ');
-	if (space_pos == string::npos)
-		command = raw_input; // If there is no space, the command is the whole input
-	else
-		command = raw_input.substr(0, space_pos); // Extract the command
-
-	if (_commands.find(command) == _commands.end()) // If the command does not exist
+	it = raw_input.begin();
+	if (*it == ':')
+		input.prefix = get_next_token(++it, raw_input.end(), ' '); // Extract the prefix
+	command = get_next_token(it, raw_input.end(), ' '); // Extract the command
+	const map<string, e_cmd_type>::const_iterator it_command = _commands.find(command);
+	if (it_command == _commands.end())
 		throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, command);
-
-	input.cmd = _commands.at(command); // Associate the command with the enum
-
-	if (space_pos != string::npos)
-		raw_input = raw_input.substr(space_pos + 1); // Skip the command
-	else
+	input.cmd = it_command->second; // Associate the command with the enum
+	while (it != raw_input.end())
 	{
-		raw_input.clear(); // Clear raw_input if there is no space
-		return input; // Return early as there's no more input to process
-	}
-
-	string param;
-
-	//TODO non funziona PRIVMSG #channel :ciao mondo
-	do {
-		space_pos = raw_input.find(' ');
-		if (!raw_input.empty() && raw_input[0] == ':')
-		{ // If the parameter starts with ':'
-			input.text = raw_input.substr(1); // Extract everything except the ':'
+		if (*it == ':')
+		{
+			input.text = string(++it, raw_input.end()); // Extract everything except the ':'
 			break;
 		}
-		if (space_pos == string::npos)
-		{
-			param = raw_input; // Extract the rest as the parameter
-			input.params.push_back(param);
-			raw_input.clear(); // Clear raw_input as there's nothing left to process
-		}
-		else
-		{
-			param = raw_input.substr(0, space_pos); // Extract the parameter
-			input.params.push_back(param); // Add the parameter to the vector
-			raw_input = raw_input.substr(space_pos + 1); // Skip the parameter
-		}
-	} while (!raw_input.empty());
+		param = get_next_token(it, raw_input.end(), ' '); // Extract the parameter
 
-	return input;
+		input.params.push_back(param); // Add the parameter to the vector
+	}
+	return input;	
 }
 
 void EventHandler::handlePass(const vector<string> &args)
@@ -581,4 +532,19 @@ static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
 		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not registered, use NICK <nickname> and USER <username> first");
+}
+
+string	get_next_token(string::iterator &it, const string::const_iterator &end, const char delim)
+{
+	const string::iterator	start = it;
+	string					token;
+
+	while (it != end && *it == delim) // Skip leading delimiters
+		it++;
+	while (it != end && *it != delim) // Extract the token
+		it++;
+	token = string(start, it);
+	while (it != end && *it == delim) // Skip trailing delimiters
+		it++;
+	return token;
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 16:02:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 23:26:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class EventHandler
 		const Client									&getClient(void) const;
 		void											setClient(Client &client);
 
-		void 											processInput(std::string raw_input);
+		void 											processInput(const std::string raw_input);
 
 		static const struct s_replyMessage				buildReplyMessage(const enum e_replyCodes code, const std::vector<std::string> &params, const std::string &custom_msg = "");
 		static const struct s_replyMessage				buildReplyMessage(const enum e_replyCodes code, const std::string &param = "", const std::string &custom_msg = "");

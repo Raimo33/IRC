@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:49:39 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 00:19:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 #include <openssl/sha.h>
+#include <openssl/evp.h>
 #include <iomanip>
 
 using std::string;
@@ -97,12 +98,15 @@ string to_hex(const unsigned char *bytes, size_t length)
 
 string	hash(const string &s)
 {
-	unsigned char	hash[SHA256_DIGEST_LENGTH];
-	SHA256_CTX		sha256;
+	unsigned char hash[EVP_MAX_MD_SIZE];
+    unsigned int lengthOfHash = 0;
 
-	SHA256_Init(&sha256);
-	SHA256_Update(&sha256, s.c_str(), s.size());
-	SHA256_Final(hash, &sha256);
+    EVP_MD_CTX *context = EVP_MD_CTX_new();
 
-	return to_hex(hash, SHA256_DIGEST_LENGTH);
+    EVP_DigestInit_ex(context, EVP_sha256(), NULL);
+	EVP_DigestUpdate(context, s.c_str(), s.size());
+	EVP_DigestFinal_ex(context, hash, &lengthOfHash);
+    EVP_MD_CTX_free(context);
+
+    return to_hex(hash, lengthOfHash);
 }
