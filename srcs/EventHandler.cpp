@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: lgaibazz <lgaibazz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 17:01:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/28 17:52:05 by lgaibazz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,10 +60,17 @@ void	EventHandler::setClient(Client &client)
 
 void	EventHandler::processInput(string raw_input)
 {
-	s_commandMessage input = parseInput(raw_input);
-	if (input.cmd < 0 || input.cmd >= N_COMMANDS)
-		throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, raw_input);	
-	(this->*(_handlers[input.cmd]))(input.params);
+	vector<string> cmds = split(raw_input, '\n');
+	std::cout << "raw_input: " << raw_input << std::endl;
+	for(uint8_t i = 0; i < cmds.size(); i++)
+	{
+		std::cout << "cmds[i]: " << cmds[i] << std::endl;
+		s_commandMessage input = parseInput(cmds[i]);
+
+		if (input.cmd < 0 || input.cmd >= N_COMMANDS)
+			throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, raw_input);	
+		(this->*(_handlers[input.cmd]))(input.params);
+	}
 }
 
 const struct s_replyMessage	EventHandler::buildReplyMessage(const enum e_replyCodes code, const vector<string> &params, const string &custom_msg)
@@ -253,7 +260,6 @@ s_commandMessage EventHandler::parseInput(string &raw_input) const
 	}
 	
 	//TODO splittare i comandi per \n
-
 	if (!raw_input.empty() && raw_input[0] == ':')
 	{
 		space_pos = raw_input.find(' ');
