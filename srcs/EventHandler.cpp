@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 12:17:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 14:01:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ void	EventHandler::processInput(string raw_input)
 
 	for(uint8_t i = 0; i < cmds.size(); i++)
 	{
-		std::cout << "cmd: " << cmds[i] << std::endl;
 		s_commandMessage input = parseInput(cmds[i]);
 		(this->*(_handlers[input.cmd]))(input.params);
 	}
@@ -259,11 +258,9 @@ struct s_commandMessage EventHandler::parseInput(string &raw_input) const
 	while (it != raw_input.end())
 	{
 		if (*it == ':')
-		{
-			input.text = string(++it, raw_input.end()); // Extract everything except the ':'
-			break;
-		}
-		param = get_next_token(it, raw_input.end(), ' '); // Extract the parameter
+			param = get_next_token(++it, raw_input.end(), '\0');
+		else
+			param = get_next_token(it, raw_input.end(), ' '); // Extract the parameter
 		input.params.push_back(param); // Add the parameter to the vector
 	}
 	return input;	
@@ -537,7 +534,7 @@ void	EventHandler::checkNicknameValidity(const string &nickname) const
 	if (nickname.empty())
 		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN);
 	if (!is_valid_nickname(nickname))
-		throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname, "allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(MAX_NICKNAME_LEN));
+		throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname, "allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(static_cast<int>(MAX_NICKNAME_LEN)));
 	if (_server->isClientConnected(nickname))
 		throw ProtocolErrorException(ERR_NICKNAMEINUSE, nickname);
 }

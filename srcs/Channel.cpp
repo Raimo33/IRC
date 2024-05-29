@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 12:15:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 13:42:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ void Channel::addMember(Client &user)
 
 	if (_modes['i'] && _pending_invitations.find(&user) == _pending_invitations.end())
 		throw ProtocolErrorException(ERR_INVITEONLYCHAN, _name);
-	if (_members.find(nickname) != _members.end())
+	if (isMember(user))
 	{
 		vector<string> params;
 		params.push_back(nickname);
@@ -157,11 +157,11 @@ void Channel::addMember(Client &user)
 	_logger.logEvent("Channel " + _name + ", member added: " + nickname);
 }
 
-void Channel::removeMember(const Client &user)
+void Channel::removeMember(Client &user)
 {
 	const string &nickname = user.getNickname();
 	
-	if (_members.find(nickname) == _members.end())
+	if (isMember(user))
 	{
 		vector<string> params;
 		params.push_back(nickname);
@@ -169,6 +169,8 @@ void Channel::removeMember(const Client &user)
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);	
 	}
 	_members.erase(nickname);
+	if (isOperator(user))
+		removeOperator(user.getNickname());
 	_logger.logEvent("Channel " + _name + ", member removed: " + nickname);
 }
 
@@ -182,40 +184,44 @@ void Channel::setOperators(const set<Client *> &new_operators)
 	_operators = new_operators;
 }
 
-void Channel::addOperator(Client &op)
+void Channel::addOperator(const string &nickname)
 {
-	string	nickname = op.getNickname();
-
-	if (isOperator(op) == true)
+	const map<string, Client *>::iterator it = _members.find(nickname);
+	if (it == _members.end())
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _name, nickname + " is not a member of " + _name);
+	Client &user = *it->second;
+	if (isOperator(user))
 	{
 		vector<string> params;
 		params.push_back(nickname);
 		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already an operator of " + _name);
 	}
-	_operators.insert(&op);
+	_operators.insert(&user);
 
 	_logger.logEvent("Channel " + _name + ", operator added: " + nickname);
 	const struct s_replyMessage youreoper = EventHandler::buildReplyMessage(RPL_YOUREOPER, nickname, "You are now an operator of " + _name);
-	op.receiveMessage(youreoper);
+	user.receiveMessage(youreoper);
 }
 
-void Channel::removeOperator(Client &op)
+void Channel::removeOperator(const string &nickname)
 {
-	string	nickname = op.getNickname();
-
-	if (!isOperator(op))
+	const map<string, Client *>::iterator it = _members.find(nickname);
+	if (it == _members.end())
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _name, nickname + " is not a member of " + _name);
+	Client user = *it->second;
+	if (!isOperator(user))
 	{
 		vector<string> params;
 		params.push_back(nickname);
 		params.push_back(_name);
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " is not an operator of " + _name);	
 	}
-	_operators.erase(&op);
+	_operators.erase(&user);
 
 	_logger.logEvent("Channel " + _name + ", operator removed: " + nickname);
 	const struct s_replyMessage notoperanymore = EventHandler::buildReplyMessage(RPL_NOTOPERANYMORE);
-	op.receiveMessage(notoperanymore);
+	user.receiveMessage(notoperanymore);
 }
 
 const set<Client *> &Channel::getPendingInvitations(void) const
@@ -235,7 +241,7 @@ void Channel::addPendingInvitation(Client &user)
 	vector<string> params;
 	params.push_back(nickname);
 	params.push_back(_name);
-	if (_members.find(nickname) != _members.end())
+	if (isMember(user))
 		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
 	if (_pending_invitations.find(&user) != _pending_invitations.end())
 		throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already invited to " + _name);
@@ -305,11 +311,7 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 		setMemberLimit(new_limit);
 	}
 	else if (mode == 'o')
-	{
-		Client	op(getMember(param));
-
-		status ? addOperator(op) : removeOperator(op);
-	}
+		status ? addOperator(param) : removeOperator(param);
 	else
 		_logger.logEvent("Channel " + _name + ", mode " + mode + " is now " + (status ? "on" : "off"));
 
@@ -318,13 +320,7 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 	params.push_back(_name);
 	params.push_back(mode_str);
 	params.push_back(param);
-	const struct s_commandMessage mode_change = EventHandler::buildCommandMessage(SERVER_NAME, MODE, params);
-	
-	
-	std::cout << "params[0]: " << params[0] << std::endl;
-	std::cout << "params[1]: " << params[1] << std::endl;
-	std::cout << "params[2]: " << params[2] << std::endl;
-	
+	const struct s_commandMessage mode_change = EventHandler::buildCommandMessage(SERVER_NAME, MODE, params);	
 	receiveMessage(mode_change);
 }
 
@@ -342,16 +338,23 @@ bool	Channel::isOperator(const Client &user) const
 	return _operators.find(const_cast<Client *>(&user)) != _operators.end();
 }
 
+bool	Channel::isMember(const string &nickname) const
+{
+	return _members.find(nickname) != _members.end();
+}
+
+bool	Channel::isMember(const Client &user) const
+{
+	return isMember(user.getNickname());
+}
+
 string	Channel::getMembersString(void) const
 {
 	string	members_str;
 
 	members_str.reserve(_members.size() * 10);
 	for (set<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); it++)
-	{
-		if (*it)
-			members_str += "@" + (*it)->getNickname() + ", ";
-	}
+		members_str += "@" + (*it)->getNickname() + ", ";
 	for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
 	{
 		if (!isOperator(*it->second))

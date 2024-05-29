@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 15:19:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 13:41:14 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,11 @@ class Channel
 		void									setMembers(const std::map<std::string, Client *> &new_members);
 		const Client							&getMember(const std::string &nickname) const;
 		void									addMember(Client &user);
-		void									removeMember(const Client &user);
+		void									removeMember(Client &user);
 		const std::set<Client *>				&getOperators(void) const;
 		void									setOperators(const std::set<Client *> &new_operators);
-		void									addOperator(Client &op);
-		void									removeOperator(Client &op);
+		void									addOperator(const std::string &nickname);
+		void									removeOperator(const std::string &nickname);
 		const std::set<Client *>				&getPendingInvitations(void) const;
 		void									setPendingInvitations(const std::set<Client *> &new_pending_invitations);
 		void									addPendingInvitation(Client &user);
@@ -59,6 +59,8 @@ class Channel
 
 		void									receiveMessage(const struct s_commandMessage &message) const;
 		bool									isOperator(const Client &user) const;
+		bool									isMember(const std::string &nickname) const;
+		bool									isMember(const Client &user) const;
 		std::string								getMembersString(void) const;
 
 	private:
@@ -67,7 +69,7 @@ class Channel
 		std::string								_key;
 		std::string								_topic;
 		uint32_t								_member_limit;
-		std::map<std::string, Client *>			_members;
+		std::map<std::string, Client *>			_members; // {nickname, client}
 		std::set<Client *>						_operators;
 		std::set<Client *>						_pending_invitations;
 		std::vector<bool>						_modes;

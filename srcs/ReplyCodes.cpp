@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 02:55:58 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:36:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 13:48:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ const map<enum e_replyCodes, string> create_reply_codes(void)
 	reply_codes.insert(make_pair(RPL_NAMREPLY, "Name reply"));
 	reply_codes.insert(make_pair(RPL_ENDOFNAMES, "End of NAMES list"));
 	reply_codes.insert(make_pair(RPL_YOUREOPER, "You are now an IRC operator"));
+	reply_codes.insert(make_pair(RPL_NOTOPERANYMORE, "You are no longer an IRC operator"));
 	reply_codes.insert(make_pair(ERR_NOSUCHNICK, "No such nick/channel"));
 	reply_codes.insert(make_pair(ERR_NOSUCHCHANNEL, "No such channel"));
 	reply_codes.insert(make_pair(ERR_TOOMANYCHANNELS, "You have joined too many channels"));
@@ -53,6 +54,7 @@ const map<enum e_replyCodes, string> create_reply_codes(void)
 	reply_codes.insert(make_pair(ERR_UNKNOWNMODE, "is unknown mode char to me"));
 	reply_codes.insert(make_pair(ERR_INVITEONLYCHAN, "Cannot join channel (+i)"));
 	reply_codes.insert(make_pair(ERR_BADCHANNELKEY, "Cannot join channel (+k)"));
+	reply_codes.insert(make_pair(ERR_CHANOPRIVSNEEDED, "You're not channel operator"));
 	return reply_codes;
 }
 

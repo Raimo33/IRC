@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 12:22:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 13:00:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class Server
 		const std::map<std::string, Client *>	&getClients(void) const;
 		void									setClients(const std::map<std::string, Client *> &clients);
 		Client									*getClient(const std::string &nickname) const;
-		void									addClient(Client *client);
+		void									addClient(Client &client);
 		void									removeClient(const Client &client);
 		const std::map<std::string, Channel *>	&getChannels(void) const;
 		void									setChannels(const std::map<std::string, Channel *> &channels);

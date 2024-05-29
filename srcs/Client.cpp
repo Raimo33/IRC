@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 16:42:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 13:42:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,11 @@ Client::Client(const Client &copy) :
 	_server(copy._server),
 	_logger(copy._logger) {}
 
-Client::~Client(void) {}
+Client::~Client(void)
+{
+	for (map<string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++)
+		it->second->removeMember(*this);
+}
 
 const map<string, Channel *>	&Client::getChannels(void) const
 {
@@ -213,12 +217,10 @@ void	Client::joinChannel(Channel &channel, const string &key)
 	const string					&channel_topic = channel.getTopic();
 	const struct s_commandMessage	join_acknowledgement = EventHandler::buildCommandMessage(_nickname, JOIN, channel_name);
 	struct s_replyMessage			topic_reply;
-
 	if (channel_topic.empty())
 		topic_reply = EventHandler::buildReplyMessage(RPL_NOTOPIC, channel_name);
 	else
 		topic_reply = EventHandler::buildReplyMessage(RPL_TOPIC, channel_name, channel_topic);
-
 	vector<string> params;
 	params.push_back("=");
 	params.push_back(channel_name);
@@ -337,14 +339,14 @@ void	Client::promoteOperator(Channel &channel, Client &user)
 {
 	checkPrivilege(channel);
 	_logger.logEvent("Client " + _nickname + " tries to promote operator " + user.getNickname() + " in channel " + channel.getName());
-	channel.addOperator(user);
+	channel.addOperator(user.getNickname());
 }
 
 void	Client::demoteOperator(Channel &channel, Client &op)
 {
 	checkPrivilege(channel);
 	_logger.logEvent("Client " + _nickname + " tries to demote operator " + op.getNickname() + " in channel " + channel.getName());
-	channel.removeOperator(op);
+	channel.removeOperator(op.getNickname());
 }
 
 void	Client::checkPrivilege(const Channel &channel) const

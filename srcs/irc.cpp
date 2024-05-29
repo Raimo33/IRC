@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 13:26:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 13:08:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@ using std::ostringstream;
 using std::exception;
 using std::cerr;
 using std::endl;
-
-;
 
 static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv);
 

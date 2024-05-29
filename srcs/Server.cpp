@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 12:22:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 13:12:45 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
     addr_list = (struct in_addr **)host->h_addr_list;
     if (addr_list[0] != NULL)
 	{
-        char *ip = inet_ntoa(*addr_list[0]);
+        char *ip = inet_ntoa(*addr_list[0]); //TODO rotto
         _logger.logEvent("Server started on " + string(ip) + ":" + ::to_string(_port));
     }
 	server_poll_fd.fd = _socket;
@@ -129,19 +129,19 @@ Client *Server::getClient(const string &nickname) const
 {
 	for (map<string, Client *>::const_iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->first == nickname)
+		if (it->second->getNickname() == nickname)
 			return it->second;
 	}
 	throw ProtocolErrorException(ERR_NOSUCHNICK, nickname);
 }
 
-void Server::addClient(Client *client)
+void Server::addClient(Client &client)
 {
-	const string &key = client->getPk();
-	
+	const string &key = client.getPk();
+
 	if (_clients.find(key) != _clients.end())
 		throw InternalErrorException("Server::addClient: Client already exists");
-	_clients[key] = client;
+	_clients[key] = &client;
 }
 
 void Server::removeClient(const Client &client)
@@ -223,7 +223,7 @@ bool Server::isClientConnected(const string &nickname) const
 {
 	for (map<string, Client *>::const_iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->first == nickname)
+		if (it->second->getNickname() == nickname)
 			return true;
 	}
 	return false;
@@ -273,7 +273,7 @@ void	Server::handleNewClient(void)
 	addPollfd(client_poll_fd);
 
 	client = new Client(_logger, this, client_socket, client_poll_fd, client_ip_addr, client_port);
-	addClient(client);
+	addClient(*client);
 
 	_logger.logEvent("Incoming connection from " + client_ip_addr);
 }
