@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 01:22:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 12:15:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -348,7 +348,10 @@ string	Channel::getMembersString(void) const
 
 	members_str.reserve(_members.size() * 10);
 	for (set<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); it++)
-		members_str += "@" + (*it)->getNickname() + ", ";
+	{
+		if (*it)
+			members_str += "@" + (*it)->getNickname() + ", ";
+	}
 	for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
 	{
 		if (!isOperator(*it->second))

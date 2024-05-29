@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 16:42:01 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 12:22:30 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,11 +127,12 @@ void	Server::setClients(const map<string, Client *> &clients)
 
 Client *Server::getClient(const string &nickname) const
 {
-	map<string, Client *>::const_iterator it = _clients.find(nickname);
-
-	if (it == _clients.end())
-		throw ProtocolErrorException(ERR_NOSUCHNICK, nickname);
-	return it->second;
+	for (map<string, Client *>::const_iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->first == nickname)
+			return it->second;
+	}
+	throw ProtocolErrorException(ERR_NOSUCHNICK, nickname);
 }
 
 void Server::addClient(Client *client)
@@ -220,7 +221,12 @@ int	Server::getSocket(void) const
 
 bool Server::isClientConnected(const string &nickname) const
 {
-	return _clients.find(nickname) != _clients.end();
+	for (map<string, Client *>::const_iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->first == nickname)
+			return true;
+	}
+	return false;
 }
 
 void Server::disconnectClient(Client &client)

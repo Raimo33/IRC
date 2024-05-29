@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 11:26:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 12:17:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -534,6 +534,8 @@ void EventHandler::handleMode(const vector<string> &args)
 
 void	EventHandler::checkNicknameValidity(const string &nickname) const
 {
+	if (nickname.empty())
+		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN);
 	if (!is_valid_nickname(nickname))
 		throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname, "allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(MAX_NICKNAME_LEN));
 	if (_server->isClientConnected(nickname))

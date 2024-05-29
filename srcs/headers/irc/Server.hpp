@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 00:31:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 12:22:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ class Server
 
 		bool									isClientConnected(const std::string &nickname) const;
 		void									disconnectClient(Client &client);
-		void									handshake(const int client_socket) const;
 		void									configureNonBlocking(const int client_socket) const;
 		void									run(void);
 		void									stop(void);
