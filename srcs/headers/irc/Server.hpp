@@ -6,11 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 13:00:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:59:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO implementare scambio di file (ERR_FILEERROR)
+//TODO aggiungere bot
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
