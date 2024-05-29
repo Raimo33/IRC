@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 16:02:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:58:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <errno.h>
+#include <cstring>
 
 #include "irc/Exceptions.hpp"
 #include "irc/Constants.hpp"
@@ -26,10 +28,13 @@ using std::vector;
 
 SystemErrorException::SystemErrorException(const string &msg) : runtime_error(msg) {}
 
+SystemErrorException::SystemErrorException(const int errnum) : runtime_error(strerror(errnum)) {}
+
 const char *SystemErrorException::what(void) const throw()
 {
 	return runtime_error::what();
 }
+
 
 InternalErrorException::InternalErrorException(const string &msg) : runtime_error(msg) {}
 

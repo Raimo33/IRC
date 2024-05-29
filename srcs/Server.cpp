@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 13:12:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:59:09 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,12 +244,8 @@ void Server::configureNonBlocking(const int socket) const
 {
 	int flags;
 
-	flags = fcntl(socket, F_GETFL); //TODO aggiungere fcntl a SystemCalls (probabilmente variadic function)
-	if (flags == -1)
-		throw SystemErrorException(strerror(errno));
-	fcntl(socket, F_SETFL, flags | O_NONBLOCK);
-	if (flags == -1)
-		throw SystemErrorException(strerror(errno));
+	flags = fcntl_p(socket, F_GETFL);
+	fcntl_p(socket, F_SETFL, flags | O_NONBLOCK);
 }
 
 void	Server::handleNewClient(void)

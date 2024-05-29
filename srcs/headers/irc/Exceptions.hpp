@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 15:56:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:48:39 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class InternalErrorException : public std::runtime_error //for internal programm
 class SystemErrorException : public std::runtime_error //for system calls errors (unpredictable)
 {
 	public:
+		SystemErrorException(const int errnum);
 		SystemErrorException(const std::string &msg);
 		virtual const char *what(void) const throw();
 };

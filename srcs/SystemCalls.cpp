@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 13:16:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:58:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,14 @@ using std::string;
 int	bind_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
 	if (bind(sockfd, addr, addrlen) == -1)
-		throw SystemErrorException("bind: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (0);
 }
 
 int	listen_p(int sockfd, int backlog)
 {
 	if (listen(sockfd, backlog) == -1)
-		throw SystemErrorException("listen: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (0);
 }
 
@@ -36,14 +36,14 @@ int	accept_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 
 	new_sockfd = accept(sockfd, addr, addrlen);
 	if (new_sockfd == -1)
-		throw SystemErrorException("accept: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (new_sockfd);
 }
 
 int	connect_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
 	if (connect(sockfd, addr, addrlen) == -1)
-		throw SystemErrorException("connect: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (0);
 }
 
@@ -53,7 +53,7 @@ int	socket_p(int domain, int type, int protocol)
 
 	sockfd = socket(domain, type, protocol);
 	if (sockfd == -1)
-		throw SystemErrorException("socket: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (sockfd);
 }
 
@@ -63,7 +63,7 @@ int	close_p(int fd)
 
 	ret = close(fd);
 	if (ret == -1)
-		throw SystemErrorException("close: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (ret);
 }
 
@@ -73,7 +73,7 @@ int poll_p(struct pollfd *fds, nfds_t nfds, int timeout)
 
 	ret = poll(fds, nfds, timeout);
 	if (ret == -1)
-		throw SystemErrorException("poll: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (ret);
 }
 
@@ -83,7 +83,7 @@ int	shutdown_p(int sockfd, int how)
 
 	ret = shutdown(sockfd, how);
 	if (ret == -1)
-		throw SystemErrorException("shutdown: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (ret);
 }
 
@@ -93,7 +93,7 @@ ssize_t	send_p(int sockfd, const void *buf, size_t len, int flags)
 
 	ret = send(sockfd, buf, len, flags);
 	if (ret == -1)
-		throw SystemErrorException("send: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (ret);
 }
 
@@ -103,7 +103,7 @@ ssize_t	recv_p(int sockfd, void *buf, size_t len, int flags)
 
 	ret = recv(sockfd, buf, len, flags);
 	if (ret == -1)
-		throw SystemErrorException("recv: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (ret);
 }
 
@@ -113,7 +113,7 @@ int	gethostname_p(char *name, size_t len)
 
 	ret = gethostname(name, len);
 	if (ret == -1)
-		throw SystemErrorException("gethostname: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (ret);
 }
 
@@ -123,6 +123,45 @@ struct hostent	*gethostbyname_p(const char *name)
 
 	ret = gethostbyname(name);
 	if (!ret)
-		throw SystemErrorException("gethostbyname: " + string(strerror(errno)));
+		throw SystemErrorException(errno);
 	return (ret);
+}
+
+int	fcntl_p(int fd, int cmd, ...)
+{
+	va_list args;
+	va_start(args, cmd);
+	int result;
+
+	switch (cmd) {
+		case F_GETFL:
+		case F_GETFD:
+			result = fcntl(fd, cmd);
+			break;
+		case F_SETFL:
+		case F_SETFD: {
+			int arg = va_arg(args, int);
+			result = fcntl(fd, cmd, arg);
+			break;
+		}
+		case F_GETLK:
+		case F_SETLK:
+		case F_SETLKW: {
+			struct flock* arg = va_arg(args, struct flock*);
+			result = fcntl(fd, cmd, arg);
+			break;
+		}
+		default:
+			result = -1;
+			errno = EINVAL;
+			break;
+	}
+
+	va_end(args);
+
+	if (result == -1) {
+		throw SystemErrorException(errno);
+	}
+
+	return result;
 }

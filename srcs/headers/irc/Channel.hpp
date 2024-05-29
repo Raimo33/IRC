@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:11:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:42:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,10 @@ class Channel
 
 	private:
 
+		const std::map<char, bool>				initModes(void) const;
+		void									checkName(const std::string &name) const;
+		void									checkKey(const std::string &key) const;
+
 		std::string								_name;
 		std::string								_key;
 		std::string								_topic;
@@ -74,10 +78,6 @@ class Channel
 		std::set<Client *>						_pending_invitations;
 		std::map<char, bool>					_modes; // {mode, status}
 		Logger									&_logger;
-
-		const std::map<char, bool>				initModes(void) const;
-		void									checkName(const std::string &name) const;
-		void									checkKey(const std::string &key) const;
 };
 
 #endif
