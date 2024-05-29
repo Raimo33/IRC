@@ -34,10 +34,5 @@ An basic Internet Relay Chat (IRC) server compatible with RFCs [1459](https://to
 
 Detailed documentation is available in the [Wiki](https://github.com/Raimo33/IRC/wiki). It includes installation guides, configuration options, and usage instructions.
 
-### Contributing
-
-Contributions are welcome! Please read our [Contributing Guidelines](https://github.com/Raimo33/IRC/blob/main/CONTRIBUTING.md) before submitting a pull request.
-
 ### License
-
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/Raimo33/IRC/blob/main/LICENSE) file for details.
+Do whatever you want with it, really.
