@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 13:42:50 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:15:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -328,11 +328,22 @@ void	Client::modeChange(Channel &channel, const char mode, const bool status, co
 	channel.setMode(mode, status, param);
 }
 
-void	Client::modesChange(Channel &channel, const vector<bool> &modes, const vector<string> &params) const
+void	Client::modesChange(Channel &channel, const map<char, bool> &modes, const vector<string> &params) const
 {
 	checkPrivilege(channel);
-	_logger.logEvent("Client " + _nickname + " tries to change modes of channel " + channel.getName());
-	channel.setModes(modes, params);
+
+	uint32_t i = 0;
+	for (map<char, bool>::const_iterator it = modes.begin(); it != modes.end(); it++)
+	{
+		if (channel_mode_requires_param(it->first, it->second))
+		{
+			if (params.empty())
+				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, channel.getName(), "Need more parameters for mode " + string(1, it->first));
+			modeChange(channel, it->first, it->second, params.at(i++));
+		}
+		else
+			modeChange(channel, it->first, it->second);
+	}
 }
 
 void	Client::promoteOperator(Channel &channel, Client &user)

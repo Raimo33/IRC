@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 13:42:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:16:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ Channel::Channel(Logger &logger, const string &name, Client &op, const string &k
 	_members(map<string, Client *>()),
 	_operators(set<Client *>()),
 	_pending_invitations(set<Client *>()),
-	_modes(256, false),
+	_modes(initModes()),
 	_logger(logger)
 {
 	checkName(name);
@@ -86,9 +86,8 @@ const string &Channel::getKey(void) const
 
 void Channel::setKey(const string &new_key)
 {
-	if (!_modes['k'])
-		throw InternalErrorException("Channel::setKey: trying to set a key on a channel without the 'k' mode");
-	checkKey(new_key);
+	if (!is_valid_channel_key(new_key))
+		throw ProtocolErrorException(ERR_BADCHANNELKEY, _name, new_key + " is not a valid channel key");
 	_key = new_key;
 	_logger.logEvent("Channel " + _name + " key set to " + new_key);
 }
@@ -264,41 +263,40 @@ void Channel::removePendingInvitation(Client &user)
 	_logger.logEvent("Channel " + _name + ", invitation to " + nickname + " removed");
 }
 
-const vector<bool> &Channel::getModes(void) const
+const map<char, bool> &Channel::getModes(void) const
 {
 	return _modes;
 }
 
-void Channel::setModes(const vector<bool> &modes, const vector<string> &params)
+void Channel::setModes(const map<char, bool> &modes, const vector<string> &params)
 {
-	uint16_t	j = 0;
+	uint32_t	i = 0;
 
-	for (uint8_t i = 0; i < (sizeof(_modes) / sizeof(_modes[0])); i++)
+	for (map<char, bool>::const_iterator it = modes.begin(); it != modes.end(); it++)
 	{
-		if (modes[i] != _modes[i])
+		if (channel_mode_requires_param(it->first, it->second))
 		{
-			if (channel_mode_requires_param(i))
-			{
-				if (params.size() - 1 < j)
-					throw InternalErrorException("Channel::setModes: missing parameter for mode");
-				setMode(i, modes[i], params[j++]);
-			}
-			else
-				setMode(i, modes[i]);
+			if (i >= params.size())
+				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name, "Missing parameter for mode " + string(1, it->first));
+			setMode(it->first, it->second, params[i++]);
 		}
+		else
+			setMode(it->first, it->second);
 	}
 }
 
 bool Channel::getMode(const char mode) const
 {
-	return _modes[mode];
+	const map<char, bool>::const_iterator it = _modes.find(mode);
+	if (it == _modes.end())
+		throw ProtocolErrorException(ERR_UNKNOWNMODE, _name, string(1, mode) + " is not a valid channel mode");
+	return it->second;
 }
 
 void Channel::setMode(const char mode, const bool status, const string &param)
 {
-	if (channel_mode_requires_param(mode) && param.empty())
+	if (channel_mode_requires_param(mode, status) && param.empty())
 		throw InternalErrorException("Channel::setMode: missing parameter for mode");
-	_modes[mode] = status;
 	if (mode == 'k')
 		setKey(param);
 	else if (mode == 'l')
@@ -312,8 +310,10 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 	}
 	else if (mode == 'o')
 		status ? addOperator(param) : removeOperator(param);
-	else
+
+	if (_modes.at(mode) != status)
 		_logger.logEvent("Channel " + _name + ", mode " + mode + " is now " + (status ? "on" : "off"));
+	_modes[mode] = status;
 
 	string mode_str = (status ? "+" : "-") + string(1, mode);
 	vector<string> params;
@@ -364,6 +364,18 @@ string	Channel::getMembersString(void) const
 	return members_str;
 }
 
+const map<char, bool>	Channel::initModes(void) const
+{
+	map<char, bool>	modes;
+
+	modes['i'] = false;
+	modes['t'] = false;
+	modes['k'] = false;
+	modes['o'] = false;
+	modes['l'] = false;
+	return modes;
+}
+
 void	Channel::checkName(const string &name) const
 {
 	if (!is_valid_channel_name(name))
@@ -373,5 +385,5 @@ void	Channel::checkName(const string &name) const
 void	Channel::checkKey(const string &key) const
 {
 	if (key != _key)
-		throw ProtocolErrorException(ERR_BADCHANNELKEY, _name, key + " is not a valid channel key");
+		throw ProtocolErrorException(ERR_BADCHANNELKEY, _name, "wrong key for " + _name);
 }

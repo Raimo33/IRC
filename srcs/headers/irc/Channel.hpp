@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 13:41:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:11:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,8 @@ class Channel
 		void									setPendingInvitations(const std::set<Client *> &new_pending_invitations);
 		void									addPendingInvitation(Client &user);
 		void									removePendingInvitation(Client &user);
-		const std::vector<bool>					&getModes(void) const;
-		void									setModes(const std::vector<bool> &modes, const std::vector<std::string> &params);
+		const std::map<char, bool>				&getModes(void) const;
+		void									setModes(const std::map<char, bool> &modes, const std::vector<std::string> &params);
 		bool									getMode(const char mode) const;
 		void									setMode(const char mode, const bool status, const std::string &param = "");
 
@@ -72,9 +72,10 @@ class Channel
 		std::map<std::string, Client *>			_members; // {nickname, client}
 		std::set<Client *>						_operators;
 		std::set<Client *>						_pending_invitations;
-		std::vector<bool>						_modes;
+		std::map<char, bool>					_modes; // {mode, status}
 		Logger									&_logger;
 
+		const std::map<char, bool>				initModes(void) const;
 		void									checkName(const std::string &name) const;
 		void									checkKey(const std::string &key) const;
 };

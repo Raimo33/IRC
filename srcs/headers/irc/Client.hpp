@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 16:42:38 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 14:59:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ class Client
 		void											invite(Client &user, Channel &channel) const; //chiama addInvite di Channel
 		void											topicSet(Channel &channel, const std::string &new_topic) const; // chiama setTopic di Channel
 		void											modeChange(Channel &channel, const char mode, const bool status, const std::string &param = "") const; // chiama setMode di Channel
-		void											modesChange(Channel &channel, const std::vector<bool> &modes, const std::vector<std::string> &params) const; // chiama setModes di Channel
+		void											modesChange(Channel &channel, const std::map<char, bool> &modes, const std::vector<std::string> &params) const; // chiama setModes di Channel
 		void											promoteOperator(Channel &channel, Client &user); // chiama addOperator di Channel
 		void											demoteOperator(Channel &channel, Client &op); // chiama removeOperator di Channel
 		
