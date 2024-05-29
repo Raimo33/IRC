@@ -61,6 +61,10 @@ void	EventHandler::setClient(Client &client)
 
 void	EventHandler::processInput(const string raw_input)
 {
+	raw_input = raw_input.substr(0, MAX_MSG_LENGTH); // Limit the length of the input to prevent buffer overflow
+	if (has_crlf(raw_input))
+		raw_input.resize(raw_input.size() - 2); // Remove \r\n
+
 	vector<string> cmds = ::split(raw_input, '\n');
 
 	for(uint8_t i = 0; i < cmds.size(); i++)
@@ -242,10 +246,6 @@ struct s_commandMessage EventHandler::parseInput(string &raw_input) const
 	string					command;
 	string					param;
 	string::iterator		it;
-
-	raw_input = raw_input.substr(0, MAX_MSG_LENGTH); // Limit the length of the input to prevent buffer overflow
-	if (has_crlf(raw_input))
-		raw_input.resize(raw_input.size() - 2); // Remove \r\n
 
 	it = raw_input.begin();
 	if (*it == ':')
