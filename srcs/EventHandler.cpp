@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:13:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:29:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ const struct s_commandMessage	EventHandler::buildCommandMessage(const string &pr
 	return buildCommandMessage(prefix, cmd, params, custom_msg);
 }
 
-void	EventHandler::sendBufferedContent(const Client &receiver, const struct s_messageBase *message) //TODO refactor con iterators
+void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_messageBase *message) //TODO refactor con iterators
 {
 	string							first_part;
 	string							second_part;
@@ -132,11 +132,11 @@ void	EventHandler::sendBufferedContent(const Client &receiver, const struct s_me
 	
 
 	if (!reply && !command)
-		throw InternalErrorException("EventHandler::sendBufferedContent: Invalid message type");
+		throw InternalErrorException("EventHandler::sendBufferedMessage: Invalid message type");
 	if (command && (command->cmd < 0 || command->cmd >= N_COMMANDS))
-		throw InternalErrorException("EventHandler::sendBufferedContent: Invalid command type");
+		throw InternalErrorException("EventHandler::sendBufferedMessage: Invalid command type");
 	if (reply && reply_codes.find(reply->code) == reply_codes.end())
-		throw InternalErrorException("EventHandler::sendBufferedContent: Invalid reply code");
+		throw InternalErrorException("EventHandler::sendBufferedMessage: Invalid reply code");
 
 	const int receiver_socket = receiver.getSocket();
 
@@ -174,7 +174,8 @@ void	EventHandler::getRawCommandMessage(const struct s_commandMessage *command, 
 	*first_part += _command_strings.at(command->cmd);
 	if (!command->params.empty() && !command->params[0].empty())
 		*first_part += " " + join(command->params, " ");
-	*second_part += " :" + command->text;
+	if (!command->text.empty())
+		*second_part += " :" + command->text;
 }
 
 const std::map<std::string, e_cmd_type>	EventHandler::initCommands(void)

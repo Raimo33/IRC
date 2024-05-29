@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:15:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:27:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,7 @@ void	Client::sendMessage(const Client &receiver, const struct s_commandMessage &
 
 void	Client::receiveMessage(const struct s_messageBase &msg) const
 {
-	EventHandler::sendBufferedContent(*this, &msg);
+	EventHandler::sendBufferedMessage(*this, &msg);
 }
 
 void	Client::kick(Client &user, Channel &channel, const string &reason) const
@@ -324,7 +324,7 @@ void	Client::topicSet(Channel &channel, const string &new_topic) const
 void	Client::modeChange(Channel &channel, const char mode, const bool status, const string &param) const
 {
 	checkPrivilege(channel);
-	_logger.logEvent("Client " + _nickname + " tries to change mode of channel " + channel.getName() + " to " + mode + (status ? "+" : "-") + param);
+	_logger.logEvent("Client " + _nickname + " tries to change mode " + mode + " of channel " + channel.getName());
 	channel.setMode(mode, status, param);
 }
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 23:26:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:27:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ class EventHandler
 		static const struct s_replyMessage				buildReplyMessage(const enum e_replyCodes code, const std::string &param = "", const std::string &custom_msg = "");
 		static const struct s_commandMessage			buildCommandMessage(const std::string &prefix, const e_cmd_type cmd, const std::vector<std::string> &params, const std::string &custom_msg = "");
 		static const struct s_commandMessage			buildCommandMessage(const std::string &prefix, const e_cmd_type cmd, const std::string param = "", const std::string &custom_msg = "");
-		static void										sendBufferedContent(const Client &receiver, const struct s_messageBase *message);
+		static void										sendBufferedMessage(const Client &receiver, const struct s_messageBase *message);
 
 	private:
 
