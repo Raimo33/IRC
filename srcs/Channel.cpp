@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:16:13 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/29 15:21:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -298,15 +298,25 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 	if (channel_mode_requires_param(mode, status) && param.empty())
 		throw InternalErrorException("Channel::setMode: missing parameter for mode");
 	if (mode == 'k')
-		setKey(param);
+	{
+		if (status)
+			setKey(param);
+		else
+			_key = "";
+	}
 	else if (mode == 'l')
 	{
-		stringstream	ss(param);
-		uint32_t		new_limit;
+		if (status)
+		{
+			stringstream	ss(param);
+			uint32_t		new_limit;
 
-		if (!(ss >> new_limit) || !ss.eof())
-			throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name, "Invalid parameter for mode 'l'");
-		setMemberLimit(new_limit);
+			if (!(ss >> new_limit) || !ss.eof())
+				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name, "Invalid parameter for mode 'l'");
+			setMemberLimit(new_limit);
+		}
+		else
+			_member_limit = -1;
 	}
 	else if (mode == 'o')
 		status ? addOperator(param) : removeOperator(param);
