@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 20:22:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 20:56:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,8 @@ void Server::run(void)
 				Client *client = getClient(events[i].data.fd);
 				if (client)
 					disconnectClient(*client);
-				_logger.logEvent("Client disconnected: " + client->getIpAddr());
+				else
+					_logger.logEvent("Client disconnected: " + client->getIpAddr());
 			}
 		}
 	}
@@ -215,10 +216,10 @@ void Server::disconnectClient(Client &client)
 {
 	int socket = client.getSocket();
 
-	
 	shutdown_p(socket, SHUT_RDWR);
 	close_p(socket);
 	removeClient(client);
+	_logger.logEvent("Client disconnected: " + client.getIpAddr());
 	delete &client;
 }
 

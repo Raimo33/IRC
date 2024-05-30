@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 20:39:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 20:57:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,7 +267,7 @@ void EventHandler::handleUser(const vector<string> &args)
 {
 	checkConnection(_client);
 	if (_client->getIsAuthenticated() || !_client->getUsername().empty())
-		throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+		throw ProtocolErrorException(ERR_ALREADYREGISTRED, default_replies.at(ERR_ALREADYREGISTRED), NULL);
 	if (args.size() < 4)
 		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "USER", "usage: USER <username> <hostname> <servername> <realname>", NULL);
 	_client->setUsername(args[0]);
