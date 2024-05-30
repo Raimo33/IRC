@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:46:06 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 01:11:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 11:19:40 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,8 @@ template <typename T>
 std::string					join(const std::vector<T>& elements, const std::string& delimiter);
 template<typename T>
 std::string					to_string(T value);
-template<typename T>
-T							min(T a, T b);
+// template<typename T>
+// T							min(T a, T b);
 
 #include "utils.tpp"
 

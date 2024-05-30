@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 02:17:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 12:11:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 #include "irc/ReplyCodes.hpp"
 #include "irc/Exceptions.hpp"
 #include "irc/Constants.hpp"
+
+#include <algorithm>
 
 using std::string;
 using std::map;
@@ -110,11 +112,8 @@ const struct s_commandMessage	EventHandler::buildCommandMessage(const string &pr
 
 void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_messageBase *message) //TODO refactor con iterators
 {
-	string							first_part;
-	string							second_part;
-	uint16_t						block_size;
-	uint16_t						send_length;
-	string							to_send;
+	string							first_part, second_part, to_send;
+	uint16_t						block_size, send_length;
 	const struct s_replyMessage		*reply = dynamic_cast<const s_replyMessage *>(message);
 	const struct s_commandMessage	*command = dynamic_cast<const s_commandMessage *>(message);
 	
@@ -132,14 +131,15 @@ void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_me
 		getRawReplyMessage(receiver, reply, &first_part, &second_part);
 	else
 		getRawCommandMessage(command, &first_part, &second_part);
-	//TODO si mangia cio che sta dopo i ':'
 	block_size = MAX_MSG_LENGTH - first_part.size() - 2; //2 per \r\n
-	do {
-		send_length = min(static_cast<size_t>(block_size), second_part.size());
+	while (!second_part.empty())
+	{
+		send_length = std::min(static_cast<size_t>(block_size),  second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
 		second_part = second_part.substr(send_length); // Update second_part correctly
+		std::cout << "to send: " << to_send << "$" << std::endl;
 		send_p(receiver_socket, to_send.c_str(), to_send.length(), 0);
-	} while (!second_part.empty());
+	}
 }
 
 void	EventHandler::getRawReplyMessage(const Client &receiver, const struct s_replyMessage *reply, string *first_part, string *second_part)
@@ -147,10 +147,10 @@ void	EventHandler::getRawReplyMessage(const Client &receiver, const struct s_rep
 	if (!reply->prefix.empty())
 		*first_part += ":" + reply->prefix + " ";
 	*first_part += ::to_string(reply->code);
-	*first_part += " " + receiver.getNickname();
+	*second_part += " " + receiver.getNickname();
 	for (vector<string>::const_iterator it = reply->params.begin(); it != reply->params.end() - 1; it++)
-		*first_part += " " + *it;
-	*second_part = " :" + reply->params.back();
+		*second_part += " " + *it;
+	*second_part += " :" + reply->params.back();
 }
 
 void	EventHandler::getRawCommandMessage(const struct s_commandMessage *command, string *first_part, string *second_part)
@@ -159,8 +159,8 @@ void	EventHandler::getRawCommandMessage(const struct s_commandMessage *command, 
 		*first_part += ":" + command->prefix + " ";
 	*first_part += _command_strings.at(command->cmd);
 	for (vector<string>::const_iterator it = command->params.begin(); it != command->params.end() - 1; it++)
-		*first_part += " " + *it;
-	*second_part = " :" + command->params.back();
+		*second_part += " " + *it;
+	*second_part += " :" + command->params.back();
 }
 
 const std::map<std::string, e_cmd_type>	EventHandler::initCommands(void)
@@ -235,6 +235,8 @@ struct s_commandMessage EventHandler::parseInput(string &raw_input) const
 	string					param;
 	string::iterator		it;
 
+	if (*raw_input.rbegin() == '\n') // Remove trailing '\n
+		raw_input.resize(raw_input.size() - 1);
 	it = raw_input.begin();
 	if (*it == ':')
 		input.prefix = get_next_token(++it, raw_input.end(), ' '); // Extract the prefix
@@ -249,7 +251,6 @@ struct s_commandMessage EventHandler::parseInput(string &raw_input) const
 			param = get_next_token(++it, raw_input.end(), '\0'); // Extract the parameter
 		else
 			param = get_next_token(it, raw_input.end(), ' '); // Extract the parameter
-		std::cout << "param: " << param << std::endl;
 		input.params.push_back(param); // Add the parameter to the vector
 	}
 	return input;	

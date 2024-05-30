@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 16:10:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 16:59:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 11:19:35 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ string join(const vector<T>& elements, const string& delimiter)
 	return oss.str();
 }
 
-template<typename T>
-T min(T a, T b)
-{
-	return (a < b ? a : b);
-}
+// template<typename T>
+// T min(T a, T b)
+// {
+// 	return (a < b ? a : b);
+// }
