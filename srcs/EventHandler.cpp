@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 12:11:24 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 17:48:23 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,8 +71,21 @@ void	EventHandler::processInput(string raw_input)
 	{
 		if (cmds[i].empty())
 			continue ;
-		s_commandMessage input = parseInput(cmds[i]);
-		(this->*(_handlers[input.cmd]))(input.params);
+		try
+		{
+			s_commandMessage input = parseInput(cmds[i]);
+			(this->*(_handlers[input.cmd]))(input.params);
+		}
+		catch (const ProtocolErrorException &e)
+		{
+			if (e.getContent().code == ERR_UNKNOWNCOMMAND)
+			{
+				_client->receiveMessage(e.getContent());
+				_logger.logError(&e);
+			}
+			else
+				throw ;
+		}
 	}
 }
 
@@ -110,7 +123,7 @@ const struct s_commandMessage	EventHandler::buildCommandMessage(const string &pr
 	return buildCommandMessage(prefix, cmd, params);
 }
 
-void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_messageBase *message) //TODO refactor con iterators
+void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_messageBase *message)
 {
 	string							first_part, second_part, to_send;
 	uint16_t						block_size, send_length;
@@ -136,8 +149,8 @@ void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_me
 	{
 		send_length = std::min(static_cast<size_t>(block_size),  second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
+		std::cout << "to send: " << to_send << std::endl;
 		second_part = second_part.substr(send_length); // Update second_part correctly
-		std::cout << "to send: " << to_send << "$" << std::endl;
 		send_p(receiver_socket, to_send.c_str(), to_send.length(), 0);
 	}
 }
@@ -150,7 +163,8 @@ void	EventHandler::getRawReplyMessage(const Client &receiver, const struct s_rep
 	*second_part += " " + receiver.getNickname();
 	for (vector<string>::const_iterator it = reply->params.begin(); it != reply->params.end() - 1; it++)
 		*second_part += " " + *it;
-	*second_part += " :" + reply->params.back();
+	if (!reply->params.empty())
+		*second_part += " :" + reply->params.back();
 }
 
 void	EventHandler::getRawCommandMessage(const struct s_commandMessage *command, string *first_part, string *second_part)
@@ -160,7 +174,8 @@ void	EventHandler::getRawCommandMessage(const struct s_commandMessage *command, 
 	*first_part += _command_strings.at(command->cmd);
 	for (vector<string>::const_iterator it = command->params.begin(); it != command->params.end() - 1; it++)
 		*second_part += " " + *it;
-	*second_part += " :" + command->params.back();
+	if (!command->params.empty())
+		*second_part += " :" + command->params.back();
 }
 
 const std::map<std::string, e_cmd_type>	EventHandler::initCommands(void)
@@ -316,7 +331,7 @@ void EventHandler::handleJoin(const vector<string> &args)
 	{
 		if (channels.find(channels_to_join[i]) == channels.end())
 		{
-			Channel			*new_channel;
+			Channel	*new_channel;
 
 			if (i < keys.size())
 				new_channel = new Channel(_logger, channels_to_join[i],  *_client, keys[i]);
@@ -326,11 +341,11 @@ void EventHandler::handleJoin(const vector<string> &args)
 		}
 		else
 		{
-			Channel *channel = _server->getChannel(channels_to_join[i]);
+			Channel &channel = _server->getChannel(channels_to_join[i]);
 			if (i < keys.size())
-				_client->joinChannel(*channel, keys[i]);
+				_client->joinChannel(channel, keys[i]);
 			else
-				_client->joinChannel(*channel);
+				_client->joinChannel(channel);
 		}
 	};
 }
@@ -347,8 +362,8 @@ void EventHandler::handlePart(const vector<string> &args)
 
 	for (vector<string>::const_iterator it = channels.begin(); it != channels.end(); it++)
 	{
-		Channel *channel = _server->getChannel(*it);
-		_client->leaveChannel(*channel, reason);
+		Channel &channel = _server->getChannel(*it);
+		_client->leaveChannel(channel, reason);
 	}
 }
 
@@ -363,18 +378,21 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 	if (n_args < 2)
 		throw ProtocolErrorException(ERR_NOTEXTTOSEND);
 
-	const struct s_commandMessage msg = EventHandler::buildCommandMessage(_client->getNickname(), PRIVMSG, args[1]);
+	vector<string> params;
+	params.push_back(args[0]);
+	params.push_back(args[1]);
+	const struct s_commandMessage msg = EventHandler::buildCommandMessage(_client->getNickname(), PRIVMSG, params);
 	if (is_channel_prefix(args[0][0])) //se il primo carattere e' #, &, + o !
 	{
 		//channel msg PRIVMSG <channel> :<message>
-		Channel *channel = _server->getChannel(args[0]);
-		_client->sendMessage(*channel, msg);
+		Channel &channel = _server->getChannel(args[0]);
+		_client->sendMessage(channel, msg);
 	}
 	else
 	{
 		//private msg PRIVMSG <nickname> :<message>
-		Client *receiver = _server->getClient(args[0]);
-		_client->sendMessage(*receiver, msg);
+		Client &receiver = _server->getClient(args[0]);
+		_client->sendMessage(receiver, msg);
 	}
 }
 
@@ -399,6 +417,7 @@ void EventHandler::handleQuit(const vector<string> &args)
 		}
 	}
 	_server->removeClient(*_client);
+	_logger.logEvent("Client " + quitting_nickname + " has quit");
 }
 
 void EventHandler::handleKick(const vector<string> &args)
@@ -410,10 +429,10 @@ void EventHandler::handleKick(const vector<string> &args)
 	if (n_args < 2)
 		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> [<reason>]");
 
-	Channel	*channel = _server->getChannel(args[0]);
-	Client	*target = _server->getClient(args[1]);
+	Channel	&channel = _server->getChannel(args[0]);
+	Client	&target = _server->getClient(args[1]);
 
-	args.size() > 2 ? _client->kick(*target, *channel, args[2]) : _client->kick(*target, *channel);
+	args.size() > 2 ? _client->kick(target, channel, args[2]) : _client->kick(target, channel);
 }
 
 void EventHandler::handleInvite(const vector<string> &args)
@@ -424,10 +443,10 @@ void EventHandler::handleInvite(const vector<string> &args)
 	if (args.size() < 2)
 		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>");
 
-	Client	*target = _server->getClient(args[0]);
-	Channel	*channel = _server->getChannel(args[1]);
+	Client	&target = _server->getClient(args[0]);
+	Channel	&channel = _server->getChannel(args[1]);
 
-	_client->invite(*target, *channel);
+	_client->invite(target, channel);
 }
 
 void EventHandler::handleTopic(const vector<string> &args)
@@ -447,13 +466,19 @@ void EventHandler::handleTopic(const vector<string> &args)
 		struct s_replyMessage topic_reply;
 
 		if (topic.empty())
-			topic_reply = EventHandler::buildReplyMessage(RPL_NOTOPIC, channel.getName());
+		{
+			vector<string>	params;
+			params.push_back(channel.getName());
+			params.push_back(reply_codes.at(RPL_NOTOPIC));
+			topic_reply = EventHandler::buildReplyMessage(RPL_NOTOPIC, params);
+		}
 		else
 		{
 			vector<string> params;
 			params.push_back(_client->getNickname());
 			params.push_back(channel.getName());
 			params.push_back(topic);
+			params.push_back(reply_codes.at(RPL_TOPIC));
 			topic_reply = EventHandler::buildReplyMessage(RPL_TOPIC, params);
 		}
 		_client->receiveMessage(topic_reply);
@@ -472,11 +497,11 @@ void EventHandler::handleMode(const vector<string> &args)
 	if (n_args < 1)
 		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}");
 
-	Channel			*channel = _server->getChannel(args[0]);
+	Channel	&channel = _server->getChannel(args[0]);
 
 	if (n_args == 1)
 	{
-		const map<char, bool>	&modes = channel->getModes();
+		const map<char, bool>	&modes = channel.getModes();
 		string					modes_str("+");
 
 		for (map<char, bool>::const_iterator it = modes.begin(); it != modes.end(); it++)
@@ -486,8 +511,9 @@ void EventHandler::handleMode(const vector<string> &args)
 		}
 
 		vector<string>	params;
-		params.push_back(channel->getName());
+		params.push_back(channel.getName());
 		params.push_back(modes_str);
+		params.push_back(reply_codes.at(RPL_CHANNELMODEIS));
 		const struct s_replyMessage	reply = EventHandler::buildReplyMessage(RPL_CHANNELMODEIS, params);
 		_client->receiveMessage(reply);
 		return;
@@ -521,7 +547,7 @@ void EventHandler::handleMode(const vector<string> &args)
 		}
 		new_modes[mode] = status;
 	}
-	_client->modesChange(*channel, new_modes, params);
+	_client->modesChange(channel, new_modes, params);
 }
 
 void	EventHandler::checkNicknameValidity(const string &nickname) const

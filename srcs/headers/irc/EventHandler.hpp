@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 01:41:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 17:43:39 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ class EventHandler
 
 		static const struct s_replyMessage				buildReplyMessage(const enum e_replyCodes code, const std::vector<std::string> &params);
 		static const struct s_replyMessage				buildReplyMessage(const enum e_replyCodes code, const std::string &param = "");
-		static const struct s_commandMessage			buildCommandMessage(const std::string &prefix, const e_cmd_type cmd, const std::vector<std::string> &params);
-		static const struct s_commandMessage			buildCommandMessage(const std::string &prefix, const e_cmd_type cmd, const std::string param = "");
+		static const struct s_commandMessage 			buildCommandMessage(const std::string &prefix, const e_cmd_type cmd, const std::vector<std::string> &params);
+		static const struct s_commandMessage 			buildCommandMessage(const std::string &prefix, const e_cmd_type cmd, const std::string param = "");
 		static void										sendBufferedMessage(const Client &receiver, const struct s_messageBase *message);
 
 	private:

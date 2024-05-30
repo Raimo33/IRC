@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.tpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 16:10:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 11:19:35 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 16:30:36 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,3 @@ string join(const vector<T>& elements, const string& delimiter)
 	}
 	return oss.str();
 }
-
-// template<typename T>
-// T min(T a, T b)
-// {
-// 	return (a < b ? a : b);
-// }

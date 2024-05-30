@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SystemCalls.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:58:28 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 16:28:15 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,16 +62,6 @@ int	close_p(int fd)
 	int	ret;
 
 	ret = close(fd);
-	if (ret == -1)
-		throw SystemErrorException(errno);
-	return (ret);
-}
-
-int poll_p(struct pollfd *fds, nfds_t nfds, int timeout)
-{
-	int	ret;
-
-	ret = poll(fds, nfds, timeout);
 	if (ret == -1)
 		throw SystemErrorException(errno);
 	return (ret);
@@ -165,3 +155,34 @@ int	fcntl_p(int fd, int cmd, ...)
 
 	return result;
 }
+
+int	epoll_create1_p(int flags)
+{
+	int	ret;
+
+	ret = epoll_create1(flags);
+	if (ret == -1)
+		throw SystemErrorException(errno);
+	return (ret);
+}
+
+int	epoll_ctl_p(int epfd, int op, int fd, struct epoll_event *event)
+{
+	int	ret;
+
+	ret = epoll_ctl(epfd, op, fd, event);
+	if (ret == -1)
+		throw SystemErrorException(errno);
+	return (ret);
+}
+
+int	epoll_wait_p(int epfd, struct epoll_event *events, int maxevents, int timeout)
+{
+	int	ret;
+
+	ret = epoll_wait(epfd, events, maxevents, timeout);
+	if (ret == -1)
+		throw SystemErrorException(errno);
+	return (ret);
+}
+

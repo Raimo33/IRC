@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 01:56:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 17:42:28 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,7 +222,7 @@ void Channel::removeOperator(const string &nickname)
 	_operators.erase(&user);
 
 	_logger.logEvent("Channel " + _name + ", operator removed: " + nickname);
-	const struct s_replyMessage notoperanymore = EventHandler::buildReplyMessage(RPL_NOTOPERANYMORE);
+	const struct s_replyMessage notoperanymore = EventHandler::buildReplyMessage(RPL_NOTOPERANYMORE, nickname + " is no longer an operator of " + _name);
 	user.receiveMessage(notoperanymore);
 }
 
@@ -367,13 +367,13 @@ string	Channel::getMembersString(void) const
 
 	members_str.reserve(_members.size() * 10);
 	for (set<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); it++)
-		members_str += "@" + (*it)->getNickname() + ", ";
+		members_str += "@" + (*it)->getNickname() + " ";
 	for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
 	{
 		if (!isOperator(*it->second))
-			members_str += it->first + ", ";
+			members_str += it->first + " ";
 	}
-	members_str.erase(members_str.length() - 2);
+	members_str.erase(members_str.length() - 1);
 	return members_str;
 }
 

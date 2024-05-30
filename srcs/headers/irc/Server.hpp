@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 12:12:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 16:39:30 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,19 +17,9 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <vector>
 # include <string>
-# include <cstring>
-# include <cstdlib>
+# include <vector>
 # include <map>
-# include <poll.h>
-# include <netinet/in.h>
-# include <iostream>
-# include <arpa/inet.h>
-# include <unistd.h>
-# include <fcntl.h>
-# include <stdexcept>
-# include <sstream>
 
 # include "SystemCalls.hpp"
 # include "Constants.hpp"
@@ -51,18 +41,15 @@ class Server
 		const std::string						&getPwdHash(void) const;
 		const std::map<std::string, Client *>	&getClients(void) const;
 		void									setClients(const std::map<std::string, Client *> &clients);
-		Client									*getClient(const std::string &nickname) const;
+		Client									&getClient(const std::string &nickname) const;
+		Client									*getClient(const int socket) const;
 		void									addClient(Client &client);
 		void									removeClient(const Client &client);
 		const std::map<std::string, Channel *>	&getChannels(void) const;
 		void									setChannels(const std::map<std::string, Channel *> &channels);
-		Channel									*getChannel(const std::string &name) const;
+		Channel									&getChannel(const std::string &name) const;
 		void									addChannel(Channel &channel);
 		void									removeChannel(const Channel &channel);
-		const std::vector<pollfd>				&getPollfds(void) const;
-		void									setPollfds(const std::vector<pollfd> &pollfds);
-		void									addPollfd(const pollfd &pollfd);
-		void									removePollfd(const pollfd &pollfd);
 		int										getSocket(void) const;
 
 		bool									isClientConnected(const std::string &nickname) const;
@@ -74,18 +61,17 @@ class Server
 	private:
 		
 		void									handleNewClient(void);
-		void									handleClient(size_t *i);
+		void									handleClient(const int client_socket);
+		void									handleClientDisconnect(const int client_socket);
 
 		const uint16_t							_port;
 		const std::string						_pwd_hash;
 		std::map<std::string, Client *>			_clients; //{pk, client}
 		std::map<std::string, Channel *>		_channels;
-		std::vector<pollfd>						_pollfds;
+		const int								_epoll_fd;
 		const int								_socket;
 		EventHandler							_handler;
 		Logger									&_logger;
 };
-
-bool	operator==(const pollfd &lhs, const pollfd &rhs);
 
 #endif

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 01:58:19 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 17:51:31 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 using std::string;
 using std::map;
 
-Client::Client(Logger &logger, Server *server, const int socket, const pollfd &pollfd, const string &ip_addr, const uint16_t port) :
+Client::Client(Logger &logger, Server *server, const int socket, const string &ip_addr, const uint16_t port) :
 	_channels(),
 	_nickname(),
 	_username(),
@@ -32,7 +32,6 @@ Client::Client(Logger &logger, Server *server, const int socket, const pollfd &p
 	_ip_addr(ip_addr),
 	_socket(socket),
 	_pk(_ip_addr + ::to_string(_port)),
-	_pollfd(pollfd),
 	_server(server),
 	_logger(logger) {}
 
@@ -47,7 +46,6 @@ Client::Client(const Client &copy) :
 	_ip_addr(copy._ip_addr),
 	_socket(copy._socket),
 	_pk(copy._pk),
-	_pollfd(copy._pollfd),
 	_server(copy._server),
 	_logger(copy._logger) {}
 
@@ -189,11 +187,6 @@ string	Client::getPk(void) const
 	return _pk;
 }
 
-const pollfd	&Client::getPollfd(void) const
-{
-	return _pollfd;
-}
-
 Server	&Client::getServer(void) const
 {
 	return *_server;
@@ -215,27 +208,44 @@ void	Client::joinChannel(Channel &channel, const string &key)
 
 	const string					&channel_name = channel.getName();
 	const string					&channel_topic = channel.getTopic();
-	const struct s_commandMessage	join_acknowledgement = EventHandler::buildCommandMessage(_nickname, JOIN, channel_name);
 	struct s_replyMessage			topic_reply;
 	if (channel_topic.empty())
-		topic_reply = EventHandler::buildReplyMessage(RPL_NOTOPIC, channel_name);
+	{
+		vector<string> params;
+		params.push_back(channel_name);
+		params.push_back(reply_codes.at(RPL_NOTOPIC));
+		topic_reply = EventHandler::buildReplyMessage(RPL_NOTOPIC, params);
+		receiveMessage(topic_reply);
+	}
 	else
 	{
 		vector<string> params;
 		params.push_back(channel_name);
 		params.push_back(channel_topic);
+		params.push_back(reply_codes.at(RPL_TOPIC));
 		topic_reply = EventHandler::buildReplyMessage(RPL_TOPIC, params);
+		receiveMessage(topic_reply);
 	}
-	vector<string> params;
-	params.push_back("=");
-	params.push_back(channel_name);
-	params.push_back(channel.getMembersString());
-	const struct s_replyMessage namreply = EventHandler::buildReplyMessage(RPL_NAMREPLY, params);
-	const struct s_replyMessage endofnames = EventHandler::buildReplyMessage(RPL_ENDOFNAMES, channel_name);
-	receiveMessage(join_acknowledgement);
-	receiveMessage(topic_reply);
-	receiveMessage(namreply);
-	receiveMessage(endofnames);
+	{
+		vector<string> params;
+		params.push_back("=");
+		params.push_back(channel_name);
+		params.push_back(channel.getMembersString());
+		const struct s_replyMessage namreply = EventHandler::buildReplyMessage(RPL_NAMREPLY, params);
+		receiveMessage(namreply);
+	}
+	{
+		vector<string> params;
+		params.push_back(channel_name);
+		params.push_back(reply_codes.at(RPL_ENDOFNAMES));
+		const struct s_replyMessage endofnames = EventHandler::buildReplyMessage(RPL_ENDOFNAMES, params);
+		receiveMessage(endofnames);
+	}
+	{
+		const string prefix = _nickname + "!" + _username + "@" + _ip_addr;
+		const struct s_commandMessage join_notification = EventHandler::buildCommandMessage(prefix, JOIN, channel_name);
+		channel.receiveMessage(join_notification);
+	}
 }
 
 void	Client::leaveChannel(Channel &channel, const string &reason)
@@ -306,6 +316,7 @@ void	Client::invite(Client &user, Channel &channel) const
 	params.push_back(channel_name);
 	channel.addPendingInvitation(user);
 	{
+		params.push_back(reply_codes.at(RPL_INVITING));
 		const struct s_replyMessage reply_to_issuer = EventHandler::buildReplyMessage(RPL_INVITING, params);
 		receiveMessage(reply_to_issuer);
 	}

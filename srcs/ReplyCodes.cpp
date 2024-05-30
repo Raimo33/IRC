@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ReplyCodes.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 02:55:58 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 13:48:29 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 17:53:21 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ const map<enum e_replyCodes, string> create_reply_codes(void)
 	reply_codes.insert(make_pair(RPL_TOPIC, "Topic"));
 	reply_codes.insert(make_pair(RPL_INVITING, "Inviting"));
 	reply_codes.insert(make_pair(RPL_NAMREPLY, "Name reply"));
-	reply_codes.insert(make_pair(RPL_ENDOFNAMES, "End of NAMES list"));
+	reply_codes.insert(make_pair(RPL_ENDOFNAMES, "End of /NAMES list"));
 	reply_codes.insert(make_pair(RPL_YOUREOPER, "You are now an IRC operator"));
 	reply_codes.insert(make_pair(RPL_NOTOPERANYMORE, "You are no longer an IRC operator"));
 	reply_codes.insert(make_pair(ERR_NOSUCHNICK, "No such nick/channel"));

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 14:59:29 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 16:31:31 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class Logger;
 class Client
 {
 	public:
-		explicit Client(Logger &logger, Server *server, const int socket, const pollfd &pollfd, const std::string &ip_addr, const uint16_t port);
+		explicit Client(Logger &logger, Server *server, const int socket, const std::string &ip_addr, const uint16_t port);
 		Client(const Client &copy);
 		virtual ~Client(void);
 
@@ -83,8 +83,7 @@ class Client
 		const std::string								_ip_addr; //aka hostname
 		const int										_socket;
 		const std::string								_pk; //ip_addr + port
-		const pollfd									&_pollfd;
-		Server											*_server;
+ 		Server											*_server;
 		Logger											&_logger;
 };
 
