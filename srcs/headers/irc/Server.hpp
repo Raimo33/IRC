@@ -6,10 +6,11 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:59:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 12:12:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+//TODO provare i casi di errore quando si disconnette un client, non funziona piu nula
 //TODO implementare scambio di file (ERR_FILEERROR)
 //TODO aggiungere bot
 
