@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:21:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 01:56:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,7 +199,10 @@ void Channel::addOperator(const string &nickname)
 	_operators.insert(&user);
 
 	_logger.logEvent("Channel " + _name + ", operator added: " + nickname);
-	const struct s_replyMessage youreoper = EventHandler::buildReplyMessage(RPL_YOUREOPER, nickname, "You are now an operator of " + _name);
+	vector<string> params;
+	params.push_back(nickname);
+	params.push_back("You are now an operator of " + _name);
+	const struct s_replyMessage youreoper = EventHandler::buildReplyMessage(RPL_YOUREOPER, params);
 	user.receiveMessage(youreoper);
 }
 

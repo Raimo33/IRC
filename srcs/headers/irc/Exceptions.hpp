@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:48:39 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 01:56:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 class ProtocolErrorException : public std::exception //for IRC protocol errors (reply codes)
 {
 	public:
-		explicit ProtocolErrorException(const enum e_replyCodes code, const std::vector<std::string> &params, const std::string &custom_msg = "");
+		explicit ProtocolErrorException(const enum e_replyCodes code, std::vector<std::string> &params, const std::string &custom_msg = "");
 		explicit ProtocolErrorException(const enum e_replyCodes code, const std::string &param = "", const std::string &custom_msg = "");
 		const char *what(void) const throw();
 		~ProtocolErrorException(void) throw();
@@ -33,7 +33,9 @@ class ProtocolErrorException : public std::exception //for IRC protocol errors (
 		const struct s_replyMessage	&getContent(void) const;
 
 	private:
-		const struct s_replyMessage	_content;
+		void						initContent(const enum e_replyCodes code, std::vector<std::string> &params, const std::string &custom_msg);
+	
+		struct s_replyMessage		_content;
 		const std::string			_formatted_msg;
 };
 

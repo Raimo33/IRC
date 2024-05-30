@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:14:51 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 01:10:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,15 +86,20 @@ bool	channel_mode_requires_param(const char mode, const bool status)
 	}
 }
 
-vector<string>	split(const string &s, char delim)
+vector<string>	split(const string &str, const string &delim)
 {
-	vector<string>	result;
-	stringstream	ss(s);
-	string			item;
+	std::vector<std::string> tokens;
+	size_t start = 0;
+	size_t end = str.find(delim);
 
-	while (getline(ss, item, delim))
-		result.push_back(item);
-	return result;
+	while (end != std::string::npos)
+	{
+		tokens.push_back(str.substr(start, end - start));
+		start = end + delim.length();
+		end = str.find(delim, start);
+	}
+	tokens.push_back(str.substr(start, end));
+	return tokens;
 }
 
 string to_hex(const unsigned char *bytes, size_t length)

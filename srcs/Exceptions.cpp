@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:58:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 01:55:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,20 +43,34 @@ const char *InternalErrorException::what(void) const throw()
 	return runtime_error::what();
 }
 
-ProtocolErrorException::ProtocolErrorException(const enum e_replyCodes code, const vector<string> &params, const string &custom_msg) :
-	_content(EventHandler::buildReplyMessage(code, params, custom_msg)) {}
+ProtocolErrorException::ProtocolErrorException(const enum e_replyCodes code, vector<string> &params, const string &custom_msg)
+{
+	initContent(code, params, custom_msg);
+}
+ProtocolErrorException::ProtocolErrorException(const enum e_replyCodes code, const string &param, const string &custom_msg)
+{
+	vector<string>	params(1, param);
 
-ProtocolErrorException::ProtocolErrorException(const enum e_replyCodes code, const string &param, const string &custom_msg) :
-	_content(EventHandler::buildReplyMessage(code, param, custom_msg)) {}
+	initContent(code, params, custom_msg);
+}
 
 ProtocolErrorException::~ProtocolErrorException(void) throw() {}
 
 const char *ProtocolErrorException::what(void) const throw()
 {
-	return _content.text.c_str();
+	return _content.params.back().c_str();
 }
 
 const struct s_replyMessage	&ProtocolErrorException::getContent(void) const
 {
 	return _content;
+}
+
+void	ProtocolErrorException::initContent(const enum e_replyCodes code, vector<string> &params, const string &custom_msg)
+{
+	if (custom_msg.empty())
+		params.push_back(reply_codes.at(code));
+	else
+		params.push_back(custom_msg);
+	_content = EventHandler::buildReplyMessage(code, params);
 }

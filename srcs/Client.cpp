@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:27:42 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 01:58:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,8 +163,8 @@ void	Client::setAuthenticated(bool is_authenticated)
 	_is_authenticated = is_authenticated;
 	_logger.logEvent("Client " + _ip_addr + " is " + (is_authenticated ? "authenticated" : "not authenticated anymore"));
 
-	const struct s_replyMessage welcome = EventHandler::buildReplyMessage(RPL_WELCOME, "", "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr);
-	const struct s_replyMessage yourhost = EventHandler::buildReplyMessage(RPL_YOURHOST, "", "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION);
+	const struct s_replyMessage welcome = EventHandler::buildReplyMessage(RPL_WELCOME, "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr);
+	const struct s_replyMessage yourhost = EventHandler::buildReplyMessage(RPL_YOURHOST, "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION);
 	receiveMessage(welcome);
 	receiveMessage(yourhost);
 }
@@ -220,11 +220,17 @@ void	Client::joinChannel(Channel &channel, const string &key)
 	if (channel_topic.empty())
 		topic_reply = EventHandler::buildReplyMessage(RPL_NOTOPIC, channel_name);
 	else
-		topic_reply = EventHandler::buildReplyMessage(RPL_TOPIC, channel_name, channel_topic);
+	{
+		vector<string> params;
+		params.push_back(channel_name);
+		params.push_back(channel_topic);
+		topic_reply = EventHandler::buildReplyMessage(RPL_TOPIC, params);
+	}
 	vector<string> params;
 	params.push_back("=");
 	params.push_back(channel_name);
-	const struct s_replyMessage namreply = EventHandler::buildReplyMessage(RPL_NAMREPLY, params, channel.getMembersString());
+	params.push_back(channel.getMembersString());
+	const struct s_replyMessage namreply = EventHandler::buildReplyMessage(RPL_NAMREPLY, params);
 	const struct s_replyMessage endofnames = EventHandler::buildReplyMessage(RPL_ENDOFNAMES, channel_name);
 	receiveMessage(join_acknowledgement);
 	receiveMessage(topic_reply);
@@ -237,7 +243,10 @@ void	Client::leaveChannel(Channel &channel, const string &reason)
 	channel.removeMember(*this);
 	removeChannel(channel);
 
-	const struct s_commandMessage part = EventHandler::buildCommandMessage(_nickname, PART, channel.getName(), reason);
+	vector<string> params;
+	params.push_back(channel.getName());
+	params.push_back(reason);
+	const struct s_commandMessage part = EventHandler::buildCommandMessage(_nickname, PART, params);
 	channel.receiveMessage(part);
 }
 
@@ -277,7 +286,8 @@ void	Client::kick(Client &user, Channel &channel, const string &reason) const
 	vector<string> params;
 	params.push_back(channel_name);
 	params.push_back(_nickname);
-	const struct s_commandMessage message_to_channel = EventHandler::buildCommandMessage("", KICK, params, reason);
+	params.push_back(reason);
+	const struct s_commandMessage message_to_channel = EventHandler::buildCommandMessage("", KICK, params);
 	channel.receiveMessage(message_to_channel);
 }
 
@@ -317,7 +327,10 @@ void	Client::topicSet(Channel &channel, const string &new_topic) const
 	_logger.logEvent("Client " + _nickname + " tries to set topic of channel " + channel.getName() + " to " + new_topic);
 	channel.setTopic(new_topic);
 
-	const struct s_commandMessage topic = EventHandler::buildCommandMessage(_nickname, TOPIC, channel.getName(), new_topic);
+	vector<string> params;
+	params.push_back(channel.getName());
+	params.push_back(new_topic);
+	const struct s_commandMessage topic = EventHandler::buildCommandMessage(_nickname, TOPIC);
 	channel.receiveMessage(topic);
 }
 

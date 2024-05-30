@@ -38,7 +38,6 @@ struct s_messageBase
 	std::string					prefix;
 
 	std::vector<std::string>	params;
-	std::string					text;
 	
 	virtual ~s_messageBase(void) {};
 };
