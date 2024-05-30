@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 16:48:40 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/30 20:22:30 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "irc/Channel.hpp"
 #include "irc/SystemCalls.hpp"
 #include "irc/EventHandler.hpp"
-#include "irc/ReplyCodes.hpp"
+#include "irc/Messages.hpp"
 #include "irc/Exceptions.hpp"
 
 #include <algorithm>
@@ -49,7 +49,9 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 	server_addr.sin_port = htons(_port);
 	bind_p(_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
 	listen_p(_socket, 5);
+
 	struct epoll_event event;
+	memset(&event, 0, sizeof(event));
 	event.events = EPOLLIN;
 	event.data.fd = _socket;
 	epoll_ctl_p(_epoll_fd, EPOLL_CTL_ADD, _socket, &event);
@@ -140,7 +142,7 @@ Client &Server::getClient(const string &nickname) const
 		if (it->second->getNickname() == nickname)
 			return *it->second;
 	}
-	throw ProtocolErrorException(ERR_NOSUCHNICK, nickname);
+	throw ProtocolErrorException(ERR_NOSUCHNICK, nickname.c_str(), default_replies.at(ERR_NOSUCHNICK), NULL);
 }
 
 void Server::addClient(Client &client)
@@ -176,7 +178,7 @@ Channel &Server::getChannel(const string &name) const
 	map<string, Channel *>::const_iterator it = _channels.find(name);
 
 	if (it == _channels.end())
-		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name);
+		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name.c_str(), default_replies.at(ERR_NOSUCHCHANNEL), NULL);
 	return *it->second;
 }
 
@@ -241,6 +243,7 @@ void Server::handleNewClient(void)
 	const uint16_t client_port = ntohs(client_addr.sin_port);
 
 	struct epoll_event event;
+	memset(&event, 0, sizeof(event));
 	event.events = EPOLLIN | EPOLLHUP | EPOLLERR;
 	event.data.fd = client_socket;
 	epoll_ctl_p(_epoll_fd, EPOLL_CTL_ADD, client_socket, &event);
@@ -277,7 +280,9 @@ void Server::handleClient(const int client_socket)
 	}
 	catch (const ProtocolErrorException &e)
 	{
-		client->receiveMessage(e.getContent());
+		struct s_message msg = e.getContent();
+		msg.params.insert(msg.params.begin(), client->getNickname());
+		client->receiveMessage(msg);
 		_logger.logError(&e);
 	}
 }

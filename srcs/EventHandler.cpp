@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 17:48:23 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/30 20:39:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "irc/Client.hpp"
 #include "irc/Client.hpp"
 #include "irc/utils.hpp"
-#include "irc/ReplyCodes.hpp"
+#include "irc/Messages.hpp"
 #include "irc/Exceptions.hpp"
 #include "irc/Constants.hpp"
 
@@ -46,7 +46,7 @@ EventHandler::EventHandler(const EventHandler &copy) :
 	
 EventHandler::~EventHandler(void) {}
 
-const map<string, e_cmd_type>	&EventHandler::getCommands(void) const
+const map<string, e_commands>	&EventHandler::getCommands(void) const
 {
 	return _commands;
 }
@@ -73,12 +73,12 @@ void	EventHandler::processInput(string raw_input)
 			continue ;
 		try
 		{
-			s_commandMessage input = parseInput(cmds[i]);
-			(this->*(_handlers[input.cmd]))(input.params);
+			const struct s_message input = parseInput(cmds[i]);
+			(this->*(_handlers[input.value]))(input.params);
 		}
 		catch (const ProtocolErrorException &e)
 		{
-			if (e.getContent().code == ERR_UNKNOWNCOMMAND)
+			if (e.getContent().value == ERR_UNKNOWNCOMMAND)
 			{
 				_client->receiveMessage(e.getContent());
 				_logger.logError(&e);
@@ -89,98 +89,64 @@ void	EventHandler::processInput(string raw_input)
 	}
 }
 
-const struct s_replyMessage	EventHandler::buildReplyMessage(const enum e_replyCodes code, const vector<string> &params)
+const struct s_message	EventHandler::buildMessage(const string &prefix, const int value, ...)
 {
-	struct s_replyMessage	content;
+	va_list	args;
 
-	content.prefix = string(SERVER_NAME);
-	content.code = code;
-	content.params = params;
+	va_start(args, value);
+	const struct s_message content = buildMessage(prefix, value, args);
+	va_end(args);
 	return content;
 }
 
-const struct s_replyMessage	EventHandler::buildReplyMessage(const enum e_replyCodes code, const string &param)
+const struct s_message EventHandler::buildMessage(const string &prefix, const int value, va_list args)
 {
-	const vector<string>	params(1, param);
-
-	return buildReplyMessage(code, params);
-}
-
-const struct s_commandMessage	EventHandler::buildCommandMessage(const string &prefix, const e_cmd_type cmd, const vector<string> &params)
-{
-	struct s_commandMessage	content;
+	struct s_message	content;
+	const char			*param;
 
 	content.prefix = prefix;
-	content.cmd = cmd;
-	content.params = params;
+	content.value = value;
+	while ((param = va_arg(args, const char *)) != NULL)
+        content.params.push_back(param);
 	return content;
 }
 
-const struct s_commandMessage	EventHandler::buildCommandMessage(const string &prefix, const e_cmd_type cmd, const string param)
+void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_message &message)
 {
-	const vector<string>	params(1, param);
-	
-	return buildCommandMessage(prefix, cmd, params);
-}
+	string		first_part, second_part, to_send;
+	uint16_t	block_size, send_length;
+	const int	receiver_socket = receiver.getSocket();
 
-void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_messageBase *message)
-{
-	string							first_part, second_part, to_send;
-	uint16_t						block_size, send_length;
-	const struct s_replyMessage		*reply = dynamic_cast<const s_replyMessage *>(message);
-	const struct s_commandMessage	*command = dynamic_cast<const s_commandMessage *>(message);
-	
-
-	if (!reply && !command)
-		throw InternalErrorException("EventHandler::sendBufferedMessage: Invalid message type");
-	if (command && (command->cmd < 0 || command->cmd >= N_COMMANDS))
-		throw InternalErrorException("EventHandler::sendBufferedMessage: Invalid command type");
-	if (reply && reply_codes.find(reply->code) == reply_codes.end())
-		throw InternalErrorException("EventHandler::sendBufferedMessage: Invalid reply code");
-
-	const int receiver_socket = receiver.getSocket();
-
-	if (reply)
-		getRawReplyMessage(receiver, reply, &first_part, &second_part);
-	else
-		getRawCommandMessage(command, &first_part, &second_part);
+	unwrapMessage(message, &first_part, &second_part);
 	block_size = MAX_MSG_LENGTH - first_part.size() - 2; //2 per \r\n
 	while (!second_part.empty())
 	{
 		send_length = std::min(static_cast<size_t>(block_size),  second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
-		std::cout << "to send: " << to_send << std::endl;
 		second_part = second_part.substr(send_length); // Update second_part correctly
 		send_p(receiver_socket, to_send.c_str(), to_send.length(), 0);
 	}
 }
 
-void	EventHandler::getRawReplyMessage(const Client &receiver, const struct s_replyMessage *reply, string *first_part, string *second_part)
+void	EventHandler::unwrapMessage(const struct s_message &msg, string *first_part, string *second_part)
 {
-	if (!reply->prefix.empty())
-		*first_part += ":" + reply->prefix + " ";
-	*first_part += ::to_string(reply->code);
-	*second_part += " " + receiver.getNickname();
-	for (vector<string>::const_iterator it = reply->params.begin(); it != reply->params.end() - 1; it++)
+	const bool is_reply = msg.value >= RPL_WELCOME && msg.value <= ERR_CHANOPRIVSNEEDED;
+
+	if (!msg.prefix.empty())
+		*first_part += ":" + msg.prefix + " ";
+	if (is_reply)
+		*first_part += ::to_string(msg.value);
+	else
+		*first_part += _command_strings.at(msg.value);
+	for (vector<string>::const_iterator it = msg.params.begin(); it != msg.params.end() - 1; it++)
 		*second_part += " " + *it;
-	if (!reply->params.empty())
-		*second_part += " :" + reply->params.back();
+	if (!msg.params.empty())
+		*second_part += " :" + msg.params.back();
 }
 
-void	EventHandler::getRawCommandMessage(const struct s_commandMessage *command, string *first_part, string *second_part)
+const std::map<std::string, e_commands>	EventHandler::initCommands(void)
 {
-	if (!command->prefix.empty())
-		*first_part += ":" + command->prefix + " ";
-	*first_part += _command_strings.at(command->cmd);
-	for (vector<string>::const_iterator it = command->params.begin(); it != command->params.end() - 1; it++)
-		*second_part += " " + *it;
-	if (!command->params.empty())
-		*second_part += " :" + command->params.back();
-}
-
-const std::map<std::string, e_cmd_type>	EventHandler::initCommands(void)
-{
-	static map<string, e_cmd_type>	commands;
+	static map<string, e_commands>	commands;
 
 	if (!commands.empty()) //se il map e' gia' stato inizializzato
 		return commands;
@@ -243,12 +209,12 @@ std::map<uint16_t, std::string> EventHandler::initCommandStrings(void)
 	return command_strings;
 }
 
-struct s_commandMessage EventHandler::parseInput(string &raw_input) const
+const struct s_message EventHandler::parseInput(string &raw_input) const
 {
-	struct s_commandMessage	input;
-	string					command;
-	string					param;
-	string::iterator		it;
+	struct s_message	input;
+	string				command;
+	string				param;
+	string::iterator	it;
 
 	if (*raw_input.rbegin() == '\n') // Remove trailing '\n
 		raw_input.resize(raw_input.size() - 1);
@@ -256,10 +222,10 @@ struct s_commandMessage EventHandler::parseInput(string &raw_input) const
 	if (*it == ':')
 		input.prefix = get_next_token(++it, raw_input.end(), ' '); // Extract the prefix
 	command = get_next_token(it, raw_input.end(), ' '); // Extract the command
-	const map<string, e_cmd_type>::const_iterator it_command = _commands.find(command);
+	const map<string, e_commands>::const_iterator it_command = _commands.find(command);
 	if (it_command == _commands.end())
-		throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, command);
-	input.cmd = it_command->second; // Associate the command with the enum
+		throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, command.c_str(), default_replies.at(ERR_UNKNOWNCOMMAND), NULL);
+	input.value = it_command->second; // Associate the command with the enum
 	while (it != raw_input.end())
 	{
 		if (*it == ':')
@@ -274,13 +240,13 @@ struct s_commandMessage EventHandler::parseInput(string &raw_input) const
 void EventHandler::handlePass(const vector<string> &args)
 {
 	if (_client->getIsConnected())
-		throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+		throw ProtocolErrorException(ERR_ALREADYREGISTRED, default_replies.at(ERR_ALREADYREGISTRED), NULL);
 
 	if (args.size() < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PASS", "usage: PASS <password>");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PASS", "usage: PASS <password>", NULL);
 
 	if (hash(args[0]) != _server->getPwdHash())
-		throw ProtocolErrorException(ERR_PASSWDMISMATCH);
+		throw ProtocolErrorException(ERR_PASSWDMISMATCH, default_replies.at(ERR_PASSWDMISMATCH), NULL);
 	_client->setIsConnected(true);
 }
 
@@ -288,9 +254,9 @@ void EventHandler::handleNick(const vector<string> &args)
 {
 	checkConnection(_client);
 	if (_client->getIsAuthenticated() || !_client->getNickname().empty())
-		throw ProtocolErrorException(ERR_ALREADYREGISTRED);
+		throw ProtocolErrorException(ERR_ALREADYREGISTRED, default_replies.at(ERR_ALREADYREGISTRED), NULL);
 	if (args.size() < 1)
-		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN);
+		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN, default_replies.at(ERR_NONICKNAMEGIVEN), NULL);
 	checkNicknameValidity(args[0]);
 	_client->setNickname(args[0]);
 	if (!_client->getUsername().empty())
@@ -303,7 +269,7 @@ void EventHandler::handleUser(const vector<string> &args)
 	if (_client->getIsAuthenticated() || !_client->getUsername().empty())
 		throw ProtocolErrorException(ERR_ALREADYREGISTRED);
 	if (args.size() < 4)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "USER", "usage: USER <username> <hostname> <servername> <realname>");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "USER", "usage: USER <username> <hostname> <servername> <realname>", NULL);
 	_client->setUsername(args[0]);
 	(void)args[1]; //args[1] = hostname
 	(void)args[2]; //args[2] = servername
@@ -318,7 +284,7 @@ void EventHandler::handleJoin(const vector<string> &args)
 	checkConnection(_client);
 	checkAuthentication(_client);
 	if (args.size() < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]", NULL);
 
 	const vector<string> 			channels_to_join = ::split(args[0], ",");
 	const map<string, Channel *>	&channels = _server->getChannels();
@@ -355,7 +321,7 @@ void EventHandler::handlePart(const vector<string> &args)
 	const uint16_t n_args = args.size();
 	
 	if (n_args < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PART", "usage: PART <channel>{,<channel>} [<reason>]");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PART", "usage: PART <channel>{,<channel>} [<reason>]", NULL);
 
 	const string reason = (n_args > 1) ? args[1] : "";
 	const vector<string> channels = split(args[0], ",");
@@ -374,14 +340,11 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 
 	const uint16_t n_args = args.size();
 	if (n_args < 1)
-		throw ProtocolErrorException(ERR_NORECIPIENT, "PRIVMSG", "no recipient given (PRIVMSG)");
+		throw ProtocolErrorException(ERR_NORECIPIENT, "PRIVMSG", "no recipient given (PRIVMSG)", NULL);
 	if (n_args < 2)
-		throw ProtocolErrorException(ERR_NOTEXTTOSEND);
+		throw ProtocolErrorException(ERR_NOTEXTTOSEND, default_replies.at(ERR_NOTEXTTOSEND), NULL);
 
-	vector<string> params;
-	params.push_back(args[0]);
-	params.push_back(args[1]);
-	const struct s_commandMessage msg = EventHandler::buildCommandMessage(_client->getNickname(), PRIVMSG, params);
+	const struct s_message msg = EventHandler::buildMessage(_client->getNickname(), PRIVMSG, args[0].c_str(), args[1].c_str(), NULL);
 	if (is_channel_prefix(args[0][0])) //se il primo carattere e' #, &, + o !
 	{
 		//channel msg PRIVMSG <channel> :<message>
@@ -400,7 +363,7 @@ void EventHandler::handleQuit(const vector<string> &args)
 {
 	const string					&reason = args.size() > 0 ? args[0] : "Client quit";
 	const string					&quitting_nickname = _client->getNickname();
-	const struct s_commandMessage	quit = EventHandler::buildCommandMessage(quitting_nickname, QUIT, reason);
+	const struct s_message			quit = EventHandler::buildMessage(quitting_nickname, QUIT, reason.c_str(), NULL);
 	const map<string, Channel *>	&channels = _client->getChannels();
 	
 	for (map<string, Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
@@ -427,7 +390,7 @@ void EventHandler::handleKick(const vector<string> &args)
 
 	const uint16_t	n_args = args.size();
 	if (n_args < 2)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> [<reason>]");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> [<reason>]", NULL);
 
 	Channel	&channel = _server->getChannel(args[0]);
 	Client	&target = _server->getClient(args[1]);
@@ -441,7 +404,7 @@ void EventHandler::handleInvite(const vector<string> &args)
 	checkAuthentication(_client);
 
 	if (args.size() < 2)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>", NULL);
 
 	Client	&target = _server->getClient(args[0]);
 	Channel	&channel = _server->getChannel(args[1]);
@@ -457,30 +420,20 @@ void EventHandler::handleTopic(const vector<string> &args)
 	const size_t	n_args = args.size();
 
 	if (n_args < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "TOPIC", "usage: TOPIC <channel> [<topic>]");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "TOPIC", "usage: TOPIC <channel> [<topic>]", NULL);
 
 	Channel &channel = _client->getChannel(args[0]);
 	if (n_args == 1)
 	{
-		const string &topic = channel.getTopic();
-		struct s_replyMessage topic_reply;
+		const string		&topic = channel.getTopic();
+		const string		&channel_name = channel.getName();
+		const string		&issuer_nickname = _client->getNickname();
+		struct s_message	topic_reply;
 
 		if (topic.empty())
-		{
-			vector<string>	params;
-			params.push_back(channel.getName());
-			params.push_back(reply_codes.at(RPL_NOTOPIC));
-			topic_reply = EventHandler::buildReplyMessage(RPL_NOTOPIC, params);
-		}
+			topic_reply = EventHandler::buildMessage(SERVER_NAME, RPL_NOTOPIC, issuer_nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_NOTOPIC), NULL);
 		else
-		{
-			vector<string> params;
-			params.push_back(_client->getNickname());
-			params.push_back(channel.getName());
-			params.push_back(topic);
-			params.push_back(reply_codes.at(RPL_TOPIC));
-			topic_reply = EventHandler::buildReplyMessage(RPL_TOPIC, params);
-		}
+			topic_reply = EventHandler::buildMessage(SERVER_NAME, RPL_TOPIC, issuer_nickname.c_str(), channel_name.c_str(), topic.c_str(), NULL);
 		_client->receiveMessage(topic_reply);
 	}
 	else
@@ -495,7 +448,7 @@ void EventHandler::handleMode(const vector<string> &args)
 	const uint16_t	n_args = args.size();
 
 	if (n_args < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}", NULL);
 
 	Channel	&channel = _server->getChannel(args[0]);
 
@@ -510,17 +463,13 @@ void EventHandler::handleMode(const vector<string> &args)
 				modes_str += it->first;
 		}
 
-		vector<string>	params;
-		params.push_back(channel.getName());
-		params.push_back(modes_str);
-		params.push_back(reply_codes.at(RPL_CHANNELMODEIS));
-		const struct s_replyMessage	reply = EventHandler::buildReplyMessage(RPL_CHANNELMODEIS, params);
+		const struct s_message	reply = EventHandler::buildMessage(SERVER_NAME, RPL_CHANNELMODEIS, _client->getNickname().c_str(), channel.getName().c_str(), modes_str.c_str(), NULL);
 		_client->receiveMessage(reply);
 		return;
 	}
 
 	if (args[1][0] != '+' && args[1][0] != '-')
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}");
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}", NULL);
 
 	char				mode;
 	bool				status;
@@ -538,11 +487,11 @@ void EventHandler::handleMode(const vector<string> &args)
 		}
 		mode = args[1][i];
 		if (string(SUPPORTED_CHANNEL_MODES).find(mode) == string::npos)
-			throw ProtocolErrorException(ERR_UNKNOWNMODE, string(1, mode));
+			throw ProtocolErrorException(ERR_UNKNOWNMODE, string(1, mode).c_str(), NULL);
 		if (channel_mode_requires_param(mode, status))
 		{
 			if (j >= n_args)
-				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode> [<param>]");
+				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode> [<param>]", NULL);
 			params.push_back(args[j++]);
 		}
 		new_modes[mode] = status;
@@ -553,11 +502,14 @@ void EventHandler::handleMode(const vector<string> &args)
 void	EventHandler::checkNicknameValidity(const string &nickname) const
 {
 	if (nickname.empty())
-		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN);
+		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN, default_replies.at(ERR_NONICKNAMEGIVEN), NULL);
 	if (!is_valid_nickname(nickname))
-		throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname, "allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(static_cast<int>(MAX_NICKNAME_LEN)));
+	{
+		const string nickname_rules_msg = "allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(static_cast<int>(MAX_NICKNAME_LEN));
+		throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname.c_str(), nickname_rules_msg.c_str(), NULL);
+	}
 	if (_server->isClientConnected(nickname))
-		throw ProtocolErrorException(ERR_NICKNAMEINUSE, nickname);
+		throw ProtocolErrorException(ERR_NICKNAMEINUSE, nickname.c_str(), default_replies.at(ERR_NICKNAMEINUSE), NULL);
 }
 
 const std::map<uint16_t, std::string> EventHandler::_command_strings = EventHandler::initCommandStrings();
@@ -565,13 +517,13 @@ const std::map<uint16_t, std::string> EventHandler::_command_strings = EventHand
 static void checkConnection(const Client *client)
 {
 	if (!client->getIsConnected())
-		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not connected, use PASS <password> first");
+		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not connected, use PASS <password> first", NULL);
 }
 
 static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
-		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not registered, use NICK <nickname> and USER <username> first");
+		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not registered, use NICK <nickname> and USER <username> first", NULL);
 }
 
 string	get_next_token(string::iterator &it, const string::const_iterator &end, const char delim)

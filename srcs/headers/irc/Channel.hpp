@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/29 15:42:42 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 18:40:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ class Channel
 		bool									getMode(const char mode) const;
 		void									setMode(const char mode, const bool status, const std::string &param = "");
 
-		void									receiveMessage(const struct s_commandMessage &message) const;
+		void									receiveMessage(const struct s_message &message) const;
 		bool									isOperator(const Client &user) const;
 		bool									isMember(const std::string &nickname) const;
 		bool									isMember(const Client &user) const;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 17:42:28 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/30 20:30:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "irc/utils.hpp"
 #include "irc/EventHandler.hpp"
 #include "irc/Exceptions.hpp"
-#include "irc/ReplyCodes.hpp"
+#include "irc/Messages.hpp"
 #include "irc/Constants.hpp"
 #include "irc/Messages.hpp"
 #include "irc/Logger.hpp"
@@ -87,7 +87,7 @@ const string &Channel::getKey(void) const
 void Channel::setKey(const string &new_key)
 {
 	if (!is_valid_channel_key(new_key))
-		throw ProtocolErrorException(ERR_BADCHANNELKEY, _name, new_key + " is not a valid channel key");
+		throw ProtocolErrorException(ERR_BADCHANNELKEY, _name.c_str(), (new_key + " is not a valid channel key").c_str(), NULL);
 	_key = new_key;
 	_logger.logEvent("Channel " + _name + " key set to " + new_key);
 }
@@ -100,7 +100,7 @@ const string &Channel::getTopic(void) const
 void Channel::setTopic(const string &new_topic)
 {
 	if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
-		throw ProtocolErrorException(RPL_NOTOPIC, _name, new_topic + " is too long");	
+		throw ProtocolErrorException(RPL_NOTOPIC, _name.c_str(), (new_topic + " is too long").c_str(), NULL);	
 	_topic = new_topic;
 	_logger.logEvent("Channel " + _name + " topic set to " + new_topic);
 }
@@ -132,7 +132,7 @@ const Client &Channel::getMember(const string &nickname) const
 		vector<string> params;
 		params.push_back(nickname);
 		params.push_back(_name);
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), default_replies.at(ERR_USERNOTINCHANNEL), NULL);
 	}
 	return *(_members.at(nickname));
 }
@@ -142,16 +142,11 @@ void Channel::addMember(Client &user)
 	const string &nickname = user.getNickname();
 
 	if (_modes['i'] && _pending_invitations.find(&user) == _pending_invitations.end())
-		throw ProtocolErrorException(ERR_INVITEONLYCHAN, _name);
+		throw ProtocolErrorException(ERR_INVITEONLYCHAN, _name.c_str(), ("You must be invited to join " + _name).c_str(), NULL);
 	if (isMember(user))
-	{
-		vector<string> params;
-		params.push_back(nickname);
-		params.push_back(_name);
-		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
-	}
+		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is already on " + _name).c_str(), NULL);
 	if (_members.size() >= _member_limit)
-		throw ProtocolErrorException(ERR_CHANNELISFULL, _name);
+		throw ProtocolErrorException(ERR_CHANNELISFULL, _name.c_str(), default_replies.at(ERR_CHANNELISFULL), NULL);
 	_members[nickname] = &user;
 	_logger.logEvent("Channel " + _name + ", member added: " + nickname);
 }
@@ -161,12 +156,7 @@ void Channel::removeMember(Client &user)
 	const string &nickname = user.getNickname();
 	
 	if (isMember(user))
-	{
-		vector<string> params;
-		params.push_back(nickname);
-		params.push_back(_name);
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params);	
-	}
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), default_replies.at(ERR_USERNOTINCHANNEL), NULL);
 	_members.erase(nickname);
 	if (isOperator(user))
 		removeOperator(user.getNickname());
@@ -187,43 +177,26 @@ void Channel::addOperator(const string &nickname)
 {
 	const map<string, Client *>::iterator it = _members.find(nickname);
 	if (it == _members.end())
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _name, nickname + " is not a member of " + _name);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _name.c_str(), (nickname + " is not a member of " + _name).c_str(), NULL);
 	Client &user = *it->second;
 	if (isOperator(user))
-	{
-		vector<string> params;
-		params.push_back(nickname);
-		params.push_back(_name);
-		throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already an operator of " + _name);
-	}
+		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is already an operator of " + _name).c_str(), NULL);
 	_operators.insert(&user);
 
 	_logger.logEvent("Channel " + _name + ", operator added: " + nickname);
-	vector<string> params;
-	params.push_back(nickname);
-	params.push_back("You are now an operator of " + _name);
-	const struct s_replyMessage youreoper = EventHandler::buildReplyMessage(RPL_YOUREOPER, params);
-	user.receiveMessage(youreoper);
 }
 
 void Channel::removeOperator(const string &nickname)
 {
 	const map<string, Client *>::iterator it = _members.find(nickname);
 	if (it == _members.end())
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _name, nickname + " is not a member of " + _name);
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _name.c_str(), (nickname + " is not a member of " + _name).c_str(), NULL);
 	Client user = *it->second;
 	if (!isOperator(user))
-	{
-		vector<string> params;
-		params.push_back(nickname);
-		params.push_back(_name);
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " is not an operator of " + _name);	
-	}
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is not an operator of " + _name).c_str(), NULL);
 	_operators.erase(&user);
 
 	_logger.logEvent("Channel " + _name + ", operator removed: " + nickname);
-	const struct s_replyMessage notoperanymore = EventHandler::buildReplyMessage(RPL_NOTOPERANYMORE, nickname + " is no longer an operator of " + _name);
-	user.receiveMessage(notoperanymore);
 }
 
 const set<Client *> &Channel::getPendingInvitations(void) const
@@ -240,13 +213,10 @@ void Channel::addPendingInvitation(Client &user)
 {
 	const string &nickname = user.getNickname();
 
-	vector<string> params;
-	params.push_back(nickname);
-	params.push_back(_name);
 	if (isMember(user))
-		throw ProtocolErrorException(ERR_USERONCHANNEL, params);
+		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), default_replies.at(ERR_USERONCHANNEL), NULL);
 	if (_pending_invitations.find(&user) != _pending_invitations.end())
-		throw ProtocolErrorException(ERR_USERONCHANNEL, params, nickname + " is already invited to " + _name);
+		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is already invited to " + _name).c_str(), NULL);
 	_pending_invitations.insert(&user);
 	_logger.logEvent("Channel " + _name + ", invitation sent to: " + nickname);
 }
@@ -256,12 +226,7 @@ void Channel::removePendingInvitation(Client &user)
 	const string &nickname = user.getNickname();
 
 	if (_pending_invitations.find(&user) == _pending_invitations.end())
-	{
-		vector<string> params;
-		params.push_back(nickname);
-		params.push_back(_name);
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, params, nickname + " was not invited to " + _name);
-	}
+		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " was not invited to " + _name).c_str(), NULL);
 	_pending_invitations.erase(&user);
 	_logger.logEvent("Channel " + _name + ", invitation to " + nickname + " removed");
 }
@@ -280,7 +245,7 @@ void Channel::setModes(const map<char, bool> &modes, const vector<string> &param
 		if (channel_mode_requires_param(it->first, it->second))
 		{
 			if (i >= params.size())
-				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name, "Missing parameter for mode " + string(1, it->first));
+				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name.c_str(), ("Missing parameter for mode " + string(1, it->first)).c_str(), NULL);
 			setMode(it->first, it->second, params[i++]);
 		}
 		else
@@ -292,7 +257,7 @@ bool Channel::getMode(const char mode) const
 {
 	const map<char, bool>::const_iterator it = _modes.find(mode);
 	if (it == _modes.end())
-		throw ProtocolErrorException(ERR_UNKNOWNMODE, _name, string(1, mode) + " is not a valid channel mode");
+		throw ProtocolErrorException(ERR_UNKNOWNMODE, _name.c_str(), (string(1, mode) + " is not a valid channel mode").c_str(), NULL);
 	return it->second;
 }
 
@@ -315,7 +280,7 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 			uint32_t		new_limit;
 
 			if (!(ss >> new_limit) || !ss.eof())
-				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name, "Invalid parameter for mode 'l'");
+				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name.c_str(), "Invalid parameter for mode 'l'");
 			setMemberLimit(new_limit);
 		}
 		else
@@ -329,15 +294,11 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 	_modes[mode] = status;
 
 	string mode_str = (status ? "+" : "-") + string(1, mode);
-	vector<string> params;
-	params.push_back(_name);
-	params.push_back(mode_str);
-	params.push_back(param);
-	const struct s_commandMessage mode_change = EventHandler::buildCommandMessage(SERVER_NAME, MODE, params);	
+	const struct s_message mode_change = EventHandler::buildMessage(SERVER_NAME, MODE, _name.c_str(), mode_str.c_str(), param.c_str(), NULL);
 	receiveMessage(mode_change);
 }
 
-void	Channel::receiveMessage(const struct s_commandMessage &msg) const
+void	Channel::receiveMessage(const struct s_message &msg) const
 {
 	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
 	{
@@ -392,11 +353,11 @@ const map<char, bool>	Channel::initModes(void) const
 void	Channel::checkName(const string &name) const
 {
 	if (!is_valid_channel_name(name))
-		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name, name + " is not a valid channel name");
+		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name.c_str(), (name + " is not a valid channel name").c_str(), NULL);
 }
 
 void	Channel::checkKey(const string &key) const
 {
 	if (key != _key)
-		throw ProtocolErrorException(ERR_BADCHANNELKEY, _name, "wrong key for " + _name);
+		throw ProtocolErrorException(ERR_BADCHANNELKEY, _name.c_str(), ("wrong key for " + _name).c_str(), NULL);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 16:31:31 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/30 20:11:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,9 @@ class Client
 
 		void											joinChannel(Channel &channel, const std::string &key = "");
 		void											leaveChannel(Channel &channel, const std::string &reason = "");
-		void											sendMessage(const Channel &channel, const struct s_commandMessage &msg) const;
-		void											sendMessage(const Client &receiver, const struct s_commandMessage &msg) const;
-		void											receiveMessage(const struct s_messageBase &msg) const;
+		void											sendMessage(const Channel &channel, const struct s_message &msg) const;
+		void											sendMessage(const Client &receiver, const struct s_message &msg) const;
+		void											receiveMessage(const struct s_message &msg) const;
 
 		void											kick(Client &user, Channel &channel, const std::string &reason = "") const; //chiama removeMember di Channel e removeChannel di Client
 		void											invite(Client &user, Channel &channel) const; //chiama addInvite di Channel

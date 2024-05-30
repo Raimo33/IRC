@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 17:43:39 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/30 19:50:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,29 +32,26 @@ class EventHandler
 		EventHandler(const EventHandler &copy);
 		~EventHandler(void);
 
-		const std::map<std::string, e_cmd_type>			&getCommands(void) const;
+		const std::map<std::string, e_commands>			&getCommands(void) const;
 		const Client									&getClient(void) const;
 		void											setClient(Client &client);
 
 		void 											processInput(std::string raw_input);
 
-		static const struct s_replyMessage				buildReplyMessage(const enum e_replyCodes code, const std::vector<std::string> &params);
-		static const struct s_replyMessage				buildReplyMessage(const enum e_replyCodes code, const std::string &param = "");
-		static const struct s_commandMessage 			buildCommandMessage(const std::string &prefix, const e_cmd_type cmd, const std::vector<std::string> &params);
-		static const struct s_commandMessage 			buildCommandMessage(const std::string &prefix, const e_cmd_type cmd, const std::string param = "");
-		static void										sendBufferedMessage(const Client &receiver, const struct s_messageBase *message);
+		static const struct s_message					buildMessage(const string &prefix, const int value, ...);
+		static const struct s_message 					buildMessage(const string &prefix, const int value, va_list args);
+		static void										sendBufferedMessage(const Client &receiver, const struct s_message &msg);
 
 	private:
 
 		typedef void (EventHandler::*CommandHandler)(const std::vector<std::string>&);
 
-		static void										getRawReplyMessage(const Client &receiver, const struct s_replyMessage *reply, std::string *first, std::string *second);
-		static void										getRawCommandMessage(const struct s_commandMessage *command, std::string *first, std::string *second);
+		static void										unwrapMessage(const struct s_message &msg, string *first_part, string *second_part);
 
-		const std::map<std::string, e_cmd_type>			initCommands(void);
+		const std::map<std::string, e_commands>			initCommands(void);
 		const std::vector<CommandHandler>				initHandlers(void);
 		static std::map<uint16_t, std::string>			initCommandStrings(void);
-		struct s_commandMessage							parseInput(std::string &raw_input) const;
+		const struct s_message							parseInput(std::string &raw_input) const;
 		void											handlePass(const std::vector<std::string> &params);
 		void											handleNick(const std::vector<std::string> &params);
 		void											handleUser(const std::vector<std::string> &params);
@@ -70,7 +67,7 @@ class EventHandler
 
 		Server											*_server;
 		Client											*_client;
-		const std::map<std::string, e_cmd_type>			_commands;
+		const std::map<std::string, e_commands>			_commands;
 		const std::vector<CommandHandler>				_handlers;
 		static const std::map<uint16_t, std::string>	_command_strings;
 		Logger											&_logger;

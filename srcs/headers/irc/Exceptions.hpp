@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 01:56:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/30 20:22:30 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,18 +25,15 @@
 class ProtocolErrorException : public std::exception //for IRC protocol errors (reply codes)
 {
 	public:
-		explicit ProtocolErrorException(const enum e_replyCodes code, std::vector<std::string> &params, const std::string &custom_msg = "");
-		explicit ProtocolErrorException(const enum e_replyCodes code, const std::string &param = "", const std::string &custom_msg = "");
+		explicit ProtocolErrorException(const int code, ...);
 		const char *what(void) const throw();
 		~ProtocolErrorException(void) throw();
 
-		const struct s_replyMessage	&getContent(void) const;
+		const struct s_message	&getContent(void) const;
 
-	private:
-		void						initContent(const enum e_replyCodes code, std::vector<std::string> &params, const std::string &custom_msg);
-	
-		struct s_replyMessage		_content;
-		const std::string			_formatted_msg;
+	private:	
+		struct s_message		_content;
+		const std::string		_formatted_msg;
 };
 
 class InternalErrorException : public std::runtime_error //for internal programming errors such as null pointers, calling addClient 2 times on the same client, etc.
