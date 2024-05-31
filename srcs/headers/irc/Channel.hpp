@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 18:40:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 13:47:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,12 +44,12 @@ class Channel
 		const Client							&getMember(const std::string &nickname) const;
 		void									addMember(Client &user);
 		void									removeMember(Client &user);
-		const std::set<Client *>				&getOperators(void) const;
-		void									setOperators(const std::set<Client *> &new_operators);
+		const std::set<const Client *>			&getOperators(void) const;
+		void									setOperators(const std::set<const Client *> &new_operators);
 		void									addOperator(const std::string &nickname);
 		void									removeOperator(const std::string &nickname);
-		const std::set<Client *>				&getPendingInvitations(void) const;
-		void									setPendingInvitations(const std::set<Client *> &new_pending_invitations);
+		const std::set<const Client *>			&getPendingInvitations(void) const;
+		void									setPendingInvitations(const std::set<const Client *> &new_pending_invitations);
 		void									addPendingInvitation(Client &user);
 		void									removePendingInvitation(Client &user);
 		const std::map<char, bool>				&getModes(void) const;
@@ -74,8 +74,8 @@ class Channel
 		std::string								_topic;
 		uint32_t								_member_limit;
 		std::map<std::string, Client *>			_members; // {nickname, client}
-		std::set<Client *>						_operators;
-		std::set<Client *>						_pending_invitations;
+		std::set<const Client *>				_operators;
+		std::set<const Client *>				_pending_invitations;
 		std::map<char, bool>					_modes; // {mode, status}
 		Logger									&_logger;
 };

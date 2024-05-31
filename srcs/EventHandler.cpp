@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 12:27:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 13:48:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,10 +297,6 @@ void EventHandler::handleJoin(const vector<string> &args)
 	if (args.size() > 1)
 		keys = ::split(args[1], ",");
 
-	std::cout << "Keys: ";
-	for (size_t i = 0; i < keys.size(); i++)
-		std::cout << keys[i] << " ";
-
 	for (size_t i = 0; i < channels_to_join.size(); i++)
 	{
 		if (channels.find(channels_to_join[i]) == channels.end())
@@ -391,7 +387,7 @@ void EventHandler::handleQuit(const vector<string> &args)
 	_logger.logEvent("Client " + quitting_nickname + " has quit");
 }
 
-void EventHandler::handleKick(const vector<string> &args)
+void EventHandler::handleKick(const vector<string> &args) //TODO non funziona
 {
 	checkConnection(_client);
 	checkAuthentication(_client);

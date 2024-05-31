@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 12:06:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 13:48:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,6 @@ Channel::Channel(Logger &logger, const string &name, Client &op, const string &k
 	_name(name),
 	_topic(""),
 	_member_limit(-1),
-	_members(map<string, Client *>()),
-	_operators(set<Client *>()),
-	_pending_invitations(set<Client *>()),
 	_modes(initModes()),
 	_logger(logger)
 {
@@ -156,20 +153,20 @@ void Channel::removeMember(Client &user)
 {
 	const string &nickname = user.getNickname();
 	
-	if (isMember(user))
+	if (isMember(nickname))
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), default_replies.at(ERR_USERNOTINCHANNEL), NULL);
 	_members.erase(nickname);
 	if (isOperator(user))
-		removeOperator(user.getNickname());
+		removeOperator(nickname);
 	_logger.logEvent("Channel " + _name + ", member removed: " + nickname);
 }
 
-const set<Client *> &Channel::getOperators(void) const
+const set<const Client *> &Channel::getOperators(void) const
 {
 	return _operators;
 }
 
-void Channel::setOperators(const set<Client *> &new_operators)
+void Channel::setOperators(const set<const Client *> &new_operators)
 {
 	_operators = new_operators;
 }
@@ -200,12 +197,12 @@ void Channel::removeOperator(const string &nickname)
 	_logger.logEvent("Channel " + _name + ", operator removed: " + nickname);
 }
 
-const set<Client *> &Channel::getPendingInvitations(void) const
+const set<const Client *> &Channel::getPendingInvitations(void) const
 {
 	return _pending_invitations;
 }
 
-void Channel::setPendingInvitations(const set<Client *> &new_invitations)
+void Channel::setPendingInvitations(const set<const Client *> &new_invitations)
 {
 	_pending_invitations = new_invitations;
 }
@@ -302,12 +299,15 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 void	Channel::receiveMessage(const struct s_message &msg) const
 {
 	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
-		receiver->second->receiveMessage(msg);
+	{
+		if (receiver->first != msg.prefix)
+			receiver->second->receiveMessage(msg);
+	}
 }
 
 bool	Channel::isOperator(const Client &user) const
 {
-	return _operators.find(const_cast<Client *>(&user)) != _operators.end();
+	return _operators.find(&user) != _operators.end();
 }
 
 bool	Channel::isMember(const string &nickname) const
@@ -325,7 +325,7 @@ string	Channel::getMembersString(void) const
 	string	members_str;
 
 	members_str.reserve(_members.size() * 10);
-	for (set<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); it++)
+	for (set<const Client *>::const_iterator it = _operators.begin(); it != _operators.end(); it++)
 		members_str += "@" + (*it)->getNickname() + " ";
 	for (map<string, Client *>::const_iterator it = _members.begin(); it != _members.end(); it++)
 	{
