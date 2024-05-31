@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 17:10:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 17:47:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_me
 	const int	receiver_socket = receiver.getSocket();
 
 	unwrapMessage(message, &first_part, &second_part);
-	block_size = MAX_MSG_LENGTH - first_part.size() - 2; //2 per \r\n
+	block_size = BUFFER_SIZE - first_part.size() - 2; //2 per \r\n
 	while (!second_part.empty())
 	{
 		send_length = std::min(static_cast<size_t>(block_size),  second_part.size());

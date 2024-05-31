@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 17:18:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 18:22:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,14 +37,12 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 	_handler(EventHandler(logger, *this)),
 	_logger(logger)
 {
-	struct sockaddr_in server_addr;
-	char hostname[256];
-	struct hostent *host;
-	struct in_addr **addr_list;
+	struct sockaddr_in	server_addr;
+    socklen_t			addr_len = sizeof(server_addr);
+	char				ipstr[INET_ADDRSTRLEN];
 
 	memset(&server_addr, 0, sizeof(server_addr));
 	configureNonBlocking(_socket);
-	configureNonBlocking(_epoll_fd);
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	server_addr.sin_port = htons(_port);
@@ -57,14 +55,9 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 	event.data.fd = _socket;
 	epoll_ctl_p(_epoll_fd, EPOLL_CTL_ADD, _socket, &event);
 
-	gethostname_p(hostname, sizeof(hostname));
-	host = gethostbyname_p(hostname);
-	addr_list = (struct in_addr **)host->h_addr_list;
-	if (addr_list[0] != NULL)
-	{
-		char *ip = inet_ntoa(*addr_list[0]);
-		_logger.logEvent("Server started on " + std::string(ip) + ":" + ::to_string(_port));
-	}
+    getsockname_p(_socket, (struct sockaddr *)&server_addr, &addr_len);
+    inet_ntop(AF_INET, &server_addr.sin_addr, ipstr, sizeof(ipstr));
+    std::cout << "Server listening on " << ipstr << ":" << _port << std::endl;
 }
 
 Server::Server(const Server &copy) : 
@@ -234,8 +227,10 @@ void Server::configureNonBlocking(const int socket) const
 {
 	int flags;
 
+	uint32_t buf_size = BUFFER_SIZE;
 	flags = fcntl_p(socket, F_GETFL);
 	fcntl_p(socket, F_SETFL, flags | O_NONBLOCK);
+	setsockopt_p(socket, SOL_SOCKET, SO_RCVBUF, &buf_size, sizeof(buf_size));
 }
 
 void Server::handleNewClient(void)

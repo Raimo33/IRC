@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SystemCalls.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:47:21 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 16:28:11 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/31 18:23:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,8 @@ int				close_p(int fd);
 int				shutdown_p(int sockfd, int how);
 ssize_t			send_p(int sockfd, const void *buf, size_t len, int flags);
 ssize_t			recv_p(int sockfd, void *buf, size_t len, int flags);
-int				gethostname_p(char *name, size_t len);
-struct hostent	*gethostbyname_p(const char *name);
+int				getsockname_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+int				setsockopt_p(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
 int				fcntl_p(int fd, int cmd, ...);
 int				epoll_create1_p(int flags);
 int				epoll_ctl_p(int epfd, int op, int fd, struct epoll_event *event);

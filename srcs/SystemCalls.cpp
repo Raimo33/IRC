@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SystemCalls.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 16:28:15 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/31 18:23:14 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,22 +97,22 @@ ssize_t	recv_p(int sockfd, void *buf, size_t len, int flags)
 	return (ret);
 }
 
-int	gethostname_p(char *name, size_t len)
+int	getsockname_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
 	int	ret;
 
-	ret = gethostname(name, len);
+	ret = getsockname(sockfd, addr, addrlen);
 	if (ret == -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
 
-struct hostent	*gethostbyname_p(const char *name)
+int	setsockopt_p(int sockfd, int level, int optname, const void *optval, socklen_t optlen)
 {
-	hostent	*ret;
+	int	ret;
 
-	ret = gethostbyname(name);
-	if (!ret)
+	ret = setsockopt(sockfd, level, optname, optval, optlen);
+	if (ret == -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -123,7 +123,8 @@ int	fcntl_p(int fd, int cmd, ...)
 	va_start(args, cmd);
 	int result;
 
-	switch (cmd) {
+	switch (cmd)
+	{
 		case F_GETFL:
 		case F_GETFD:
 			result = fcntl(fd, cmd);
@@ -149,9 +150,8 @@ int	fcntl_p(int fd, int cmd, ...)
 
 	va_end(args);
 
-	if (result == -1) {
+	if (result == -1)
 		throw SystemErrorException(errno);
-	}
 
 	return result;
 }
