@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 16:07:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 17:10:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class EventHandler
 		const Client									&getClient(void) const;
 		void											setClient(Client &client);
 
-		void 											processInput(std::string raw_input);
+		void 											processInput(std::string &raw_input);
 
 		static const struct s_message					buildMessage(const string &prefix, const int value, ...);
 		static const struct s_message 					buildMessage(const string &prefix, const int value, va_list args);

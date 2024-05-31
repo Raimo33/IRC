@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 16:09:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 17:10:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,10 +61,8 @@ void	EventHandler::setClient(Client &client)
 	_client = &client;
 }
 
-void	EventHandler::processInput(string raw_input)
+void	EventHandler::processInput(string &raw_input)
 {
-	raw_input = raw_input.substr(0, MAX_MSG_LENGTH); // Limit the length of the input to prevent buffer overflow
-
 	vector<string> cmds = ::split(raw_input, "\r\n");
 
 	for(uint8_t i = 0; i < cmds.size(); i++)

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 16:03:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 17:17:08 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,20 +271,27 @@ void Server::handleClient(const int client_socket)
 
 	try
 	{
-		char buffer[BUFFER_SIZE] = {0};
-		int bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
+		string	raw_input;
+		char	buffer[BUFFER_SIZE];
 
-		if (bytes_read > 0)
+		raw_input.reserve(BUFFER_SIZE);
+		while (true)
 		{
-			_handler.setClient(*client);
-			_handler.processInput(buffer);
+			memset(buffer, 0, sizeof(buffer));
+			int bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
+			if (bytes_read <= 0)
+			{
+				disconnectClient(*client);
+				if (bytes_read < 0)
+					throw SystemErrorException(strerror(errno));
+				break;
+			}
+			raw_input += buffer;
+			if (raw_input.find("\r\n") != string::npos)
+				break;
 		}
-		else
-		{
-			disconnectClient(*client);
-			if (bytes_read < 0)
-				throw SystemErrorException(strerror(errno));
-		}
+		_handler.setClient(*client);
+		_handler.processInput(raw_input);
 	}
 	catch (const ProtocolErrorException &e)
 	{
