@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 14:34:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 14:49:51 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,9 +155,9 @@ void Channel::removeMember(Client &user)
 	
 	if (!isMember(nickname))
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), default_replies.at(ERR_USERNOTINCHANNEL), NULL);
-	_members.erase(nickname);
 	if (isOperator(user))
 		removeOperator(nickname);
+	_members.erase(nickname);
 	_logger.logEvent("Channel " + _name + ", member removed: " + nickname);
 }
 
