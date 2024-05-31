@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 20:09:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 23:20:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_me
 	{
 		send_length = std::min(static_cast<size_t>(block_size),  second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
+		std::cout << "Sending: " << to_send << std::endl;
 		second_part = second_part.substr(send_length); // Update second_part correctly
 		send_p(receiver_socket, to_send.c_str(), to_send.length(), 0);
 	}
@@ -380,7 +381,7 @@ void EventHandler::handleSend(const vector<string> &args)
 	ostringstream		dcc_send;
 
 	dcc_send << "DCC SEND " << filename << " " << ip_long << " " << sender_port << " " << file_size;
-	const struct s_message msg(_client->getNickname(), PRIVMSG, args[0].c_str(), dcc_send.str().c_str(), NULL); //TODO probabilmente non va bene mettere il nome del canale ma andrebbe loopato send_message per ogni membro del canale
+	const struct s_message msg(_client->getNickname(), PRIVMSG, args[0].c_str(), dcc_send.str().c_str(), NULL);
 
 	if (is_channel_prefix(args[0][0]))
 	{

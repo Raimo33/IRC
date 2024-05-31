@@ -1,0 +1,8 @@
+2024-05-31 23:22:33 - Server listening on 0.0.0.0:8080
+2024-05-31 23:22:40 - Incoming connection from 127.0.0.1
+2024-05-31 23:22:40 - User action failed: Unknown command
+2024-05-31 23:22:40 - Client 127.0.0.1 has connected
+2024-05-31 23:22:40 - Client 127.0.0.1 has set nickname to claudio
+2024-05-31 23:22:40 - Client 127.0.0.1 has set username to claudio
+2024-05-31 23:22:40 - Client 127.0.0.1 has set realname to realname
+2024-05-31 23:22:40 - Client 127.0.0.1 is authenticated

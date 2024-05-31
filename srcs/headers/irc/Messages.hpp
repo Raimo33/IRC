@@ -16,6 +16,7 @@
 # include <string>
 # include <vector>
 # include <map>
+# include <cstdarg>
 
 # include "irc/Messages.hpp"
 

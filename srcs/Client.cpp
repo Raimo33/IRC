@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 20:08:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 23:22:19 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,11 +178,11 @@ void	Client::setAuthenticated(bool is_authenticated)
 	oss << "Client " << _ip_addr << " is " << (is_authenticated ? "authenticated" : "not authenticated anymore");
 	_logger.logEvent(oss.str());
 
-	oss.clear();
+	oss.str("");
 	oss << "Welcome to the Internet Relay Network " << _nickname << "!" << _username << "@" << _ip_addr;
 	const string welcome_msg = oss.str();
 	const struct s_message welcome(SERVER_NAME, RPL_WELCOME, _nickname.c_str(), welcome_msg.c_str(), NULL);
-	oss.clear();
+	oss.str("");
 	oss << "Your host is " << SERVER_NAME << ", running version " << SERVER_VERSION;
 	const string host_msg = oss.str();
 	const struct s_message yourhost(SERVER_NAME, RPL_YOURHOST, _nickname.c_str(), host_msg.c_str(), NULL);
@@ -301,13 +301,13 @@ void	Client::kick(Client &user, Channel &channel, const string &reason) const
 	ostringstream oss;
 	oss << "Client " << _nickname << " tries to kick " << user_nickname << " from channel " << channel_name;
 	_logger.logEvent(oss.str());
-	oss.clear();
+	oss.str("");
 	oss << "Client " << _nickname << " tries to kick " << user_nickname << " from channel " << channel_name;
 	_logger.logEvent(oss.str());
 	channel.removeMember(user_nickname);
 	user.removeChannel(channel);
 
-	oss.clear();
+	oss.str("");
 	oss << _nickname << "!" << _username << "@" << _ip_addr;
 	const string prefix = oss.str();
 	const struct s_message kick_notification(prefix, KICK, channel_name.c_str(), user_nickname.c_str(), reason.c_str(), NULL);
