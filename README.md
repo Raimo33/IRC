@@ -34,5 +34,20 @@ An basic Internet Relay Chat (IRC) server compatible with RFCs [1459](https://to
 
 Detailed documentation is available in the [Wiki](https://github.com/Raimo33/IRC/wiki). It includes installation guides, configuration options, and usage instructions.
 
+IRC message format cheat sheet:
+
+<message> ::= [':' <prefix> <SPACE>] <command> <params> <crlf>
+<prefix> ::= <servername> | <nick> ['!' <user>] ['@' <host>]
+<command> ::= <letter> {<letter>} | <number> <number> <number>
+<params> ::= <SPACE> [':' <trailing> | <middle> <params>]
+
+<middle> ::= <Any *non-empty* sequence of octets not including SPACE
+           or NUL or CR or LF, the first of which may not be ':'>
+<trailing> ::= <Any, possibly *empty*, sequence of octets not including
+             NUL or CR or LF>
+
+<SPACE> ::= ' ' { ' ' }
+<crlf> ::= CR LF
+
 ### License
 Do whatever you want with it, really.
