@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 20:36:39 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 12:11:00 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,9 +162,9 @@ void	Client::setAuthenticated(bool is_authenticated)
 	_logger.logEvent("Client " + _ip_addr + " is " + (is_authenticated ? "authenticated" : "not authenticated anymore"));
 
 	const string welcome_msg = "Welcome to the Internet Relay Network " + _nickname + "!" + _username + "@" + _ip_addr;
-	const struct s_message welcome = EventHandler::buildMessage(SERVER_NAME, RPL_WELCOME, welcome_msg.c_str(), NULL);
+	const struct s_message welcome = EventHandler::buildMessage(SERVER_NAME, RPL_WELCOME, _nickname.c_str(), welcome_msg.c_str(), NULL);
 	const string host_msg = "Your host is " + string(SERVER_NAME) + ", running version " + SERVER_VERSION;
-	const struct s_message yourhost = EventHandler::buildMessage(SERVER_NAME, RPL_YOURHOST, host_msg.c_str(), NULL);
+	const struct s_message yourhost = EventHandler::buildMessage(SERVER_NAME, RPL_YOURHOST, _nickname.c_str(), host_msg.c_str(), NULL);
 	receiveMessage(welcome);
 	receiveMessage(yourhost);
 }
@@ -208,21 +208,23 @@ void	Client::joinChannel(Channel &channel, const string &key)
 	channel.addMember(*this);
 	addChannel(channel);
 
-	const string		&channel_name = channel.getName();
-	const string		&channel_topic = channel.getTopic();
-	struct s_message	topic_reply;
+	const string			&channel_name = channel.getName();
+	const string			&channel_topic = channel.getTopic();
+	const string			prefix = _nickname + "!" + _username + "@" + _ip_addr;
+	const struct s_message	join_notification = EventHandler::buildMessage(prefix, JOIN, channel_name.c_str(), NULL);
+	struct s_message		topic_reply;
+
 	if (channel_topic.empty())
 		topic_reply = EventHandler::buildMessage(SERVER_NAME, RPL_NOTOPIC, _nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_NOTOPIC), NULL);
 	else
 		topic_reply = EventHandler::buildMessage(SERVER_NAME, RPL_TOPIC, _nickname.c_str(), channel_name.c_str(), channel_topic.c_str(), default_replies.at(RPL_TOPIC), NULL);
+
 	const struct s_message namreply = EventHandler::buildMessage(SERVER_NAME, RPL_NAMREPLY, _nickname.c_str(), "=", channel_name.c_str(), channel.getMembersString().c_str(), NULL);
 	const struct s_message endofnames = EventHandler::buildMessage(SERVER_NAME, RPL_ENDOFNAMES, _nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_ENDOFNAMES), NULL);
-	const string prefix = _nickname + "!" + _username + "@" + _ip_addr;
-	const struct s_message join_notification = EventHandler::buildMessage(prefix, JOIN, channel_name.c_str(), NULL);
+	channel.receiveMessage(join_notification);
 	receiveMessage(topic_reply);
 	receiveMessage(namreply);
 	receiveMessage(endofnames);
-	channel.receiveMessage(join_notification);
 }
 
 void	Client::leaveChannel(Channel &channel, const string &reason)

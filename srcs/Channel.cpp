@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 20:30:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 12:06:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,10 @@ Channel::Channel(Logger &logger, const string &name, Client &op, const string &k
 	_logger(logger)
 {
 	checkName(name);
+	_operators.insert(&op);
 	op.joinChannel(*this);
-	setMode('o', true, op.getNickname());
-	setMode('t', true);
+	//setMode('o', true, op.getNickname());
+	//setMode('t', true);
 	if (!key.empty())
 		setMode('k', true, key);
 	_logger.logEvent("Channel created: " + name);
@@ -301,10 +302,7 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 void	Channel::receiveMessage(const struct s_message &msg) const
 {
 	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
-	{
-		if (receiver->first != msg.prefix)
-			receiver->second->receiveMessage(msg);
-	}
+		receiver->second->receiveMessage(msg);
 }
 
 bool	Channel::isOperator(const Client &user) const

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 20:57:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 12:27:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,11 @@ void	EventHandler::unwrapMessage(const struct s_message &msg, string *first_part
 	if (!msg.prefix.empty())
 		*first_part += ":" + msg.prefix + " ";
 	if (is_reply)
-		*first_part += ::to_string(msg.value);
+	{
+		ostringstream oss;
+		oss << std::setw(3) << std::setfill('0') << msg.value;	
+		*first_part += oss.str();
+	}
 	else
 		*first_part += _command_strings.at(msg.value);
 	for (vector<string>::const_iterator it = msg.params.begin(); it != msg.params.end() - 1; it++)
@@ -292,6 +296,10 @@ void EventHandler::handleJoin(const vector<string> &args)
 	
 	if (args.size() > 1)
 		keys = ::split(args[1], ",");
+
+	std::cout << "Keys: ";
+	for (size_t i = 0; i < keys.size(); i++)
+		std::cout << keys[i] << " ";
 
 	for (size_t i = 0; i < channels_to_join.size(); i++)
 	{
@@ -455,14 +463,15 @@ void EventHandler::handleMode(const vector<string> &args)
 	if (n_args == 1)
 	{
 		const map<char, bool>	&modes = channel.getModes();
-		string					modes_str("+");
+		string					modes_str;
 
 		for (map<char, bool>::const_iterator it = modes.begin(); it != modes.end(); it++)
 		{
 			if (it->second)
 				modes_str += it->first;
 		}
-
+		if (!modes_str.empty())
+			modes_str.insert(0, "+");
 		const struct s_message	reply = EventHandler::buildMessage(SERVER_NAME, RPL_CHANNELMODEIS, _client->getNickname().c_str(), channel.getName().c_str(), modes_str.c_str(), NULL);
 		_client->receiveMessage(reply);
 		return;

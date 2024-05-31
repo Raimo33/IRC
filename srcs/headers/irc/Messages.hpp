@@ -21,17 +21,17 @@
 
 enum e_commands
 {
-	PASS,
-	NICK,
-	USER,
-	JOIN,
-	PART,
-	PRIVMSG,
-	QUIT,
-	KICK,
-	INVITE,
-	TOPIC,
-	MODE,
+	PASS = 1001,
+	NICK = 1002,
+	USER = 1003,
+	JOIN = 1004,
+	PART = 1005,
+	PRIVMSG = 1006,
+	QUIT = 1007,
+	KICK = 1008,
+	INVITE = 1009,
+	TOPIC = 1010,
+	MODE = 1011,
 };
 
 //https://github.com/williamkapke/irc-replies/blob/master/replies.json

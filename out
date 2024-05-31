@@ -1,0 +1,45 @@
+2024-05-31 12:13:35 - [0;34mServer started on 10.12.4.9:8080[0m
+2024-05-31 12:13:38 - [0;34mIncoming connection from 127.0.0.1[0m
+Sending: :IRCServer 421 CAP :Unknown command
+$
+2024-05-31 12:13:38 - [0;34mUser action failed: Unknown command[0m
+2024-05-31 12:13:38 - [0;34mClient 127.0.0.1 has connected[0m
+2024-05-31 12:13:38 - [0;34mClient 127.0.0.1 has set nickname to raimo[0m
+2024-05-31 12:13:38 - [0;34mClient 127.0.0.1 has set username to craimond[0m
+2024-05-31 12:13:38 - [0;34mClient 127.0.0.1 has set realname to realname[0m
+2024-05-31 12:13:38 - [0;34mClient 127.0.0.1 is authenticated[0m
+Sending: :IRCServer 001 raimo :Welcome to the Internet Relay Network raimo!craimond@127.0.0.1
+$
+Sending: :IRCServer 002 raimo :Your host is IRCServer, running version 1.0
+$
+2024-05-31 12:13:42 - [0;34mChannel #new, member added: raimo[0m
+2024-05-31 12:13:42 - [0;34mClient raimo, channel added: #new[0m
+Sending: :raimo!craimond@127.0.0.1 JOIN :#new
+$
+Sending: :IRCServer 331 raimo #new :No topic is set
+$
+Sending: :IRCServer 353 raimo = #new :@raimo
+$
+Sending: :IRCServer 366 raimo #new :End of /NAMES list
+$
+2024-05-31 12:13:42 - [0;34mChannel created: #new[0m
+Sending: :IRCServer 324 raimo #new :+
+$
+Sending: :IRCServer 421 WHO :Unknown command
+$
+2024-05-31 12:13:42 - [0;34mUser action failed: Unknown command[0m
+2024-05-31 12:13:50 - [0;34mClient raimo tries to change mode o of channel #new[0m
+Sending: :IRCServer 443 raimo raimo #new :raimo is already an operator of #new
+$
+2024-05-31 12:13:50 - [0;34mUser action failed: raimo is already an operator of #new[0m
+2024-05-31 12:13:52 - [0;34mClient raimo tries to change mode o of channel #new[0m
+Sending: :IRCServer 443 raimo raimo #new :raimo is already an operator of #new
+$
+2024-05-31 12:13:52 - [0;34mUser action failed: raimo is already an operator of #new[0m
+Sending: :raimo PRIVMSG raimo :ciao
+$
+2024-05-31 12:13:59 - [0;34mClient raimo sent message to client raimo[0m
+2024-05-31 12:14:06 - [0;34mIncoming connection from 127.0.0.1[0m
+Sending: :IRCServer 421 CAP :Unknown command
+$
+2024-05-31 12:14:06 - [0;34mUser action failed: Unknown command[0m
