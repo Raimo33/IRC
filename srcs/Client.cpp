@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 12:11:00 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 14:38:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,8 +270,9 @@ void	Client::kick(Client &user, Channel &channel, const string &reason) const
 	user.removeChannel(channel);
 
 	const string prefix = _nickname + "!" + _username + "@" + _ip_addr;
-	const struct s_message message_to_channel = EventHandler::buildMessage(prefix, KICK, channel_name.c_str(), user.getNickname().c_str(), reason.c_str(), NULL);
-	channel.receiveMessage(message_to_channel);
+	const struct s_message kick_notification = EventHandler::buildMessage(prefix, KICK, channel_name.c_str(), user.getNickname().c_str(), reason.c_str(), NULL);
+	channel.receiveMessage(kick_notification);
+	user.receiveMessage(kick_notification);
 }
 
 void	Client::invite(Client &user, Channel &channel) const
