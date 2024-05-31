@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 14:49:51 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 15:29:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,13 +125,8 @@ void Channel::setMembers(const map<string, Client *> &new_members)
 
 const Client &Channel::getMember(const string &nickname) const
 {
-	if (_members.find(nickname) == _members.end())
-	{
-		vector<string> params;
-		params.push_back(nickname);
-		params.push_back(_name);
+	if (!isMember(nickname))
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), default_replies.at(ERR_USERNOTINCHANNEL), NULL);
-	}
 	return *(_members.at(nickname));
 }
 
@@ -149,14 +144,11 @@ void Channel::addMember(Client &user)
 	_logger.logEvent("Channel " + _name + ", member added: " + nickname);
 }
 
-void Channel::removeMember(Client &user)
-{
-	const string &nickname = user.getNickname();
-	
-	if (!isMember(nickname))
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), default_replies.at(ERR_USERNOTINCHANNEL), NULL);
+void Channel::removeMember(const string &nickname)
+{	
+	const Client &user = getMember(nickname);
 	if (isOperator(user))
-		removeOperator(nickname);
+		_operators.erase(&user);
 	_members.erase(nickname);
 	_logger.logEvent("Channel " + _name + ", member removed: " + nickname);
 }
@@ -173,10 +165,7 @@ void Channel::setOperators(const set<const Client *> &new_operators)
 
 void Channel::addOperator(const string &nickname)
 {
-	const map<string, Client *>::iterator it = _members.find(nickname);
-	if (it == _members.end())
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _name.c_str(), (nickname + " is not a member of " + _name).c_str(), NULL);
-	Client &user = *it->second;
+	const Client &user = getMember(nickname);
 	if (isOperator(user))
 		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is already an operator of " + _name).c_str(), NULL);
 	_operators.insert(&user);
@@ -186,10 +175,7 @@ void Channel::addOperator(const string &nickname)
 
 void Channel::removeOperator(const string &nickname)
 {
-	const map<string, Client *>::iterator it = _members.find(nickname);
-	if (it == _members.end())
-		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, _name.c_str(), (nickname + " is not a member of " + _name).c_str(), NULL);
-	Client user = *it->second;
+	const Client &user = getMember(nickname);
 	if (!isOperator(user))
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is not an operator of " + _name).c_str(), NULL);
 	_operators.erase(&user);
@@ -234,7 +220,7 @@ const map<char, bool> &Channel::getModes(void) const
 	return _modes;
 }
 
-void Channel::setModes(const map<char, bool> &modes, const vector<string> &params)
+void Channel::setModes(const map<char, bool> &modes, const vector<string> &params, const Client *setter)
 {
 	uint32_t	i = 0;
 
@@ -244,10 +230,10 @@ void Channel::setModes(const map<char, bool> &modes, const vector<string> &param
 		{
 			if (i >= params.size())
 				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, _name.c_str(), ("Missing parameter for mode " + string(1, it->first)).c_str(), NULL);
-			setMode(it->first, it->second, params[i++]);
+			setMode(it->first, it->second, params[i++], setter);
 		}
 		else
-			setMode(it->first, it->second);
+			setMode(it->first, it->second, "", setter);
 	}
 }
 
@@ -259,7 +245,7 @@ bool Channel::getMode(const char mode) const
 	return it->second;
 }
 
-void Channel::setMode(const char mode, const bool status, const string &param)
+void Channel::setMode(const char mode, const bool status, const string &param, const Client *setter)
 {
 	if (channel_mode_requires_param(mode, status) && param.empty())
 		throw InternalErrorException("Channel::setMode: missing parameter for mode");
@@ -291,18 +277,17 @@ void Channel::setMode(const char mode, const bool status, const string &param)
 		_logger.logEvent("Channel " + _name + ", mode " + mode + " is now " + (status ? "on" : "off"));
 	_modes[mode] = status;
 
+	string prefix = setter ? setter->getNickname() : SERVER_NAME;
 	string mode_str = (status ? "+" : "-") + string(1, mode);
-	const struct s_message mode_change = EventHandler::buildMessage(SERVER_NAME, MODE, _name.c_str(), mode_str.c_str(), param.c_str(), NULL);
+	const struct s_message mode_change = EventHandler::buildMessage(prefix, MODE, _name.c_str(), mode_str.c_str(), param.c_str(), NULL);
 	receiveMessage(mode_change);
 }
 
-void	Channel::receiveMessage(const struct s_message &msg) const
+void	Channel::receiveMessage(const struct s_message &msg, const Client *sender) const
 {
 	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
-	{
-		if (receiver->first != msg.prefix)
+		if (!sender || receiver->second != sender)
 			receiver->second->receiveMessage(msg);
-	}
 }
 
 bool	Channel::isOperator(const Client &user) const

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 14:38:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 15:22:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ Client::Client(const Client &copy) :
 Client::~Client(void)
 {
 	for (map<string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++)
-		it->second->removeMember(*this);
+		it->second->removeMember(_nickname);
 }
 
 const map<string, Channel *>	&Client::getChannels(void) const
@@ -229,7 +229,7 @@ void	Client::joinChannel(Channel &channel, const string &key)
 
 void	Client::leaveChannel(Channel &channel, const string &reason)
 {
-	channel.removeMember(*this);
+	channel.removeMember(_nickname);
 	removeChannel(channel);
 
 	const struct s_message part = EventHandler::buildMessage(_nickname.c_str(), PART, channel.getName().c_str(), reason.c_str(), NULL);
@@ -264,13 +264,14 @@ void	Client::kick(Client &user, Channel &channel, const string &reason) const
 	checkPrivilege(channel);
 
 	const string &channel_name = channel.getName();
+	const string &user_nickname = user.getNickname();
 
-	_logger.logEvent("Client " + _nickname + " tries to kick " + user.getNickname() + " from channel " + channel_name);
-	channel.removeMember(user);
+	_logger.logEvent("Client " + _nickname + " tries to kick " + user_nickname + " from channel " + channel_name);
+	channel.removeMember(user_nickname);
 	user.removeChannel(channel);
 
 	const string prefix = _nickname + "!" + _username + "@" + _ip_addr;
-	const struct s_message kick_notification = EventHandler::buildMessage(prefix, KICK, channel_name.c_str(), user.getNickname().c_str(), reason.c_str(), NULL);
+	const struct s_message kick_notification = EventHandler::buildMessage(prefix, KICK, channel_name.c_str(), user_nickname.c_str(), reason.c_str(), NULL);
 	channel.receiveMessage(kick_notification);
 	user.receiveMessage(kick_notification);
 }
@@ -307,7 +308,7 @@ void	Client::modeChange(Channel &channel, const char mode, const bool status, co
 {
 	checkPrivilege(channel);
 	_logger.logEvent("Client " + _nickname + " tries to change mode " + mode + " of channel " + channel.getName());
-	channel.setMode(mode, status, param);
+	channel.setMode(mode, status, param, this);
 }
 
 void	Client::modesChange(Channel &channel, const map<char, bool> &modes, const vector<string> &params) const

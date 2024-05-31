@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 13:47:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 15:25:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class Channel
 		void									setMembers(const std::map<std::string, Client *> &new_members);
 		const Client							&getMember(const std::string &nickname) const;
 		void									addMember(Client &user);
-		void									removeMember(Client &user);
+		void									removeMember(const std::string &nickname);
 		const std::set<const Client *>			&getOperators(void) const;
 		void									setOperators(const std::set<const Client *> &new_operators);
 		void									addOperator(const std::string &nickname);
@@ -53,11 +53,11 @@ class Channel
 		void									addPendingInvitation(Client &user);
 		void									removePendingInvitation(Client &user);
 		const std::map<char, bool>				&getModes(void) const;
-		void									setModes(const std::map<char, bool> &modes, const std::vector<std::string> &params);
+		void									setModes(const std::map<char, bool> &modes, const std::vector<std::string> &params, const Client *setter = NULL);
 		bool									getMode(const char mode) const;
-		void									setMode(const char mode, const bool status, const std::string &param = "");
+		void									setMode(const char mode, const bool status, const std::string &param = "", const Client *setter = NULL);
 
-		void									receiveMessage(const struct s_message &message) const;
+		void									receiveMessage(const struct s_message &message, const Client *sender = NULL) const;
 		bool									isOperator(const Client &user) const;
 		bool									isMember(const std::string &nickname) const;
 		bool									isMember(const Client &user) const;
