@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 13:48:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 14:34:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -387,7 +387,7 @@ void EventHandler::handleQuit(const vector<string> &args)
 	_logger.logEvent("Client " + quitting_nickname + " has quit");
 }
 
-void EventHandler::handleKick(const vector<string> &args) //TODO non funziona
+void EventHandler::handleKick(const vector<string> &args)
 {
 	checkConnection(_client);
 	checkAuthentication(_client);

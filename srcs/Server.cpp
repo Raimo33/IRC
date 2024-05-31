@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 20:56:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 14:30:03 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 
 	memset(&server_addr, 0, sizeof(server_addr));
 	configureNonBlocking(_socket);
+	configureNonBlocking(_epoll_fd);
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	server_addr.sin_port = htons(_port);
