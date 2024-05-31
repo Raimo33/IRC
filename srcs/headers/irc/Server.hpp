@@ -3,14 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 16:39:30 by egualand         ###   ########.fr       */
+/*   Updated: 2024/05/31 15:59:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//TODO provare i casi di errore quando si disconnette un client, non funziona piu nula
 //TODO implementare scambio di file (ERR_FILEERROR)
 //TODO aggiungere bot
 

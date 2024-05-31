@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 15:37:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 16:09:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void	EventHandler::processInput(string raw_input)
 		try
 		{
 			const struct s_message input = parseInput(cmds[i]);
-			(this->*(_handlers[input.value]))(input.params);
+			(this->*(_handlers.at(static_cast<e_commands>(input.value))))(input.params);
 		}
 		catch (const ProtocolErrorException &e)
 		{
@@ -172,9 +172,9 @@ const std::map<std::string, e_commands>	EventHandler::initCommands(void)
 	return commands;
 }
 
-const vector<EventHandler::CommandHandler>	EventHandler::initHandlers(void)
+const map<e_commands, EventHandler::CommandHandler>	EventHandler::initHandlers(void)
 {
-	vector<CommandHandler>	handlers(N_COMMANDS);
+	map<e_commands, CommandHandler>	handlers;
 
 	handlers[PASS] = &EventHandler::handlePass;
 	handlers[NICK] = &EventHandler::handleNick;

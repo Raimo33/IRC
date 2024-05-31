@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 14:30:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 16:03:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,13 @@ Server::Server(const Server &copy) :
 
 Server::~Server(void)
 {
-	// TODO delete di tutto
+	for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		disconnectClient(*it->second);
+	for (map<string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++)
+		delete it->second;
+	close_p(_socket);
+	close_p(_epoll_fd);
+	std::cout << "Goodbye, hope you have a great day without me :( " << std::endl;
 }
 
 void Server::run(void)

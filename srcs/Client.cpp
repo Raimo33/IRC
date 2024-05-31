@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 15:22:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 16:11:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,6 +234,8 @@ void	Client::leaveChannel(Channel &channel, const string &reason)
 
 	const struct s_message part = EventHandler::buildMessage(_nickname.c_str(), PART, channel.getName().c_str(), reason.c_str(), NULL);
 	channel.receiveMessage(part);
+	receiveMessage(part);
+	_logger.logEvent("Client " + _nickname + " left channel " + channel.getName());
 }
 
 void	Client::sendMessage(const Channel &channel, const struct s_message &msg) const

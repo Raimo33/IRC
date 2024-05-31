@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 19:50:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 16:07:37 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ class EventHandler
 		static void										unwrapMessage(const struct s_message &msg, string *first_part, string *second_part);
 
 		const std::map<std::string, e_commands>			initCommands(void);
-		const std::vector<CommandHandler>				initHandlers(void);
+		const std::map<e_commands, CommandHandler>		initHandlers(void);
 		static std::map<uint16_t, std::string>			initCommandStrings(void);
 		const struct s_message							parseInput(std::string &raw_input) const;
 		void											handlePass(const std::vector<std::string> &params);
@@ -68,7 +68,7 @@ class EventHandler
 		Server											*_server;
 		Client											*_client;
 		const std::map<std::string, e_commands>			_commands;
-		const std::vector<CommandHandler>				_handlers;
+		const std::map<e_commands, CommandHandler>		_handlers;
 		static const std::map<uint16_t, std::string>	_command_strings;
 		Logger											&_logger;
 };
