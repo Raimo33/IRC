@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 20:11:42 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 19:46:45 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@
 
 class Server;
 class Channel;
-class Message;
-class PrivateMessage;
 class Logger;
 
 class Client

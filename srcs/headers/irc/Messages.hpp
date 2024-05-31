@@ -28,10 +28,11 @@ enum e_commands
 	PART = 1005,
 	PRIVMSG = 1006,
 	QUIT = 1007,
-	KICK = 1008,
-	INVITE = 1009,
-	TOPIC = 1010,
-	MODE = 1011,
+	SEND = 1008,
+	KICK = 1009,
+	INVITE = 1010,
+	TOPIC = 1011,
+	MODE = 1012,
 };
 
 //https://github.com/williamkapke/irc-replies/blob/master/replies.json
@@ -76,6 +77,12 @@ enum e_replyCodes
 
 struct s_message
 {
+	s_message(void);
+	s_message(const std::string &prefix, const int value, ...);
+	s_message(const std::string &prefix, const int value, va_list args);
+
+	s_message	&operator=(const s_message &copy);
+
 	std::string					prefix;
 	int							value;
 	std::vector<std::string>	params;

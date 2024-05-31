@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 20:22:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 19:53:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ ProtocolErrorException::ProtocolErrorException(const int value, ...)
 	if (value < RPL_WELCOME || value > ERR_CHANOPRIVSNEEDED)
 		throw InternalErrorException("ProtocolErrorException::ProtocolErrorException: Invalid reply code");
 	va_start(args, value);
-	_content = EventHandler::buildMessage(SERVER_NAME, value, args);
+	_content = s_message(SERVER_NAME, value, args);
 	va_end(args);
 }
 

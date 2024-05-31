@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 17:10:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 19:46:45 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,6 @@ class EventHandler
 
 		void 											processInput(std::string &raw_input);
 
-		static const struct s_message					buildMessage(const string &prefix, const int value, ...);
-		static const struct s_message 					buildMessage(const string &prefix, const int value, va_list args);
 		static void										sendBufferedMessage(const Client &receiver, const struct s_message &msg);
 
 	private:
@@ -57,13 +55,15 @@ class EventHandler
 		void											handleUser(const std::vector<std::string> &params);
 		void											handleJoin(const std::vector<std::string> &params);
 		void											handlePart(const std::vector<std::string> &params);
-		void											handlePrivmsg(const std::vector<std::string> &params); //chiama sendMessage di User
+		void											handlePrivmsg(const std::vector<std::string> &params);
 		void											handleQuit(const std::vector<std::string> &params);
+		void											handleSend(const std::vector<std::string> &params);
 		void											handleKick(const std::vector<std::string> &params);
 		void											handleInvite(const std::vector<std::string> &params);
 		void											handleTopic(const std::vector<std::string> &params);
 		void											handleMode(const std::vector<std::string> &params);
 		void											checkNicknameValidity(const std::string &nickname) const;
+		uint16_t										getRandomPort(void) const;
 
 		Server											*_server;
 		Client											*_client;

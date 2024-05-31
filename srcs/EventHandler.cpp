@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 17:47:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 20:09:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,28 +87,6 @@ void	EventHandler::processInput(string &raw_input)
 	}
 }
 
-const struct s_message	EventHandler::buildMessage(const string &prefix, const int value, ...)
-{
-	va_list	args;
-
-	va_start(args, value);
-	const struct s_message content = buildMessage(prefix, value, args);
-	va_end(args);
-	return content;
-}
-
-const struct s_message EventHandler::buildMessage(const string &prefix, const int value, va_list args)
-{
-	struct s_message	content;
-	const char			*param;
-
-	content.prefix = prefix;
-	content.value = value;
-	while ((param = va_arg(args, const char *)) != NULL)
-        content.params.push_back(param);
-	return content;
-}
-
 void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_message &message)
 {
 	string		first_part, second_part, to_send;
@@ -121,7 +99,6 @@ void	EventHandler::sendBufferedMessage(const Client &receiver, const struct s_me
 	{
 		send_length = std::min(static_cast<size_t>(block_size),  second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
-		//std::cout << "Sending: " << to_send << std::endl;
 		second_part = second_part.substr(send_length); // Update second_part correctly
 		send_p(receiver_socket, to_send.c_str(), to_send.length(), 0);
 	}
@@ -181,6 +158,7 @@ const map<e_commands, EventHandler::CommandHandler>	EventHandler::initHandlers(v
 	handlers[PART] = &EventHandler::handlePart;
 	handlers[PRIVMSG] = &EventHandler::handlePrivmsg;
 	handlers[QUIT] = &EventHandler::handleQuit;
+	handlers[SEND] = &EventHandler::handleSend;
 
 	handlers[KICK] = &EventHandler::handleKick;
 	handlers[INVITE] = &EventHandler::handleInvite;
@@ -203,6 +181,7 @@ std::map<uint16_t, std::string> EventHandler::initCommandStrings(void)
 		command_strings[PART] = "PART";
 		command_strings[PRIVMSG] = "PRIVMSG";
 		command_strings[QUIT] = "QUIT";
+		command_strings[SEND] = "SEND";
 
 		command_strings[KICK] = "KICK";
 		command_strings[INVITE] = "INVITE";
@@ -219,23 +198,23 @@ const struct s_message EventHandler::parseInput(string &raw_input) const
 	string				param;
 	string::iterator	it;
 
-	if (*raw_input.rbegin() == '\n') // Remove trailing '\n
+	if (*raw_input.rbegin() == '\n')
 		raw_input.resize(raw_input.size() - 1);
 	it = raw_input.begin();
 	if (*it == ':')
-		input.prefix = get_next_token(++it, raw_input.end(), ' '); // Extract the prefix
-	command = get_next_token(it, raw_input.end(), ' '); // Extract the command
+		input.prefix = get_next_token(++it, raw_input.end(), ' ');
+	command = get_next_token(it, raw_input.end(), ' ');
 	const map<string, e_commands>::const_iterator it_command = _commands.find(command);
 	if (it_command == _commands.end())
 		throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, command.c_str(), default_replies.at(ERR_UNKNOWNCOMMAND), NULL);
-	input.value = it_command->second; // Associate the command with the enum
+	input.value = it_command->second;
 	while (it != raw_input.end())
 	{
 		if (*it == ':')
-			param = get_next_token(++it, raw_input.end(), '\0'); // Extract the parameter
+			param = get_next_token(++it, raw_input.end(), '\0');
 		else
-			param = get_next_token(it, raw_input.end(), ' '); // Extract the parameter
-		input.params.push_back(param); // Add the parameter to the vector
+			param = get_next_token(it, raw_input.end(), ' ');
+		input.params.push_back(param);
 	}
 	return input;	
 }
@@ -281,7 +260,6 @@ void EventHandler::handleUser(const vector<string> &args)
 		_client->setAuthenticated(true);
 }
 
-//JOIN <channel1,channel2,channel3> <key1,key2,key3>
 void EventHandler::handleJoin(const vector<string> &args)
 {
 	checkConnection(_client);
@@ -347,16 +325,14 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 	if (n_args < 2)
 		throw ProtocolErrorException(ERR_NOTEXTTOSEND, default_replies.at(ERR_NOTEXTTOSEND), NULL);
 
-	const struct s_message msg = EventHandler::buildMessage(_client->getNickname(), PRIVMSG, args[0].c_str(), args[1].c_str(), NULL);
+	const struct s_message msg(_client->getNickname(), PRIVMSG, args[0].c_str(), args[1].c_str(), NULL);
 	if (is_channel_prefix(args[0][0])) //se il primo carattere e' #, &, + o !
 	{
-		//channel msg PRIVMSG <channel> :<message>
 		Channel &channel = _server->getChannel(args[0]);
 		_client->sendMessage(channel, msg);
 	}
 	else
 	{
-		//private msg PRIVMSG <nickname> :<message>
 		Client &receiver = _server->getClient(args[0]);
 		_client->sendMessage(receiver, msg);
 	}
@@ -366,7 +342,7 @@ void EventHandler::handleQuit(const vector<string> &args)
 {
 	const string					&reason = args.size() > 0 ? args[0] : "Client quit";
 	const string					&quitting_nickname = _client->getNickname();
-	const struct s_message			quit = EventHandler::buildMessage(quitting_nickname, QUIT, reason.c_str(), NULL);
+	const struct s_message			quit(quitting_nickname, QUIT, reason.c_str(), NULL);
 	const map<string, Channel *>	&channels = _client->getChannels();
 	
 	for (map<string, Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
@@ -383,7 +359,39 @@ void EventHandler::handleQuit(const vector<string> &args)
 		}
 	}
 	_server->removeClient(*_client);
-	_logger.logEvent("Client " + quitting_nickname + " has quit");
+	ostringstream oss;
+	oss << "Client " << quitting_nickname << " has quit";
+	_logger.logEvent(oss.str());
+}
+
+void EventHandler::handleSend(const vector<string> &args)
+{
+	checkConnection(_client);
+	checkAuthentication(_client);
+
+	if (args.size() < 2)
+		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "SEND", "usage: SEND <nick|channel> <filename> [filesize]", NULL);
+
+	const string		&sender_ip = _client->getIpAddr();
+	const uint16_t		&sender_port = getRandomPort();
+	const string		&filename = args[1];
+	const uint32_t		file_size = args.size() > 2 ? std::atol(args[2].c_str()) : 0;
+	const uint64_t		ip_long = ip_to_long(sender_ip);
+	ostringstream		dcc_send;
+
+	dcc_send << "DCC SEND " << filename << " " << ip_long << " " << sender_port << " " << file_size;
+	const struct s_message msg(_client->getNickname(), PRIVMSG, args[0].c_str(), dcc_send.str().c_str(), NULL); //TODO probabilmente non va bene mettere il nome del canale ma andrebbe loopato send_message per ogni membro del canale
+
+	if (is_channel_prefix(args[0][0]))
+	{
+		Channel &channel = _server->getChannel(args[0]);
+		_client->sendMessage(channel, msg);
+	}
+	else
+	{
+		Client &receiver = _server->getClient(args[0]);
+		_client->sendMessage(receiver, msg);
+	}
 }
 
 void EventHandler::handleKick(const vector<string> &args)
@@ -434,9 +442,9 @@ void EventHandler::handleTopic(const vector<string> &args)
 		struct s_message	topic_reply;
 
 		if (topic.empty())
-			topic_reply = EventHandler::buildMessage(SERVER_NAME, RPL_NOTOPIC, issuer_nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_NOTOPIC), NULL);
+			topic_reply = s_message(SERVER_NAME, RPL_NOTOPIC, issuer_nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_NOTOPIC), NULL);
 		else
-			topic_reply = EventHandler::buildMessage(SERVER_NAME, RPL_TOPIC, issuer_nickname.c_str(), channel_name.c_str(), topic.c_str(), NULL);
+			topic_reply = s_message(SERVER_NAME, RPL_TOPIC, issuer_nickname.c_str(), channel_name.c_str(), topic.c_str(), NULL);
 		_client->receiveMessage(topic_reply);
 	}
 	else
@@ -467,7 +475,7 @@ void EventHandler::handleMode(const vector<string> &args)
 		}
 		if (!modes_str.empty())
 			modes_str.insert(0, "+");
-		const struct s_message	reply = EventHandler::buildMessage(SERVER_NAME, RPL_CHANNELMODEIS, _client->getNickname().c_str(), channel.getName().c_str(), modes_str.c_str(), NULL);
+		const struct s_message	reply(SERVER_NAME, RPL_CHANNELMODEIS, _client->getNickname().c_str(), channel.getName().c_str(), modes_str.c_str(), NULL);
 		_client->receiveMessage(reply);
 		return;
 	}
@@ -514,6 +522,11 @@ void	EventHandler::checkNicknameValidity(const string &nickname) const
 	}
 	if (_server->isClientConnected(nickname))
 		throw ProtocolErrorException(ERR_NICKNAMEINUSE, nickname.c_str(), default_replies.at(ERR_NICKNAMEINUSE), NULL);
+}
+
+uint16_t	EventHandler::getRandomPort(void) const
+{
+	return 1024 + (rand() % (65535 - 1024));
 }
 
 const std::map<uint16_t, std::string> EventHandler::_command_strings = EventHandler::initCommandStrings();

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 01:10:26 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 19:24:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <openssl/evp.h>
 #include <iomanip>
 #include <cstring>
+#include <arpa/inet.h>
 
 using std::string;
 using std::vector;
@@ -123,4 +124,12 @@ string	hash(const string &s)
     EVP_MD_CTX_free(context);
 
     return to_hex(hash, lengthOfHash);
+}
+
+uint64_t	ip_to_long(const std::string& ip)
+{
+    struct sockaddr_in sa;
+
+    inet_pton(AF_INET, ip.c_str(), &(sa.sin_addr));
+    return ntohl(sa.sin_addr.s_addr);
 }

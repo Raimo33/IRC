@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 15:29:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 20:02:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,9 @@ Channel::Channel(Logger &logger, const string &name, Client &op, const string &k
 	//setMode('t', true);
 	if (!key.empty())
 		setMode('k', true, key);
-	_logger.logEvent("Channel created: " + name);
+	ostringstream oss;
+	oss << "Channel created: " << name;
+	_logger.logEvent(oss.str());
 }
 
 Channel::Channel(const Channel &copy) :
@@ -57,12 +59,16 @@ Channel::Channel(const Channel &copy) :
 	_modes(copy._modes),
 	_logger(copy._logger)
 {
-	_logger.logEvent("Channel created: " + _name);
+	ostringstream oss;
+	oss << "Channel created: " << _name;
+	_logger.logEvent(oss.str());
 }
 
 Channel::~Channel(void)
 {
-	_logger.logEvent("Channel deleted: " + _name);
+	ostringstream oss;
+	oss << "Channel deleted: " << _name;
+	_logger.logEvent(oss.str());
 }
 
 const string &Channel::getName(void) const
@@ -73,7 +79,9 @@ const string &Channel::getName(void) const
 void Channel::setName(const string &new_name)
 {
 	checkName(new_name);
-	_logger.logEvent("Channel " + _name + " renamed to " + new_name);
+	ostringstream oss;
+	oss << "Channel " << _name << " renamed to " << new_name;
+	_logger.logEvent(oss.str());
 	_name = new_name;
 }
 
@@ -87,7 +95,9 @@ void Channel::setKey(const string &new_key)
 	if (!is_valid_channel_key(new_key))
 		throw ProtocolErrorException(ERR_BADCHANNELKEY, _name.c_str(), (new_key + " is not a valid channel key").c_str(), NULL);
 	_key = new_key;
-	_logger.logEvent("Channel " + _name + " key set to " + new_key);
+	ostringstream oss;
+	oss << "Channel " << _name << " key set to " << new_key;
+	_logger.logEvent(oss.str());
 }
 
 const string &Channel::getTopic(void) const
@@ -100,7 +110,9 @@ void Channel::setTopic(const string &new_topic)
 	if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
 		throw ProtocolErrorException(RPL_NOTOPIC, _name.c_str(), (new_topic + " is too long").c_str(), NULL);	
 	_topic = new_topic;
-	_logger.logEvent("Channel " + _name + " topic set to " + new_topic);
+	ostringstream oss;
+	oss << "Channel " << _name << " topic set to " << new_topic;
+	_logger.logEvent(oss.str());
 }
 
 uint32_t Channel::getMemberLimit(void) const
@@ -141,7 +153,9 @@ void Channel::addMember(Client &user)
 	if (_members.size() >= _member_limit)
 		throw ProtocolErrorException(ERR_CHANNELISFULL, _name.c_str(), default_replies.at(ERR_CHANNELISFULL), NULL);
 	_members[nickname] = &user;
-	_logger.logEvent("Channel " + _name + ", member added: " + nickname);
+	ostringstream oss;
+	oss << "Channel " << _name << ", member added: " << nickname;
+	_logger.logEvent(oss.str());
 }
 
 void Channel::removeMember(const string &nickname)
@@ -150,7 +164,9 @@ void Channel::removeMember(const string &nickname)
 	if (isOperator(user))
 		_operators.erase(&user);
 	_members.erase(nickname);
-	_logger.logEvent("Channel " + _name + ", member removed: " + nickname);
+	ostringstream oss;
+	oss << "Channel " << _name << ", member removed: " << nickname;
+	_logger.logEvent(oss.str());
 }
 
 const set<const Client *> &Channel::getOperators(void) const
@@ -170,7 +186,9 @@ void Channel::addOperator(const string &nickname)
 		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is already an operator of " + _name).c_str(), NULL);
 	_operators.insert(&user);
 
-	_logger.logEvent("Channel " + _name + ", operator added: " + nickname);
+	ostringstream oss;
+	oss << "Channel " << _name << ", operator added: " << nickname;
+	_logger.logEvent(oss.str());
 }
 
 void Channel::removeOperator(const string &nickname)
@@ -180,7 +198,9 @@ void Channel::removeOperator(const string &nickname)
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is not an operator of " + _name).c_str(), NULL);
 	_operators.erase(&user);
 
-	_logger.logEvent("Channel " + _name + ", operator removed: " + nickname);
+	ostringstream oss;
+	oss << "Channel " << _name << ", operator removed: " << nickname;
+	_logger.logEvent(oss.str());
 }
 
 const set<const Client *> &Channel::getPendingInvitations(void) const
@@ -202,7 +222,9 @@ void Channel::addPendingInvitation(Client &user)
 	if (_pending_invitations.find(&user) != _pending_invitations.end())
 		throw ProtocolErrorException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is already invited to " + _name).c_str(), NULL);
 	_pending_invitations.insert(&user);
-	_logger.logEvent("Channel " + _name + ", invitation sent to: " + nickname);
+	ostringstream oss;
+	oss << "Channel " << _name << ", invitation sent to: " << nickname;
+	_logger.logEvent(oss.str());
 }
 
 void Channel::removePendingInvitation(Client &user)
@@ -212,7 +234,9 @@ void Channel::removePendingInvitation(Client &user)
 	if (_pending_invitations.find(&user) == _pending_invitations.end())
 		throw ProtocolErrorException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " was not invited to " + _name).c_str(), NULL);
 	_pending_invitations.erase(&user);
-	_logger.logEvent("Channel " + _name + ", invitation to " + nickname + " removed");
+	ostringstream oss;
+	oss << "Channel " << _name << ", invitation to " << nickname << " removed";
+	_logger.logEvent(oss.str());
 }
 
 const map<char, bool> &Channel::getModes(void) const
@@ -274,12 +298,16 @@ void Channel::setMode(const char mode, const bool status, const string &param, c
 		status ? addOperator(param) : removeOperator(param);
 
 	if (_modes.at(mode) != status)
-		_logger.logEvent("Channel " + _name + ", mode " + mode + " is now " + (status ? "on" : "off"));
+	{
+		ostringstream oss;
+		oss << "Channel " << _name << ", mode " << mode << " is now " << (status ? "on" : "off");	
+		_logger.logEvent(oss.str());
+	}
 	_modes[mode] = status;
 
 	string prefix = setter ? setter->getNickname() : SERVER_NAME;
 	string mode_str = (status ? "+" : "-") + string(1, mode);
-	const struct s_message mode_change = EventHandler::buildMessage(prefix, MODE, _name.c_str(), mode_str.c_str(), param.c_str(), NULL);
+	const struct s_message mode_change(prefix, MODE, _name.c_str(), mode_str.c_str(), param.c_str(), NULL);
 	receiveMessage(mode_change);
 }
 

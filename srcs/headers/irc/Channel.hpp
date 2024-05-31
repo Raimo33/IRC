@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 15:25:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 19:47:14 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@
 # include <stdint.h>
 # include <stdexcept>
 
-class Client;
-class Client;
-class Logger;
+class	Client;
+class	Client;
+class	Logger;
 
 class Channel
 {

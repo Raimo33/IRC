@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 18:22:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 19:57:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,9 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 
     getsockname_p(_socket, (struct sockaddr *)&server_addr, &addr_len);
     inet_ntop(AF_INET, &server_addr.sin_addr, ipstr, sizeof(ipstr));
-    std::cout << "Server listening on " << ipstr << ":" << _port << std::endl;
+	ostringstream oss;
+	oss << "Server listening on " << ipstr << ":" << _port;
+    _logger.logEvent(oss.str());
 }
 
 Server::Server(const Server &copy) : 
@@ -242,10 +244,10 @@ void Server::handleNewClient(void)
 
 	configureNonBlocking(client_socket);
 
-	const std::string client_ip_addr = std::string(inet_ntoa(client_addr.sin_addr));
-	const uint16_t client_port = ntohs(client_addr.sin_port);
+	const std::string	client_ip_addr = std::string(inet_ntoa(client_addr.sin_addr));
+	const uint16_t		client_port = ntohs(client_addr.sin_port);
 
-	struct epoll_event event;
+	struct epoll_event	event;
 	memset(&event, 0, sizeof(event));
 	event.events = EPOLLIN | EPOLLHUP | EPOLLERR;
 	event.data.fd = client_socket;
@@ -259,7 +261,7 @@ void Server::handleNewClient(void)
 
 void Server::handleClient(const int client_socket)
 {
-	Client *client = getClient(client_socket);
+	Client	*client = getClient(client_socket);
 
 	if (!client)
 		return;

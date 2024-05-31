@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 02:55:58 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 19:30:35 by craimond         ###   ########.fr       */
+/*   Updated: 2024/05/31 19:54:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,41 @@
 using std::string;
 using std::map;
 using std::make_pair;
+
+s_message::s_message(void) {}
+
+s_message::s_message(const string &prefix, const int value, ...)
+{
+	va_list		args;
+	const char	*param;
+
+	va_start(args, value);
+	this->prefix = prefix;
+	this->value = value;
+	while ((param = va_arg(args, const char *)) != NULL)
+        params.push_back(param);
+	va_end(args);
+}
+
+s_message::s_message(const string &prefix, const int value, va_list args)
+{
+	const char	*param;
+
+	this->prefix = prefix;
+	this->value = value;
+	while ((param = va_arg(args, const char *)) != NULL)
+        params.push_back(param);
+}
+
+s_message &s_message::operator=(const s_message &other)
+{
+	if (this == &other)
+		return *this;
+	prefix = other.prefix;
+	value = other.value;
+	params = other.params;
+	return *this;
+}
 
 const map<enum e_replyCodes, const char *> create_default_replies(void)
 {
