@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 19:57:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 11:01:02 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "irc/Channel.hpp"
 #include "irc/SystemCalls.hpp"
 #include "irc/EventHandler.hpp"
-#include "irc/Messages.hpp"
+#include "irc/Message.hpp"
 #include "irc/Exceptions.hpp"
 
 #include <algorithm>
@@ -290,10 +290,10 @@ void Server::handleClient(const int client_socket)
 		_handler.setClient(*client);
 		_handler.processInput(raw_input);
 	}
-	catch (const ProtocolErrorException &e) //TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
+	catch (ProtocolErrorException &e) //TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
 	{
-		struct s_message msg = e.getContent();
-		msg.params.insert(msg.params.begin(), client->getNickname());
+		Message	msg = e.getContent();
+		msg.setParam(client->getNickname(), 0);
 		client->receiveMessage(msg);
 		_logger.logError(&e);
 	}

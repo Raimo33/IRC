@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 19:46:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 11:00:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # include <vector>
 # include <stdint.h>
 
-# include <irc/Messages.hpp>
+# include <irc/Message.hpp>
 
 class ProtocolErrorException : public std::exception //for IRC protocol errors (reply codes)
 {
@@ -29,11 +29,11 @@ class ProtocolErrorException : public std::exception //for IRC protocol errors (
 		const char *what(void) const throw();
 		~ProtocolErrorException(void) throw();
 
-		const struct s_message	&getContent(void) const;
+		Message				&getContent(void);
 
 	private:	
-		struct s_message		_content;
-		const std::string		_formatted_msg;
+		Message				_content;
+		const std::string	_formatted_msg;
 };
 
 class InternalErrorException : public std::runtime_error //for internal programming errors such as null pointers, calling addClient 2 times on the same client, etc.

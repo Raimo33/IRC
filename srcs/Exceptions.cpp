@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 19:53:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 11:00:14 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 #include "irc/Exceptions.hpp"
 #include "irc/Constants.hpp"
-#include "irc/Messages.hpp"
+#include "irc/Message.hpp"
 #include "irc/EventHandler.hpp"
 
 using std::string;
@@ -49,7 +49,7 @@ ProtocolErrorException::ProtocolErrorException(const int value, ...)
 	if (value < RPL_WELCOME || value > ERR_CHANOPRIVSNEEDED)
 		throw InternalErrorException("ProtocolErrorException::ProtocolErrorException: Invalid reply code");
 	va_start(args, value);
-	_content = s_message(SERVER_NAME, value, args);
+	_content = Message(SERVER_NAME, value, args);
 	va_end(args);
 }
 
@@ -57,10 +57,10 @@ ProtocolErrorException::~ProtocolErrorException(void) throw() {}
 
 const char *ProtocolErrorException::what(void) const throw()
 {
-	return _content.params.back().c_str();
+	return _content.getParams().back().c_str();
 }
 
-const struct s_message	&ProtocolErrorException::getContent(void) const
+Message	&ProtocolErrorException::getContent(void)
 {
 	return _content;
 }

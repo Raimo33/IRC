@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 19:46:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 10:42:09 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 # include "utils.hpp"
 # include "Constants.hpp"
-# include "Messages.hpp"
+# include "Message.hpp"
 
 class Client;
 class Server;
@@ -32,24 +32,21 @@ class EventHandler
 		EventHandler(const EventHandler &copy);
 		~EventHandler(void);
 
-		const std::map<std::string, e_commands>			&getCommands(void) const;
 		const Client									&getClient(void) const;
 		void											setClient(Client &client);
 
 		void 											processInput(std::string &raw_input);
 
-		static void										sendBufferedMessage(const Client &receiver, const struct s_message &msg);
+		static void										sendBufferedMessage(const Client &receiver, const Message &msg);
 
 	private:
 
 		typedef void (EventHandler::*CommandHandler)(const std::vector<std::string>&);
 
-		static void										unwrapMessage(const struct s_message &msg, string *first_part, string *second_part);
+		static void										unwrapMessage(const Message &msg, string *first_part, string *second_part);
 
-		const std::map<std::string, e_commands>			initCommands(void);
 		const std::map<e_commands, CommandHandler>		initHandlers(void);
 		static std::map<uint16_t, std::string>			initCommandStrings(void);
-		const struct s_message							parseInput(std::string &raw_input) const;
 		void											handlePass(const std::vector<std::string> &params);
 		void											handleNick(const std::vector<std::string> &params);
 		void											handleUser(const std::vector<std::string> &params);
@@ -67,7 +64,6 @@ class EventHandler
 
 		Server											*_server;
 		Client											*_client;
-		const std::map<std::string, e_commands>			_commands;
 		const std::map<e_commands, CommandHandler>		_handlers;
 		static const std::map<uint16_t, std::string>	_command_strings;
 		Logger											&_logger;

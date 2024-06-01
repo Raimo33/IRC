@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 20:02:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 10:31:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,9 @@
 #include "irc/utils.hpp"
 #include "irc/EventHandler.hpp"
 #include "irc/Exceptions.hpp"
-#include "irc/Messages.hpp"
+#include "irc/Message.hpp"
 #include "irc/Constants.hpp"
-#include "irc/Messages.hpp"
+#include "irc/Message.hpp"
 #include "irc/Logger.hpp"
 
 #include <sstream>
@@ -307,11 +307,11 @@ void Channel::setMode(const char mode, const bool status, const string &param, c
 
 	string prefix = setter ? setter->getNickname() : SERVER_NAME;
 	string mode_str = (status ? "+" : "-") + string(1, mode);
-	const struct s_message mode_change(prefix, MODE, _name.c_str(), mode_str.c_str(), param.c_str(), NULL);
+	const Message mode_change(prefix, MODE, _name.c_str(), mode_str.c_str(), param.c_str(), NULL);
 	receiveMessage(mode_change);
 }
 
-void	Channel::receiveMessage(const struct s_message &msg, const Client *sender) const
+void	Channel::receiveMessage(const Message &msg, const Client *sender) const
 {
 	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
 		if (!sender || receiver->second != sender)

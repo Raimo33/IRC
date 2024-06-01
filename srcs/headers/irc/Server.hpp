@@ -6,12 +6,11 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 00:04:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 10:23:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO aggiungere bot
-//TODO comando SUMMON per fare entrare un bot in un canale
 
 #ifndef SERVER_HPP
 # define SERVER_HPP

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 19:46:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 10:41:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 class Server;
 class Channel;
 class Logger;
+class Message;
 
 class Client
 {
@@ -54,9 +55,9 @@ class Client
 
 		void											joinChannel(Channel &channel, const std::string &key = "");
 		void											leaveChannel(Channel &channel, const std::string &reason = "");
-		void											sendMessage(const Channel &channel, const struct s_message &msg) const;
-		void											sendMessage(const Client &receiver, const struct s_message &msg) const;
-		void											receiveMessage(const struct s_message &msg) const;
+		void											sendMessage(const Channel &channel, const Message &msg) const;
+		void											sendMessage(const Client &receiver, const Message &msg) const;
+		void											receiveMessage(const Message &msg) const;
 
 		void											kick(Client &user, Channel &channel, const std::string &reason = "") const; //chiama removeMember di Channel e removeChannel di Client
 		void											invite(Client &user, Channel &channel) const; //chiama addInvite di Channel

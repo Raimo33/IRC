@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Messages.hpp                                        :+:      :+:    :+:   */
+/*   Message.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/23 15:38:24 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 12:33:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 11:08:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,7 @@
 # include <vector>
 # include <map>
 # include <cstdarg>
-
-# include "irc/Messages.hpp"
+# include <stdint.h>
 
 enum e_commands
 {
@@ -76,17 +75,36 @@ enum e_replyCodes
 	ERR_CHANOPRIVSNEEDED = 482,
 };
 
-struct s_message
+class Message
 {
-	s_message(void);
-	s_message(const std::string &prefix, const int value, ...);
-	s_message(const std::string &prefix, const int value, va_list args);
+	public:
+		Message(void);
+		Message(const std::string &raw_input);
+		Message(const std::string &prefix, const int value, ...);
+		Message(const std::string &prefix, const int value, va_list args);
+		Message(const Message &copy);
+		~Message(void);
 
-	s_message	&operator=(const s_message &copy);
+		Message	&operator=(const Message &copy);
 
-	std::string					prefix;
-	int							value;
-	std::vector<std::string>	params;
+		const std::string							&getPrefix(void) const;
+		void										setPrefix(const std::string &prefix);
+		uint16_t									getValue(void) const;
+		void										setValue(const uint16_t value);
+		const std::vector<std::string>				&getParams(void) const;
+		void										setParams(const std::vector<std::string> &params);
+		void										setParam(const std::string &param, const int32_t index = -1);
+		const std::map<std::string, e_commands>		&getCommands(void) const;
+		void										setCommands(const std::map<std::string, e_commands> &commands);
+
+	private:
+		void										initCommands(void);
+		void										parse(std::string raw_input);
+
+		std::string									_prefix;
+		uint16_t									_value;
+		std::vector<std::string>					_params;
+		std::map<std::string, e_commands>			_commands;
 };
 
 const std::map<enum e_replyCodes, const char *>			create_default_replies(void);

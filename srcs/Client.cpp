@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 23:22:19 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 10:41:40 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "irc/utils.hpp"
 #include "irc/Constants.hpp"
 #include "irc/Exceptions.hpp"
-#include "irc/Messages.hpp"
+#include "irc/Message.hpp"
 
 using std::string;
 using std::map;
@@ -181,11 +181,11 @@ void	Client::setAuthenticated(bool is_authenticated)
 	oss.str("");
 	oss << "Welcome to the Internet Relay Network " << _nickname << "!" << _username << "@" << _ip_addr;
 	const string welcome_msg = oss.str();
-	const struct s_message welcome(SERVER_NAME, RPL_WELCOME, _nickname.c_str(), welcome_msg.c_str(), NULL);
+	const Message welcome(SERVER_NAME, RPL_WELCOME, _nickname.c_str(), welcome_msg.c_str(), NULL);
 	oss.str("");
 	oss << "Your host is " << SERVER_NAME << ", running version " << SERVER_VERSION;
 	const string host_msg = oss.str();
-	const struct s_message yourhost(SERVER_NAME, RPL_YOURHOST, _nickname.c_str(), host_msg.c_str(), NULL);
+	const Message yourhost(SERVER_NAME, RPL_YOURHOST, _nickname.c_str(), host_msg.c_str(), NULL);
 	receiveMessage(welcome);
 	receiveMessage(yourhost);
 }
@@ -232,16 +232,16 @@ void	Client::joinChannel(Channel &channel, const string &key)
 	const string			&channel_name = channel.getName();
 	const string			&channel_topic = channel.getTopic();
 	const string			prefix = _nickname + "!" + _username + "@" + _ip_addr;
-	const struct s_message	join_notification(prefix, JOIN, channel_name.c_str(), NULL);
-	struct s_message		topic_reply;
+	const Message	join_notification(prefix, JOIN, channel_name.c_str(), NULL);
+	Message		topic_reply;
 
 	if (channel_topic.empty())
-		topic_reply = s_message(SERVER_NAME, RPL_NOTOPIC, _nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_NOTOPIC), NULL);
+		topic_reply = Message(SERVER_NAME, RPL_NOTOPIC, _nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_NOTOPIC), NULL);
 	else
-		topic_reply = s_message(SERVER_NAME, RPL_TOPIC, _nickname.c_str(), channel_name.c_str(), channel_topic.c_str(), default_replies.at(RPL_TOPIC), NULL);
+		topic_reply = Message(SERVER_NAME, RPL_TOPIC, _nickname.c_str(), channel_name.c_str(), channel_topic.c_str(), default_replies.at(RPL_TOPIC), NULL);
 
-	const struct s_message namreply(SERVER_NAME, RPL_NAMREPLY, _nickname.c_str(), "=", channel_name.c_str(), channel.getMembersString().c_str(), NULL);
-	const struct s_message endofnames(SERVER_NAME, RPL_ENDOFNAMES, _nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_ENDOFNAMES), NULL);
+	const Message namreply(SERVER_NAME, RPL_NAMREPLY, _nickname.c_str(), "=", channel_name.c_str(), channel.getMembersString().c_str(), NULL);
+	const Message endofnames(SERVER_NAME, RPL_ENDOFNAMES, _nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_ENDOFNAMES), NULL);
 	channel.receiveMessage(join_notification);
 	receiveMessage(topic_reply);
 	receiveMessage(namreply);
@@ -253,7 +253,7 @@ void	Client::leaveChannel(Channel &channel, const string &reason)
 	channel.removeMember(_nickname);
 	removeChannel(channel);
 
-	const struct s_message part(_nickname.c_str(), PART, channel.getName().c_str(), reason.c_str(), NULL);
+	const Message part(_nickname.c_str(), PART, channel.getName().c_str(), reason.c_str(), NULL);
 	channel.receiveMessage(part);
 	receiveMessage(part);
 
@@ -262,7 +262,7 @@ void	Client::leaveChannel(Channel &channel, const string &reason)
 	_logger.logEvent(oss.str());
 }
 
-void	Client::sendMessage(const Channel &channel, const struct s_message &msg) const
+void	Client::sendMessage(const Channel &channel, const Message &msg) const
 {
 	const string &channel_name = channel.getName();
 	
@@ -275,7 +275,7 @@ void	Client::sendMessage(const Channel &channel, const struct s_message &msg) co
 	_logger.logEvent(oss.str());
 }
 
-void	Client::sendMessage(const Client &receiver, const struct s_message &msg) const
+void	Client::sendMessage(const Client &receiver, const Message &msg) const
 {
 	if (!receiver.getIsAuthenticated())
 		throw ProtocolErrorException(ERR_NOLOGIN, receiver.getNickname().c_str(), default_replies.at(ERR_NOLOGIN), NULL);
@@ -286,7 +286,7 @@ void	Client::sendMessage(const Client &receiver, const struct s_message &msg) co
 	_logger.logEvent(oss.str());
 }
 
-void	Client::receiveMessage(const struct s_message &msg) const
+void	Client::receiveMessage(const Message &msg) const
 {
 	EventHandler::sendBufferedMessage(*this, msg);
 }
@@ -310,7 +310,7 @@ void	Client::kick(Client &user, Channel &channel, const string &reason) const
 	oss.str("");
 	oss << _nickname << "!" << _username << "@" << _ip_addr;
 	const string prefix = oss.str();
-	const struct s_message kick_notification(prefix, KICK, channel_name.c_str(), user_nickname.c_str(), reason.c_str(), NULL);
+	const Message kick_notification(prefix, KICK, channel_name.c_str(), user_nickname.c_str(), reason.c_str(), NULL);
 	channel.receiveMessage(kick_notification);
 	user.receiveMessage(kick_notification);
 }
@@ -326,8 +326,8 @@ void	Client::invite(Client &user, Channel &channel) const
 	oss << "Client " << _nickname << " tries to invite " << nickname << " to channel " << channel_name;
 	_logger.logEvent(oss.str());
 	channel.addPendingInvitation(user);
-	const struct s_message reply_to_issuer(SERVER_NAME, RPL_INVITING, _nickname.c_str(), nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_INVITING), NULL);
-	const struct s_message message_to_target(_nickname, INVITE, _nickname.c_str(), nickname.c_str(), channel_name.c_str(), NULL);
+	const Message reply_to_issuer(SERVER_NAME, RPL_INVITING, _nickname.c_str(), nickname.c_str(), channel_name.c_str(), default_replies.at(RPL_INVITING), NULL);
+	const Message message_to_target(_nickname, INVITE, _nickname.c_str(), nickname.c_str(), channel_name.c_str(), NULL);
 	receiveMessage(reply_to_issuer);
 	user.receiveMessage(message_to_target);
 }
@@ -344,7 +344,7 @@ void	Client::topicSet(Channel &channel, const string &new_topic) const
 	_logger.logEvent(oss.str());
 	channel.setTopic(new_topic);
 
-	const struct s_message topic(_nickname, TOPIC, channel_name.c_str(), new_topic.c_str(), NULL);
+	const Message topic(_nickname, TOPIC, channel_name.c_str(), new_topic.c_str(), NULL);
 	channel.receiveMessage(topic);
 }
 
@@ -386,7 +386,7 @@ void	Client::promoteOperator(Channel &channel, Client &user)
 	oss << "Client " << _nickname << " tries to promote operator " << user_nickname << " in channel " << channel_name;
 	_logger.logEvent(oss.str());
 	channel.addOperator(user_nickname);
-	const struct s_message youreoper(SERVER_NAME, RPL_YOUREOPER, _nickname.c_str(), user_nickname.c_str(), ("You are now an operator of " + channel_name).c_str(), NULL);
+	const Message youreoper(SERVER_NAME, RPL_YOUREOPER, _nickname.c_str(), user_nickname.c_str(), ("You are now an operator of " + channel_name).c_str(), NULL);
 	user.receiveMessage(youreoper);
 }
 
@@ -400,7 +400,7 @@ void	Client::demoteOperator(Channel &channel, Client &op)
 	oss << "Client " << _nickname << " tries to demote operator " << user_nickname << " in channel " << channel_name;
 	_logger.logEvent(oss.str());
 	channel.removeOperator(op.getNickname());
-	const struct s_message notoperanymore(SERVER_NAME, RPL_NOTOPERANYMORE, _nickname.c_str(), (user_nickname + " is no longer an operator of " + channel_name).c_str(), NULL);
+	const Message notoperanymore(SERVER_NAME, RPL_NOTOPERANYMORE, _nickname.c_str(), (user_nickname + " is no longer an operator of " + channel_name).c_str(), NULL);
 	op.receiveMessage(notoperanymore);
 }
 
