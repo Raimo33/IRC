@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:16:50 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 11:41:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 16:05:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,11 @@ using std::ostringstream;
 using std::cout;
 using std::endl;
 
-Logger::Logger(void) :
-	_filename(),
-	_file(),
-	_timestamp() {}
+Logger::Logger(void) {}
 
 Logger::Logger(const string &filename) :
 	_filename(filename),
-	_file(_filename.c_str()),
-	_timestamp()
+	_file(_filename.c_str())
 {
 	if (!_file.is_open())
 		throw SystemErrorException("Failed to open log file");
@@ -41,14 +37,26 @@ Logger::Logger(const Logger &copy) :
 	_file(_filename.c_str()),
 	_timestamp(copy._timestamp)
 {
-	if (!_file.is_open())
+	if (!_filename.empty() && !_file.is_open())
 		throw SystemErrorException("Failed to open log file");
 }
 
 Logger::~Logger(void)
 {
-	if (_file.is_open())
+	if (!_filename.empty() && _file.is_open())
 		_file.close();
+}
+
+Logger	&Logger::operator=(const Logger &rhs)
+{
+	if (this == &rhs)
+		return *this;
+	_filename = rhs._filename;
+	_file.open(_filename.c_str());
+	if (!_file.is_open())
+		throw SystemErrorException("Failed to open log file");
+	_timestamp = rhs._timestamp;
+	return *this;
 }
 
 const string	&Logger::getFilename(void) const
@@ -56,7 +64,7 @@ const string	&Logger::getFilename(void) const
 	return _filename;
 }
 
-void	Logger::init(const string &filename)
+void	Logger::setFile(const string &filename)
 {
 	_filename = filename;
 	_file.open(_filename.c_str());
@@ -95,7 +103,7 @@ void	Logger::log(const string &message, const char *const color)
 
 void	Logger::logToFile(const string &message)
 {
-	if (_file.is_open())
+	if (!_filename.empty() && _file.is_open())
 		_file << getTimestamp() << " - " << message << endl;
 }
 

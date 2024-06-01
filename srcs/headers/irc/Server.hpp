@@ -6,12 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 11:27:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 16:18:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //TODO aggiungere bot
 //TODO 2024-06-01 11:23:32 - System error: Resource temporarily unavailable testando con Konversation
+//TODO provare invite only e key insieme
 
 #ifndef SERVER_HPP
 # define SERVER_HPP

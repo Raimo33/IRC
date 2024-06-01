@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/28 13:24:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 16:05:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,11 @@ class Logger
 		Logger(const Logger &copy);
 		~Logger(void);
 
-		const std::string	&getFilename(void) const;
+		Logger				&operator=(const Logger &rhs);
 
-		void				init(const std::string &filename);
+		const std::string	&getFilename(void) const;		
+		void				setFile(const std::string &filename);
+
 		void				logEvent(const std::string &message);
 		void				logError(const std::exception *e);
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 12:23:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 12:40:09 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,6 @@ void	EventHandler::sendBufferedMessage(const Client &receiver, const Message &me
 	{
 		send_length = std::min(static_cast<size_t>(block_size),  second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
-		std::cout << "Sending: " << to_send << std::endl;
 		second_part = second_part.substr(send_length); // Update second_part correctly
 		send_p(receiver_socket, to_send.c_str(), to_send.length(), 0);
 	}

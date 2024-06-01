@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 10:31:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 16:12:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -314,7 +314,7 @@ void Channel::setMode(const char mode, const bool status, const string &param, c
 void	Channel::receiveMessage(const Message &msg, const Client *sender) const
 {
 	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
-		if (!sender || receiver->second != sender)
+		if (receiver->first != msg.getPrefix() && receiver->second != sender)
 			receiver->second->receiveMessage(msg);
 }
 
