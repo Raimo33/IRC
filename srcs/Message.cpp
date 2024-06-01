@@ -63,7 +63,7 @@ Message::Message(const string &prefix, const int value, va_list args)
 	_prefix = prefix;
 	_value = value;
 	while ((param = va_arg(args, const char *)) != NULL)
-        setParam(param);
+        _params.push_back(param);
 }
 
 Message::~Message(void) {}

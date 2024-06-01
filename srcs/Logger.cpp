@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:16:50 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/30 20:22:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 11:41:20 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,8 @@ Logger::Logger(const Logger &copy) :
 
 Logger::~Logger(void)
 {
-	_file.close();
+	if (_file.is_open())
+		_file.close();
 }
 
 const string	&Logger::getFilename(void) const

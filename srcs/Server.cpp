@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 11:01:02 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 12:23:52 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,6 @@ Server::~Server(void)
 		delete it->second;
 	close_p(_socket);
 	close_p(_epoll_fd);
-	std::cout << "Goodbye, hope you have a great day without me :( " << std::endl;
 }
 
 void Server::run(void)
@@ -292,9 +291,12 @@ void Server::handleClient(const int client_socket)
 	}
 	catch (ProtocolErrorException &e) //TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
 	{
-		Message	msg = e.getContent();
-		msg.setParam(client->getNickname(), 0);
-		client->receiveMessage(msg);
+		Message	&reply = e.getContent();
+		if (client->getIsAuthenticated())
+			reply.setParam(client->getNickname(), 0);
+		else
+			reply.setParam(SERVER_NAME, 0);
+		client->receiveMessage(reply);
 		_logger.logError(&e);
 	}
 }
