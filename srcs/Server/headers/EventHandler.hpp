@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 10:42:09 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 17:06:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class EventHandler
 		void 											processInput(std::string &raw_input);
 
 		static void										sendBufferedMessage(const Client &receiver, const Message &msg);
+		static void										sendBufferedMessage(const int socket, const Message &msg);
 
 	private:
 

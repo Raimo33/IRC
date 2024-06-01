@@ -6,20 +6,20 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 16:12:55 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:32:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "irc/Channel.hpp"
-#include "irc/Client.hpp"
-#include "irc/Client.hpp"
-#include "irc/utils.hpp"
-#include "irc/EventHandler.hpp"
-#include "irc/Exceptions.hpp"
-#include "irc/Message.hpp"
-#include "irc/Constants.hpp"
-#include "irc/Message.hpp"
-#include "irc/Logger.hpp"
+#include "Channel.hpp"
+#include "Client.hpp"
+#include "Client.hpp"
+#include "utils.hpp"
+#include "EventHandler.hpp"
+#include "Exceptions.hpp"
+#include "Message.hpp"
+#include "Constants.hpp"
+#include "Message.hpp"
+#include "Logger.hpp"
 
 #include <sstream>
 

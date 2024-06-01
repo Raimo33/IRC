@@ -6,12 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:16:50 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 16:05:57 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:32:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "irc/Logger.hpp"
-#include "irc/Exceptions.hpp"
+#include "Logger.hpp"
+#include "Exceptions.hpp"
 
 # include <ctime>
 

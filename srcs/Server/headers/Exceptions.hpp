@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 11:00:20 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:32:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # include <vector>
 # include <stdint.h>
 
-# include <irc/Message.hpp>
+# include <Message.hpp>
 
 class ProtocolErrorException : public std::exception //for IRC protocol errors (reply codes)
 {

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:43:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 15:39:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:10:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@
 
 class Channel;
 
-class Bot: public ABot
+class BeetleBot: public ABot
 {
 	public:
-		explicit Bot(const std::string &nickname, const std::string &username, const std::string &realname);
-		Bot(const Bot &copy);
-		~Bot(void);
+		explicit BeetleBot(const std::string &nickname, const std::string &username, const std::string &realname);
+		BeetleBot(const BeetleBot &copy);
+		~BeetleBot(void);
 
 		void						run(void);
 

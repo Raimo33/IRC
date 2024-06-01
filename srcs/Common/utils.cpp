@@ -6,12 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 19:24:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:32:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "irc/utils.hpp"
-#include "irc/Constants.hpp"
+#include "utils.hpp"
+#include "Constants.hpp"
 
 #include <stdint.h>
 #include <openssl/sha.h>

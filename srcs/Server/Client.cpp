@@ -6,17 +6,17 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 11:36:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:32:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "irc/Client.hpp"
-#include "irc/Channel.hpp"
-#include "irc/Server.hpp"
-#include "irc/utils.hpp"
-#include "irc/Constants.hpp"
-#include "irc/Exceptions.hpp"
-#include "irc/Message.hpp"
+#include "Client.hpp"
+#include "Channel.hpp"
+#include "Server.hpp"
+#include "utils.hpp"
+#include "Constants.hpp"
+#include "Exceptions.hpp"
+#include "Message.hpp"
 
 using std::string;
 using std::map;

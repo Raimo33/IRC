@@ -6,19 +6,19 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 12:40:09 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:34:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "irc/EventHandler.hpp"
-#include "irc/Server.hpp"
-#include "irc/Channel.hpp"
-#include "irc/Client.hpp"
-#include "irc/Client.hpp"
-#include "irc/utils.hpp"
-#include "irc/Message.hpp"
-#include "irc/Exceptions.hpp"
-#include "irc/Constants.hpp"
+#include "EventHandler.hpp"
+#include "Server.hpp"
+#include "Channel.hpp"
+#include "Client.hpp"
+#include "Client.hpp"
+#include "utils.hpp"
+#include "Message.hpp"
+#include "Exceptions.hpp"
+#include "Constants.hpp"
 
 #include <algorithm>
 
@@ -84,11 +84,17 @@ void	EventHandler::processInput(string &raw_input)
 	}
 }
 
-void	EventHandler::sendBufferedMessage(const Client &receiver, const Message &message)
+void	EventHandler::sendBufferedMessage(const Client &receiver, const Message &message) //TODO valutare se rimuovere e chiamare direttamente la utils con il socket
+{
+	const int	socket = receiver.getSocket();
+
+	sendBufferedMessage(socket, message);
+}
+/* TODO rendere common con bot (utils)
+void	EventHandler::sendBufferedMessage(const int socket, const Message &message)
 {
 	string		first_part, second_part, to_send;
 	uint16_t	block_size, send_length;
-	const int	receiver_socket = receiver.getSocket();
 
 	unwrapMessage(message, &first_part, &second_part);
 	block_size = BUFFER_SIZE - first_part.size() - 2; //2 per \r\n
@@ -97,7 +103,7 @@ void	EventHandler::sendBufferedMessage(const Client &receiver, const Message &me
 		send_length = std::min(static_cast<size_t>(block_size),  second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
 		second_part = second_part.substr(send_length); // Update second_part correctly
-		send_p(receiver_socket, to_send.c_str(), to_send.length(), 0);
+		send_p(socket, to_send.c_str(), to_send.length(), 0);
 	}
 }
 
@@ -122,7 +128,7 @@ void	EventHandler::unwrapMessage(const Message &msg, string *first_part, string 
 		*second_part += " " + *it;
 	if (!params.empty())
 		*second_part += " :" + params.back();
-}
+}*/
 
 const map<e_commands, EventHandler::CommandHandler>	EventHandler::initHandlers(void)
 {

@@ -6,13 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 18:23:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:32:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-#include "irc/Exceptions.hpp"
-#include "irc/SystemCalls.hpp"
+#include "Exceptions.hpp"
+#include "SystemCalls.hpp"
 
 using std::string;
 
@@ -183,6 +183,16 @@ int	epoll_wait_p(int epfd, struct epoll_event *events, int maxevents, int timeou
 	ret = epoll_wait(epfd, events, maxevents, timeout);
 	if (ret == -1)
 		throw SystemErrorException(errno);
+	return (ret);
+}
+
+int getaddrinfo_p(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res)
+{
+	int	ret;
+
+	ret = getaddrinfo(node, service, hints, res);
+	if (ret != 0)
+		throw SystemErrorException(gai_strerror(ret));
 	return (ret);
 }
 

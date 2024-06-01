@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 11:00:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:32:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@
 #include <errno.h>
 #include <cstring>
 
-#include "irc/Exceptions.hpp"
-#include "irc/Constants.hpp"
-#include "irc/Message.hpp"
-#include "irc/EventHandler.hpp"
+#include "Exceptions.hpp"
+#include "Constants.hpp"
+#include "Message.hpp"
+#include "EventHandler.hpp"
 
 using std::string;
 using std::map;

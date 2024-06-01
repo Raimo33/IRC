@@ -6,18 +6,18 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 12:23:52 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 18:32:06 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "irc/Server.hpp"
-#include "irc/SystemCalls.hpp"
-#include "irc/Client.hpp"
-#include "irc/Channel.hpp"
-#include "irc/SystemCalls.hpp"
-#include "irc/EventHandler.hpp"
-#include "irc/Message.hpp"
-#include "irc/Exceptions.hpp"
+#include "Server.hpp"
+#include "SystemCalls.hpp"
+#include "Client.hpp"
+#include "Channel.hpp"
+#include "SystemCalls.hpp"
+#include "EventHandler.hpp"
+#include "Message.hpp"
+#include "Exceptions.hpp"
 
 #include <algorithm>
 #include <arpa/inet.h>
