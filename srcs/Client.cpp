@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 10:41:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/01 11:36:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,7 +268,7 @@ void	Client::sendMessage(const Channel &channel, const Message &msg) const
 	
 	if (_channels.find(channel_name) == _channels.end())
 		throw ProtocolErrorException(ERR_NOTONCHANNEL, channel_name.c_str(), default_replies.at(ERR_NOTONCHANNEL), NULL);
-	channel.receiveMessage(msg);
+	channel.receiveMessage(msg, this);
 
 	ostringstream oss;
 	oss << "Client " << _nickname << " sent message to channel " << channel_name;
