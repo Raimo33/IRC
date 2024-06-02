@@ -36,6 +36,9 @@ Detailed documentation is available in the [Wiki](https://github.com/Raimo33/IRC
 
 IRC message format cheat sheet:
 
+# IRC Message Format Cheat Sheet
+
+```plaintext
 <message> ::= [':' <prefix> <SPACE>] <command> <params> <crlf>
 <prefix> ::= <servername> | <nick> ['!' <user>] ['@' <host>]
 <command> ::= <letter> {<letter>} | <number> <number> <number>
