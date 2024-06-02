@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 18:18:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 23:56:05 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,7 +211,7 @@ bool Server::isClientConnected(const string &nickname) const
 
 void Server::disconnectClient(Client &client)
 {
-	int socket = client.getSocket();
+	int		socket = client.getSocket();
 
 	shutdown_p(socket, SHUT_RDWR);
 	close_p(socket);

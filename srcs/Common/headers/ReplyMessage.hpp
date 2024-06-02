@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:36:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 22:36:38 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 22:57:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ class ReplyMessage : public AMessage
 		void 				parse(std::string raw_input);
 		void 				unwrapMessage(std::string &first_part, std::string &second_part) const;
 
-		enum e_replyCodes _reply_code;
+		enum e_replyCodes	_reply_code;
 };
 
 const std::map<enum e_replyCodes, const char *>			create_g_default_replies_map(void);

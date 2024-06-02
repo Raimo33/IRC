@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 16:31:10 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 23:49:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class Channel
 		void									setMemberLimit(const uint32_t new_limit);
 		const std::map<std::string, Client *>	&getMembers(void) const;
 		void									setMembers(const std::map<std::string, Client *> &new_members);
-		const Client							&getMember(const std::string &nickname) const;
+		Client									&getMember(const std::string &nickname) const;
 		void									addMember(Client &user);
 		void									removeMember(const std::string &nickname);
 		const std::set<const Client *>			&getOperators(void) const;

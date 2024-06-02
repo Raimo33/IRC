@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 18:28:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 23:51:45 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ using std::vector;
 
 Channel::Channel(Logger &logger, const string &name, Client &op, const string &key) : 
 	_name(name),
-	_topic(""),
 	_member_limit(-1),
 	_modes(initModes()),
 	_logger(logger)
@@ -134,7 +133,7 @@ void Channel::setMembers(const map<string, Client *> &new_members)
 	_members = new_members;
 }
 
-const Client &Channel::getMember(const string &nickname) const
+Client &Channel::getMember(const string &nickname) const
 {
 	if (!isMember(nickname))
 		throw ActionFailedException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), g_default_replies_map.at(ERR_USERNOTINCHANNEL), NULL);
@@ -159,13 +158,15 @@ void Channel::addMember(Client &user)
 
 void Channel::removeMember(const string &nickname)
 {
-	const Client &user = getMember(nickname);
+	Client &user = getMember(nickname);
 	if (isOperator(user))
 		_operators.erase(&user);
 	_members.erase(nickname);
 	ostringstream oss;
 	oss << "Channel " << _name << ", member removed: " << nickname;
 	_logger.logEvent(oss.str());
+	if (_members.empty())
+		delete this;
 }
 
 const set<const Client *> &Channel::getOperators(void) const
@@ -313,7 +314,7 @@ void Channel::setMode(const char mode, const bool status, const string &param, c
 void Channel::receiveMessage(const AMessage &msg, const Client *sender) const
 {
 	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
-		if (receiver->first != msg.getPrefix() && receiver->second != sender)
+		if (!sender || receiver->second != sender)
 			receiver->second->receiveMessage(&msg);
 }
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 17:04:16 by egualand          #+#    #+#             */
-/*   Updated: 2024/06/02 18:17:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 23:17:35 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ ActionFailedException::ActionFailedException(const int reply_code, ...)
 	if (reply_code < RPL_WELCOME || reply_code > ERR_CHANOPRIVSNEEDED)
 		throw InternalErrorException("ActionFailedException::ActionFailedException: Invalid reply code");
 	va_start(args, reply_code);
-	_content = ReplyMessage(SERVER_NAME, reply_code, args);
+	_content = ReplyMessage(SERVER_NAME, static_cast<enum e_replyCodes>(reply_code), args);
 	va_end(args);
 }
 

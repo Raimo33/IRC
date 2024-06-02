@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:54:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 18:28:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 23:28:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,27 +26,27 @@ using std::istringstream;
 
 ReplyMessage::ReplyMessage(void) {}
 
-ReplyMessage::ReplyMessage(const std::string &raw_input)
+ReplyMessage::ReplyMessage(const string &raw_input)
 {
 	parse(raw_input);
 }
 
-ReplyMessage::ReplyMessage(const std::string &prefix, const int reply_code, ...)
+ReplyMessage::ReplyMessage(const string &prefix, const int reply_code, ...)
 {
 	va_list		args;
 	const char	*param;
 
 	if (reply_code < RPL_WELCOME || reply_code > ERR_CHANOPRIVSNEEDED)
 		throw InternalErrorException("ReplyMessage::ReplyMessage: invalid reply code");
-	va_start(args, reply_code);
 	_prefix = prefix;
 	_reply_code = static_cast<enum e_replyCodes>(reply_code);
+	va_start(args, reply_code);
 	while ((param = va_arg(args, const char *)) != NULL)
 		_params.push_back(param);
 	va_end(args);
 }
 
-ReplyMessage::ReplyMessage(const std::string &prefix, const enum e_replyCodes reply_code, va_list args)
+ReplyMessage::ReplyMessage(const string &prefix, const enum e_replyCodes reply_code, va_list args)
 {
 	const char	*param;
 
@@ -105,7 +105,7 @@ void	ReplyMessage::parse(string raw_input)
 	}
 }
 
-void	ReplyMessage::unwrapMessage(std::string &first_part, std::string &second_part) const
+void	ReplyMessage::unwrapMessage(string &first_part, string &second_part) const
 {
 	if (!_prefix.empty())
 		first_part += ":" + _prefix + " ";

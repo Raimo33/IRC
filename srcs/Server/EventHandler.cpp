@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 22:47:56 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 23:53:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,7 +219,7 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 void EventHandler::handleQuit(const vector<string> &args)
 {
 	const string					&reason = args.size() > 0 ? args[0] : "Client quit";
-	const string					&quitting_nickname = _client->getNickname();
+	const string					quitting_nickname = _client->getNickname();
 	const CommandMessage			quit(quitting_nickname, QUIT, reason.c_str(), NULL);
 	const map<string, Channel *>	&channels = _client->getChannels();
 
@@ -232,11 +232,11 @@ void EventHandler::handleQuit(const vector<string> &args)
 		{
 			const Client *member = it_member->second;
 
-			if (member->getNickname() != quitting_nickname)
+			if (member && member->getNickname() != quitting_nickname)
 				member->receiveMessage(&quit);
 		}
 	}
-	_server->removeClient(*_client);
+	_server->disconnectClient(*_client);
 	ostringstream oss;
 	oss << "Client " << quitting_nickname << " has quit";
 	_logger.logEvent(oss.str());
