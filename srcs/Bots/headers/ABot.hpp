@@ -6,15 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:45:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 17:59:14 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 19:02:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ABOT_HPP
 # define ABOT_HPP
-
-//TODO ogni volta che il bot riceve un messaggio indietro dal server deve interpetarlo e farsi il suo database di roba di riferimento
-//tipo: appena entra in un canale crea l'oggetto Channel, appena riceve la Namreply si fa la lista degli utenti e se li salva nell'oggetto Channel
 
 #include <string>
 #include <map>
@@ -22,11 +19,9 @@
 
 #include "Logger.hpp"
 
-class Server;
 class Action;
-class Channel;
-class Client;
 class Logger;
+class CommandMessage;
 
 class ABot
 {
@@ -43,19 +38,12 @@ class ABot
 		void								setLogger(const Logger &logger);
 		const Logger						&getLogger(void) const;
 
-		virtual void						run(void) = 0;
+		void								run(void);
 	
 	protected:
-		void								setConnected(bool connected);
-		void								setSocket(int socket);
 
-		void								joinChannel(Channel &channel, const std::string &key = "");
-		void								leaveChannel(Channel &channel, const std::string &reason = "");
-		void								sendText(const Channel &channel, const std::string &text); //:nickname PRIVMSG #channel|nickname :text
-		void								sendText(const Client &user, const std::string &text); //:nickname PRIVMSG #channel|nickname :text
-		void								connect(const std::string &ip, const std::string &port, const std::string &password = "");
-		void								disconnect(void);
-		//receive message (Message o text)				
+		virtual void						routine(void) = 0;
+		void								sendMessage(const CommandMessage &msg) const; //sends a message to the server
 
 		const std::string					_nickname;
 		const std::string					_username;
@@ -66,11 +54,18 @@ class ABot
 	private:
 		ABot(void);
 
+		void								setConnected(bool connected);
+		void								setSocket(int socket);
+
+		void								connect(void);
+		void								disconnect(void);
 		void								authenticate(const std::string &password = "");
 
-		int									_socket;
+		int									_server_socket; // socket to the 
+		std::string							_server_ip;
+		uint16_t							_server_port;
+		std::string							_server_password;
 		std::map<std::string, Action>		_actions;
-		std::map<std::string, Channel *>	_channels;
 };
 
 #endif

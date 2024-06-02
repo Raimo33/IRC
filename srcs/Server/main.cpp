@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 16:25:16 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 19:12:17 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 using std::string;
 using std::istringstream;
 using std::ostringstream;
-using std::exception;
 using std::cerr;
 using std::endl;
 
@@ -43,7 +42,7 @@ int main(const int argc, const char **argv)
 	{
 		cerr << "Invalid argument: " << e.what() << endl;
 	}
-	catch (const exception &e)
+	catch (const std::exception &e)
 	{
 		logger.logError(&e);
 		logger.logEvent("Server shutting down");
@@ -59,11 +58,11 @@ static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, 
 	istringstream	iss(argv[1]);
 
 	if (!(iss >> *port_nbr))
-		throw std::invalid_argument("Invalid port number");
+		throw std::invalid_argument("Invalid port number format");
 	iss.clear();
 	iss.str(argv[2]);
 	if (!(iss >> *password))
-		throw std::invalid_argument("Invalid password");
+		throw std::invalid_argument("Invalid password format");
 	if (password->length() > MAX_SERVER_PASSWORD_LEN)
 	{
 		ostringstream oss;

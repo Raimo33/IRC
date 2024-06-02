@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server_exceptions.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 16:08:11 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 17:49:27 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:17:53 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,12 @@
 
 #include <exception>
 
-class ProtocolErrorException : public std::exception // for IRC protocol errors (reply codes)
+class ActionFailedException : public std::exception // for IRC protocol errors (reply codes)
 {
 public:
-	explicit ProtocolErrorException(const int reply_code, ...);
+	explicit ActionFailedException(const int reply_code, ...);
 	const char *what(void) const throw();
-	~ProtocolErrorException(void) throw();
+	~ActionFailedException(void) throw();
 
 	ReplyMessage &getContent(void);
 

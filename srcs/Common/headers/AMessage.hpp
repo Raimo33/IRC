@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AMessage.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/23 15:38:24 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 17:21:15 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:42:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ class AMessage
 		void							setParams(const std::vector<std::string> &params);
 		void							setParam(const std::string &param, const int32_t index = -1);
 
-		void							deliver(const int socket) const;
+		void							getDelivered(const int socket) const;
 
 	protected:
 		virtual void					parse(std::string raw_input) = 0;

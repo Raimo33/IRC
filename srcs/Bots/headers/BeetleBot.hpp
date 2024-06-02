@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Bot.hpp                                            :+:      :+:    :+:   */
+/*   BeetleBot.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:43:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 18:10:31 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 19:11:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 
 #include "ABot.hpp"
 
-class Channel;
 
 class BeetleBot: public ABot
 {
@@ -26,11 +25,7 @@ class BeetleBot: public ABot
 		BeetleBot(const BeetleBot &copy);
 		~BeetleBot(void);
 
-		void						run(void);
-
-	private:
-		void						joinChannel(const Channel &channel);
-		void						leaveChannel(const Channel &channel);
+		void	routine(void);
 };
 
 

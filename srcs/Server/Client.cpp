@@ -3,19 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 16:37:09 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:42:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "Server.hpp"
-#include "utils.hpp"
-#include "Constants.hpp"
-#include "Exceptions.hpp"
+#include "server_utils.hpp"
+#include "server_exceptions.hpp"
+#include "server_constants.hpp"
 
 using std::map;
 using std::string;
@@ -63,14 +63,14 @@ Channel &Client::getChannel(const string &channel_name) const
 	map<string, Channel *>::const_iterator it = _channels.find(channel_name);
 
 	if (it == _channels.end()) // se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
-		throw ProtocolErrorException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
+		throw ActionFailedException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
 	return *it->second;
 }
 
 void Client::addChannel(Channel &channel)
 {
 	if (_channels.size() >= MAX_CHANNELS_PER_USER)
-		throw ProtocolErrorException(ERR_TOOMANYCHANNELS, channel.getName().c_str(), g_default_replies_map.at(ERR_TOOMANYCHANNELS), NULL);
+		throw ActionFailedException(ERR_TOOMANYCHANNELS, channel.getName().c_str(), g_default_replies_map.at(ERR_TOOMANYCHANNELS), NULL);
 	_channels[channel.getName()] = &channel;
 
 	ostringstream oss;
@@ -84,7 +84,7 @@ void Client::removeChannel(const Channel &channel)
 	map<string, Channel *>::iterator it = _channels.find(channel_name);
 
 	if (it == _channels.end()) // se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
-		throw ProtocolErrorException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
+		throw ActionFailedException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
 	_channels.erase(it);
 
 	ostringstream oss;
@@ -215,13 +215,13 @@ Server &Client::getServer(void) const
 void Client::joinChannel(Channel &channel, const string &key)
 {
 	if (!_is_authenticated)
-		throw ProtocolErrorException(ERR_NOTREGISTERED, g_default_replies_map.at(ERR_NOTREGISTERED), NULL);
+		throw ActionFailedException(ERR_NOTREGISTERED, g_default_replies_map.at(ERR_NOTREGISTERED), NULL);
 	if (channel.getMode('k') && channel.getKey() != key)
-		throw ProtocolErrorException(ERR_BADCHANNELKEY, channel.getName().c_str(), g_default_replies_map.at(ERR_BADCHANNELKEY), NULL);
+		throw ActionFailedException(ERR_BADCHANNELKEY, channel.getName().c_str(), g_default_replies_map.at(ERR_BADCHANNELKEY), NULL);
 	if (channel.getMembers().size() >= channel.getMemberLimit())
-		throw ProtocolErrorException(ERR_CHANNELISFULL, channel.getName().c_str(), g_default_replies_map.at(ERR_CHANNELISFULL), NULL);
+		throw ActionFailedException(ERR_CHANNELISFULL, channel.getName().c_str(), g_default_replies_map.at(ERR_CHANNELISFULL), NULL);
 	if (_channels.size() >= MAX_CHANNELS_PER_USER)
-		throw ProtocolErrorException(ERR_TOOMANYCHANNELS, channel.getName().c_str(), g_default_replies_map.at(ERR_TOOMANYCHANNELS), NULL);
+		throw ActionFailedException(ERR_TOOMANYCHANNELS, channel.getName().c_str(), g_default_replies_map.at(ERR_TOOMANYCHANNELS), NULL);
 
 	channel.addMember(*this);
 	addChannel(channel);
@@ -264,7 +264,7 @@ void Client::sendMessage(const Channel &channel, const AMessage &msg) const
 	const string &channel_name = channel.getName();
 
 	if (_channels.find(channel_name) == _channels.end())
-		throw ProtocolErrorException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
+		throw ActionFailedException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
 	channel.receiveMessage(msg, this);
 
 	ostringstream oss;
@@ -275,7 +275,7 @@ void Client::sendMessage(const Channel &channel, const AMessage &msg) const
 void Client::sendMessage(const Client &receiver, const AMessage &msg) const
 {
 	if (!receiver.getIsAuthenticated())
-		throw ProtocolErrorException(ERR_NOLOGIN, receiver.getNickname().c_str(), g_default_replies_map.at(ERR_NOLOGIN), NULL);
+		throw ActionFailedException(ERR_NOLOGIN, receiver.getNickname().c_str(), g_default_replies_map.at(ERR_NOLOGIN), NULL);
 	receiver.receiveMessage(&msg);
 
 	ostringstream oss;
@@ -285,7 +285,7 @@ void Client::sendMessage(const Client &receiver, const AMessage &msg) const
 
 void Client::receiveMessage(const AMessage *msg) const
 {
-	msg->deliver(this->getSocket());
+	msg->getDelivered(this->getSocket());
 }
 
 void Client::kick(Client &user, Channel &channel, const string &reason) const
@@ -334,7 +334,7 @@ void Client::topicSet(Channel &channel, const string &new_topic) const
 	const string &channel_name = channel.getName();
 
 	if (channel.getMode('t') && !channel.isOperator(*this))
-		throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, _nickname.c_str(), channel_name.c_str(), g_default_replies_map.at(ERR_CHANOPRIVSNEEDED), NULL);
+		throw ActionFailedException(ERR_CHANOPRIVSNEEDED, _nickname.c_str(), channel_name.c_str(), g_default_replies_map.at(ERR_CHANOPRIVSNEEDED), NULL);
 
 	ostringstream oss;
 	oss << "Client " << _nickname << " tries to set topic of channel " << channel_name << " to " << new_topic;
@@ -365,7 +365,7 @@ void Client::modesChange(Channel &channel, const map<char, bool> &modes, const v
 		if (channel_mode_requires_param(it->first, it->second))
 		{
 			if (params.empty())
-				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, channel.getName().c_str(), ("Need more parameters for mode " + string(1, it->first)).c_str(), NULL);
+				throw ActionFailedException(ERR_NEEDMOREPARAMS, channel.getName().c_str(), ("Need more parameters for mode " + string(1, it->first)).c_str(), NULL);
 			modeChange(channel, it->first, it->second, params.at(i++));
 		}
 		else
@@ -404,5 +404,5 @@ void Client::demoteOperator(Channel &channel, Client &op)
 void Client::checkPrivilege(const Channel &channel) const
 {
 	if (!channel.isOperator(*this))
-		throw ProtocolErrorException(ERR_CHANOPRIVSNEEDED, channel.getName().c_str(), g_default_replies_map.at(ERR_CHANOPRIVSNEEDED), NULL);
+		throw ActionFailedException(ERR_CHANOPRIVSNEEDED, channel.getName().c_str(), g_default_replies_map.at(ERR_CHANOPRIVSNEEDED), NULL);
 }

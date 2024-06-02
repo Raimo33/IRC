@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandMessage.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:37:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 17:51:19 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:09:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,19 +46,25 @@ class CommandMessage : public AMessage
 		CommandMessage(const CommandMessage &copy);
 		virtual ~CommandMessage(void);
 
-		CommandMessage			&operator=(const CommandMessage &copy);
+		CommandMessage					&operator=(const CommandMessage &copy);
 
-		void					setCommand(const enum e_commands command);
-		const enum e_commands	&getCommand(void) const;
+		void							setCommand(const enum e_commands command);
+		const enum e_commands			&getCommand(void) const;
+		
+		static enum e_commands			getCommandFromString(const std::string &command);
+		static const std::string		getStringFromCommand(const enum e_commands command);
 
 	private:
-		void					parse(std::string raw_input);
-		void					unwrapMessage(std::string &first_part, std::string &second_part) const;
+		void							parse(std::string raw_input);
+		void							unwrapMessage(std::string &first_part, std::string &second_part) const;
 
-		enum e_commands			_command;
+		enum e_commands					_command;
 };
 
-const std::map<std::string, enum e_commands>		create_commands_map(void); //TODO mettere statici dentro la classe
-extern const std::map<std::string, enum e_commands>	g_commands;
+extern const std::map<std::string, enum e_commands>	g_str_cmd_map;
+extern const std::map<enum e_commands, std::string>	g_cmd_str_map;
+
+const std::map<std::string, enum e_commands>	create_str_cmd_map(void);
+const std::map<enum e_commands, std::string>	create_cmd_str_map(void);
 
 #endif

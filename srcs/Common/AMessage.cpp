@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AMessage.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 15:31:09 by egualand          #+#    #+#             */
-/*   Updated: 2024/06/02 17:20:24 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:42:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void AMessage::setParam(const std::string &param, int32_t index)
 	_params.insert(_params.begin() + index, param);
 }
 
-void AMessage::deliver(const int socket) const
+void AMessage::getDelivered(const int socket) const
 {
 	string first_part, second_part, to_send;
 	uint16_t block_size, send_length;

@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Logger.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:16:50 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 15:47:52 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:16:45 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
-#include "Exceptions.hpp"
+#include "common_exceptions.hpp"
 
 # include <ctime>
 
@@ -84,9 +84,7 @@ void	Logger::logError(const exception *e)
 
 	const string	message(e->what());
 
-	if (dynamic_cast<const ProtocolErrorException *>(e))
-		log("User action failed: " + message, BLUE);
-	else if (dynamic_cast<const InternalErrorException *>(e))
+	if (dynamic_cast<const InternalErrorException *>(e))
 		log("Internal error: " + message, RED);
 	else if (dynamic_cast<const SystemErrorException *>(e))
 		log("System error: " + message, ORANGE);

@@ -19,12 +19,12 @@ SERVER_OBJS = $(patsubst srcs/Server/%.cpp, objs/Server/%.o, $(SERVER_SRCS))
 SERVER_INCS_DIR = srcs/Server/headers
 
 BOT_SRCS = $(addprefix srcs/Bots/, main.cpp ABot.cpp BeetleBot.cpp bot_utils.cpp bot_exceptions.cpp)
-BOT_HDRS = $(addprefix srcs/Bots/headers/, ABot.hpp BeetleBot.hpp bot_utils.hpp bot_exceptions.hpp)
+BOT_HDRS = $(addprefix srcs/Bots/headers/, ABot.hpp BeetleBot.hpp bot_utils.hpp bot_exceptions.hpp bot_constants.hpp)
 BOT_OBJS = $(patsubst srcs/Bots/%.cpp, objs/Bots/%.o, $(BOT_SRCS))
 BOT_INCS_DIR = srcs/Bots/headers
 
 COMMON_SRCS = $(addprefix srcs/Common/, AMessage.cpp CommandMessage.cpp ReplyMessage.cpp Logger.cpp system_calls.cpp common_utils.cpp common_exceptions.cpp)
-COMMON_HDRS = $(addprefix srcs/Common/headers/, AMessage/hpp CommandMessage.hpp ReplyMessage.hpp Logger.hpp system_calls.hpp common_utils.hpp common_exceptions.hpp)
+COMMON_HDRS = $(addprefix srcs/Common/headers/, AMessage/hpp CommandMessage.hpp ReplyMessage.hpp Logger.hpp system_calls.hpp common_utils.hpp common_exceptions.hpp common_constants.hpp)
 COMMON_OBJS = $(patsubst srcs/Common/%.cpp, objs/Common/%.o, $(COMMON_SRCS))
 COMMON_INCS_DIR = srcs/Common/headers
 

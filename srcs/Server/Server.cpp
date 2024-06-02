@@ -3,20 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 16:45:40 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:18:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "system_calls.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
-#include "system_calls.hpp"
 #include "EventHandler.hpp"
-#include "Exceptions.hpp"
+#include "system_calls.hpp"
+#include "server_exceptions.hpp"
 
 #include <algorithm>
 #include <arpa/inet.h>
@@ -141,7 +140,7 @@ Client &Server::getClient(const string &nickname) const
 		if (it->second->getNickname() == nickname)
 			return *it->second;
 	}
-	throw ProtocolErrorException(ERR_NOSUCHNICK, nickname.c_str(), g_default_replies_map.at(ERR_NOSUCHNICK), NULL);
+	throw ActionFailedException(ERR_NOSUCHNICK, nickname.c_str(), g_default_replies_map.at(ERR_NOSUCHNICK), NULL);
 }
 
 void Server::addClient(Client &client)
@@ -177,7 +176,7 @@ Channel &Server::getChannel(const string &name) const
 	map<string, Channel *>::const_iterator it = _channels.find(name);
 
 	if (it == _channels.end())
-		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name.c_str(), g_default_replies_map.at(ERR_NOSUCHCHANNEL), NULL);
+		throw ActionFailedException(ERR_NOSUCHCHANNEL, name.c_str(), g_default_replies_map.at(ERR_NOSUCHCHANNEL), NULL);
 	return *it->second;
 }
 
@@ -286,7 +285,7 @@ void Server::handleClient(const int client_socket)
 		_handler.setClient(*client);
 		_handler.processInput(raw_input);
 	}
-	catch (ProtocolErrorException &e) // TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
+	catch (ActionFailedException &e) // TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
 	{
 		ReplyMessage &reply = e.getContent();
 		if (client->getIsAuthenticated())
@@ -294,7 +293,9 @@ void Server::handleClient(const int client_socket)
 		else
 			reply.setParam(SERVER_NAME, 0);
 		client->receiveMessage(&reply);
-		_logger.logError(&e);
+		ostringstream oss;
+		oss << "Action failed: " << e.what();
+		_logger.logEvent(oss.str());
 	}
 }
 

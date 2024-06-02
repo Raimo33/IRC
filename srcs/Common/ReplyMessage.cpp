@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ReplyMessage.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:54:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 17:39:41 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:28:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ void	ReplyMessage::parse(string raw_input)
 	iss.str(reply_code_str);
 	iss >> reply_code;
 	if (reply_code < RPL_WELCOME || reply_code > ERR_CHANOPRIVSNEEDED)
-		_reply_code = UNKNOWN;
+		_reply_code = RPL_UNKNOWN;
 	else	
 		_reply_code = static_cast<enum e_replyCodes>(reply_code);
 	while (it != raw_input.end())
@@ -157,4 +157,4 @@ const map<enum e_replyCodes, const char *> create_default_replies_map(void)
 	return default_replies;
 }
 
-const map<enum e_replyCodes, const char *> g_default_replies = create_default_replies_map();
+const map<enum e_replyCodes, const char *> g_default_replies_map = create_default_replies_map();

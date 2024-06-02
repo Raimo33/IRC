@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 17:52:03 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:29:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,15 +30,17 @@ using std::vector;
 static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
 
-EventHandler::EventHandler(Logger &logger, Server &server) : _server(&server),
-															 _client(NULL),
-															 _handlers(initHandlers()),
-															 _logger(logger) {}
+EventHandler::EventHandler(Logger &logger, Server &server) : 
+	_server(&server),
+	_client(NULL),
+	_handlers(initHandlers()),
+	_logger(logger) {}
 
-EventHandler::EventHandler(const EventHandler &copy) : _server(copy._server),
-													   _client(copy._client),
-													   _handlers(copy._handlers),
-													   _logger(copy._logger) {}
+EventHandler::EventHandler(const EventHandler &copy) :
+	_server(copy._server),
+	_client(copy._client),
+	_handlers(copy._handlers),
+	_logger(copy._logger) {}
 
 EventHandler::~EventHandler(void) {}
 
@@ -66,7 +68,7 @@ void EventHandler::processInput(string &raw_input)
 		if (command == CMD_UNKNOWN)
 		{
 			const string &first_param = _client->getIsAuthenticated() ? _client->getNickname() : SERVER_NAME;
-			ReplyMessage reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, first_param.c_str(), input.getCommandStr().c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
+			ReplyMessage reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, first_param.c_str(), input.getStringFromCommand(command).c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
 			_client->receiveMessage(&reply);
 		}
 		(this->*(_handlers.at(input.getCommand())))(input.getParams());
@@ -97,13 +99,13 @@ const map<e_commands, EventHandler::CommandHandler> EventHandler::initHandlers(v
 void EventHandler::handlePass(const vector<string> &args)
 {
 	if (_client->getIsConnected())
-		throw ProtocolErrorException(ERR_ALREADYREGISTRED, g_default_replies_map.at(ERR_ALREADYREGISTRED), NULL);
+		throw ActionFailedException(ERR_ALREADYREGISTRED, g_default_replies_map.at(ERR_ALREADYREGISTRED), NULL);
 
 	if (args.size() < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PASS", "usage: PASS <password>", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "PASS", "usage: PASS <password>", NULL);
 
 	if (hash(args[0]) != _server->getPwdHash())
-		throw ProtocolErrorException(ERR_PASSWDMISMATCH, g_default_replies_map.at(ERR_PASSWDMISMATCH), NULL);
+		throw ActionFailedException(ERR_PASSWDMISMATCH, g_default_replies_map.at(ERR_PASSWDMISMATCH), NULL);
 	_client->setIsConnected(true);
 }
 
@@ -111,9 +113,9 @@ void EventHandler::handleNick(const vector<string> &args)
 {
 	checkConnection(_client);
 	if (_client->getIsAuthenticated() || !_client->getNickname().empty())
-		throw ProtocolErrorException(ERR_ALREADYREGISTRED, g_default_replies_map.at(ERR_ALREADYREGISTRED), NULL);
+		throw ActionFailedException(ERR_ALREADYREGISTRED, g_default_replies_map.at(ERR_ALREADYREGISTRED), NULL);
 	if (args.size() < 1)
-		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN, g_default_replies_map.at(ERR_NONICKNAMEGIVEN), NULL);
+		throw ActionFailedException(ERR_NONICKNAMEGIVEN, g_default_replies_map.at(ERR_NONICKNAMEGIVEN), NULL);
 	checkNicknameValidity(args[0]);
 	_client->setNickname(args[0]);
 	if (!_client->getUsername().empty())
@@ -124,9 +126,9 @@ void EventHandler::handleUser(const vector<string> &args)
 {
 	checkConnection(_client);
 	if (_client->getIsAuthenticated() || !_client->getUsername().empty())
-		throw ProtocolErrorException(ERR_ALREADYREGISTRED, g_default_replies_map.at(ERR_ALREADYREGISTRED), NULL);
+		throw ActionFailedException(ERR_ALREADYREGISTRED, g_default_replies_map.at(ERR_ALREADYREGISTRED), NULL);
 	if (args.size() < 4)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "USER", "usage: USER <username> <hostname> <servername> <realname>", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "USER", "usage: USER <username> <hostname> <servername> <realname>", NULL);
 	_client->setUsername(args[0]);
 	(void)args[1]; // args[1] = hostname
 	(void)args[2]; // args[2] = servername
@@ -140,7 +142,7 @@ void EventHandler::handleJoin(const vector<string> &args)
 	checkConnection(_client);
 	checkAuthentication(_client);
 	if (args.size() < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]", NULL);
 
 	const vector<string> channels_to_join = ::split(args[0], ",");
 	const map<string, Channel *> &channels = _server->getChannels();
@@ -177,7 +179,7 @@ void EventHandler::handlePart(const vector<string> &args)
 	const uint16_t n_args = args.size();
 
 	if (n_args < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "PART", "usage: PART <channel>{,<channel>} [<reason>]", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "PART", "usage: PART <channel>{,<channel>} [<reason>]", NULL);
 
 	const string reason = (n_args > 1) ? args[1] : "";
 	const vector<string> channels = split(args[0], ",");
@@ -196,9 +198,9 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 
 	const uint16_t n_args = args.size();
 	if (n_args < 1)
-		throw ProtocolErrorException(ERR_NORECIPIENT, "PRIVMSG", "no recipient given (PRIVMSG)", NULL);
+		throw ActionFailedException(ERR_NORECIPIENT, "PRIVMSG", "no recipient given (PRIVMSG)", NULL);
 	if (n_args < 2)
-		throw ProtocolErrorException(ERR_NOTEXTTOSEND, g_default_replies_map.at(ERR_NOTEXTTOSEND), NULL);
+		throw ActionFailedException(ERR_NOTEXTTOSEND, g_default_replies_map.at(ERR_NOTEXTTOSEND), NULL);
 
 	const CommandMessage msg(_client->getNickname(), PRIVMSG, args[0].c_str(), args[1].c_str(), NULL);
 	if (is_channel_prefix(args[0][0])) // se il primo carattere e' #, &, + o !
@@ -245,7 +247,7 @@ void EventHandler::handleSend(const vector<string> &args)
 	checkAuthentication(_client);
 
 	if (args.size() < 2)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "SEND", "usage: SEND <nick|channel> <filename> [filesize]", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "SEND", "usage: SEND <nick|channel> <filename> [filesize]", NULL);
 
 	const string &sender_ip = _client->getIpAddr();
 	const uint16_t &sender_port = getRandomPort();
@@ -276,7 +278,7 @@ void EventHandler::handleKick(const vector<string> &args)
 
 	const uint16_t n_args = args.size();
 	if (n_args < 2)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> [<reason>]", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> [<reason>]", NULL);
 
 	Channel &channel = _server->getChannel(args[0]);
 	Client &target = _server->getClient(args[1]);
@@ -290,7 +292,7 @@ void EventHandler::handleInvite(const vector<string> &args)
 	checkAuthentication(_client);
 
 	if (args.size() < 2)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>", NULL);
 
 	Client &target = _server->getClient(args[0]);
 	Channel &channel = _server->getChannel(args[1]);
@@ -306,7 +308,7 @@ void EventHandler::handleTopic(const vector<string> &args)
 	const size_t n_args = args.size();
 
 	if (n_args < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "TOPIC", "usage: TOPIC <channel> [<topic>]", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "TOPIC", "usage: TOPIC <channel> [<topic>]", NULL);
 
 	Channel &channel = _client->getChannel(args[0]);
 	if (n_args == 1)
@@ -334,7 +336,7 @@ void EventHandler::handleMode(const vector<string> &args)
 	const uint16_t n_args = args.size();
 
 	if (n_args < 1)
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}", NULL);
 
 	Channel &channel = _server->getChannel(args[0]);
 
@@ -356,7 +358,7 @@ void EventHandler::handleMode(const vector<string> &args)
 	}
 
 	if (args[1][0] != '+' && args[1][0] != '-')
-		throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}", NULL);
+		throw ActionFailedException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}", NULL);
 
 	char mode;
 	bool status;
@@ -374,11 +376,11 @@ void EventHandler::handleMode(const vector<string> &args)
 		}
 		mode = args[1][i];
 		if (string(SUPPORTED_CHANNEL_MODES).find(mode) == string::npos)
-			throw ProtocolErrorException(ERR_UNKNOWNMODE, string(1, mode).c_str(), NULL);
+			throw ActionFailedException(ERR_UNKNOWNMODE, string(1, mode).c_str(), NULL);
 		if (channel_mode_requires_param(mode, status))
 		{
 			if (j >= n_args)
-				throw ProtocolErrorException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode> [<param>]", NULL);
+				throw ActionFailedException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode> [<param>]", NULL);
 			params.push_back(args[j++]);
 		}
 		new_modes[mode] = status;
@@ -389,14 +391,14 @@ void EventHandler::handleMode(const vector<string> &args)
 void EventHandler::checkNicknameValidity(const string &nickname) const
 {
 	if (nickname.empty())
-		throw ProtocolErrorException(ERR_NONICKNAMEGIVEN, g_default_replies_map.at(ERR_NONICKNAMEGIVEN), NULL);
+		throw ActionFailedException(ERR_NONICKNAMEGIVEN, g_default_replies_map.at(ERR_NONICKNAMEGIVEN), NULL);
 	if (!is_valid_nickname(nickname))
 	{
 		const string nickname_rules_msg = "allowed characters: A-Z, a-z, 0-9, -, [, ], \\, `, ^, {, }\nmax nickname lenght: " + to_string(static_cast<int>(MAX_NICKNAME_LEN));
-		throw ProtocolErrorException(ERR_ERRONEOUSNICKNAME, nickname.c_str(), nickname_rules_msg.c_str(), NULL);
+		throw ActionFailedException(ERR_ERRONEOUSNICKNAME, nickname.c_str(), nickname_rules_msg.c_str(), NULL);
 	}
 	if (_server->isClientConnected(nickname))
-		throw ProtocolErrorException(ERR_NICKNAMEINUSE, nickname.c_str(), g_default_replies_map.at(ERR_NICKNAMEINUSE), NULL);
+		throw ActionFailedException(ERR_NICKNAMEINUSE, nickname.c_str(), g_default_replies_map.at(ERR_NICKNAMEINUSE), NULL);
 }
 
 uint16_t EventHandler::getRandomPort(void) const
@@ -404,16 +406,14 @@ uint16_t EventHandler::getRandomPort(void) const
 	return 1024 + (rand() % (65535 - 1024));
 }
 
-const std::map<uint16_t, std::string> EventHandler::_command_strings = EventHandler::initCommandStrings();
-
 static void checkConnection(const Client *client)
 {
 	if (!client->getIsConnected())
-		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not connected, use PASS <password> first", NULL);
+		throw ActionFailedException(ERR_NOTREGISTERED, "you are not connected, use PASS <password> first", NULL);
 }
 
 static void checkAuthentication(const Client *client)
 {
 	if (!client->getIsAuthenticated())
-		throw ProtocolErrorException(ERR_NOTREGISTERED, "you are not registered, use NICK <nickname> and USER <username> first", NULL);
+		throw ActionFailedException(ERR_NOTREGISTERED, "you are not registered, use NICK <nickname> and USER <username> first", NULL);
 }
