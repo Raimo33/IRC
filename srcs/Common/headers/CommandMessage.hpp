@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:37:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 18:09:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 22:35:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 # include <string>
 # include <map>
+# include <cstdarg>
 
 enum e_commands
 {

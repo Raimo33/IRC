@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 18:29:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 22:47:56 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ void EventHandler::processInput(string &raw_input)
 			const string &first_param = _client->getIsAuthenticated() ? _client->getNickname() : SERVER_NAME;
 			ReplyMessage reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, first_param.c_str(), input.getStringFromCommand(command).c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
 			_client->receiveMessage(&reply);
+			continue;
 		}
 		(this->*(_handlers.at(input.getCommand())))(input.getParams());
 	}

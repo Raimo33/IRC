@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:36:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 18:44:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 22:36:38 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 #include <map>
 #include <string>
+#include <cstdarg>
 
 // https://github.com/williamkapke/irc-replies/blob/master/replies.json
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 17:46:15 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 22:47:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ class EventHandler
 
 		Server											*_server;
 		Client											*_client;
-		const std::map<e_commands, CommandHandler>		_handlers;
+		const std::map<enum e_commands, CommandHandler>	_handlers;
 		static const std::map<uint16_t, std::string>	_command_strings;
 		Logger											&_logger;
 };

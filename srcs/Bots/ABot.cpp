@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 19:01:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 22:37:54 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,9 +81,9 @@ void	ABot::sendMessage(const CommandMessage &msg) const
 
 void	ABot::authenticate(const string &password)
 {
-	const CommandMessage pass(_nickname, PASS, password.c_str());
-	const CommandMessage nick(_nickname, NICK, _nickname.c_str());
-	const CommandMessage user(_nickname, USER, _username.c_str(), "0", "*", _realname.c_str());
+	const CommandMessage pass(_nickname, PASS, password.c_str(), NULL);
+	const CommandMessage nick(_nickname, NICK, _nickname.c_str(), NULL);
+	const CommandMessage user(_nickname, USER, _username.c_str(), "0", "*", _realname.c_str(), NULL);
 
 	pass.getDelivered(_server_socket);
 	nick.getDelivered(_server_socket);

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 19:04:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 18:31:00 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 22:36:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 #include "common_exceptions.hpp"
 #include "ReplyMessage.hpp"
 #include "common_utils.hpp"
-
-#include <cstdarg>
 
 using std::map;
 using std::string;

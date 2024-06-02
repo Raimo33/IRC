@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:45:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 19:02:41 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 22:37:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ class ABot
 		std::string							_server_ip;
 		uint16_t							_server_port;
 		std::string							_server_password;
-		std::map<std::string, Action>		_actions;
+		std::map<std::string, Action *>		_actions;
 };
 
 #endif
