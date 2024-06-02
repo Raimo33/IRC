@@ -51,6 +51,3 @@ IRC message format cheat sheet:
 
 <SPACE> ::= ' ' { ' ' }
 <crlf> ::= CR LF
-
-### License
-Do whatever you want with it, really.
