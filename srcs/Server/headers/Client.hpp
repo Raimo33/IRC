@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 16:32:10 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/03 00:13:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,13 @@ class Client
 	public:
 		explicit Client(Logger &logger, Server *server, const int socket, const std::string &ip_addr, const uint16_t port);
 		Client(const Client &copy);
-		virtual ~Client(void);
+		~Client(void);
 
 		const std::map<std::string, Channel *>			&getChannels(void) const;
 		void											setChannels(const std::map<std::string, Channel *> &channels);
 		Channel											&getChannel(const std::string &channel_name) const;
 		void											addChannel(Channel &channel);
-		void											removeChannel(const Channel &channel);
+		void											removeChannel(Channel &channel);
 		const std::string								&getNickname(void) const;
 		void											setNickname(const std::string &nickname);
 		const std::string								&getUsername(void) const;

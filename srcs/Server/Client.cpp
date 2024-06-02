@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 23:55:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/03 00:18:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,34 +18,37 @@
 #include "server_constants.hpp"
 
 using std::map;
+using std::set;
 using std::string;
 
-Client::Client(Logger &logger, Server *server, const int socket, const string &ip_addr, const uint16_t port) : _is_connected(false),
-																											   _is_authenticated(false),
-																											   _port(port),
-																											   _ip_addr(ip_addr),
-																											   _socket(socket),
-																											   _pk(_ip_addr + ::to_string(_port)),
-																											   _server(server),
-																											   _logger(logger) {}
+Client::Client(Logger &logger, Server *server, const int socket, const string &ip_addr, const uint16_t port) :
+	_is_connected(false),
+	_is_authenticated(false),
+	_port(port),
+	_ip_addr(ip_addr),
+	_socket(socket),
+	_pk(_ip_addr + ::to_string(_port)),
+	_server(server),
+	_logger(logger) {}
 
-Client::Client(const Client &copy) : _channels(copy._channels),
-									 _nickname(copy._nickname),
-									 _username(copy._username),
-									 _realname(copy._realname),
-									 _is_connected(copy._is_connected),
-									 _is_authenticated(copy._is_authenticated),
-									 _port(copy._port),
-									 _ip_addr(copy._ip_addr),
-									 _socket(copy._socket),
-									 _pk(copy._pk),
-									 _server(copy._server),
-									 _logger(copy._logger) {}
+Client::Client(const Client &copy) :
+	_channels(copy._channels),
+	_nickname(copy._nickname),
+	_username(copy._username),
+	_realname(copy._realname),
+	_is_connected(copy._is_connected),
+	_is_authenticated(copy._is_authenticated),
+	_port(copy._port),
+	_ip_addr(copy._ip_addr),
+	_socket(copy._socket),
+	_pk(copy._pk),
+	_server(copy._server),
+	_logger(copy._logger) {}
 
 Client::~Client(void)
 {
 	for (map<string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++)
-		it->second->removeMember(_nickname);
+		leaveChannel(*it->second, "Client disconnected");
 }
 
 const map<string, Channel *> &Client::getChannels(void) const
@@ -78,7 +81,7 @@ void Client::addChannel(Channel &channel)
 	_logger.logEvent(oss.str());
 }
 
-void Client::removeChannel(const Channel &channel)
+void Client::removeChannel(Channel &channel)
 {
 	const string &channel_name = channel.getName();
 	map<string, Channel *>::iterator it = _channels.find(channel_name);
@@ -86,6 +89,11 @@ void Client::removeChannel(const Channel &channel)
 	if (it == _channels.end()) // se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
 		throw ActionFailedException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
 	_channels.erase(it);
+	if (channel.getMembers().empty())
+	{
+		_server->removeChannel(channel);	
+		delete &channel;
+	}
 
 	ostringstream oss;
 	oss << "Client " << _nickname << ", channel removed: " << channel_name;
@@ -214,8 +222,12 @@ Server &Client::getServer(void) const
 
 void Client::joinChannel(Channel &channel, const string &key)
 {
+	const set<const Client *> &pending_invitations = channel.getPendingInvitations();
+	
 	if (!_is_authenticated)
 		throw ActionFailedException(ERR_NOTREGISTERED, g_default_replies_map.at(ERR_NOTREGISTERED), NULL);
+	if (channel.getMode('i') && pending_invitations.find(this) == pending_invitations.end())
+		throw ActionFailedException(ERR_INVITEONLYCHAN, channel.getName().c_str(), g_default_replies_map.at(ERR_INVITEONLYCHAN), NULL);
 	if (channel.getMode('k') && channel.getKey() != key)
 		throw ActionFailedException(ERR_BADCHANNELKEY, channel.getName().c_str(), g_default_replies_map.at(ERR_BADCHANNELKEY), NULL);
 	if (channel.getMembers().size() >= channel.getMemberLimit())
@@ -246,13 +258,14 @@ void Client::joinChannel(Channel &channel, const string &key)
 }
 
 void Client::leaveChannel(Channel &channel, const string &reason)
-{
+{	
 	channel.removeMember(_nickname);
-	removeChannel(channel);
 
 	const CommandMessage part(_nickname.c_str(), PART, channel.getName().c_str(), reason.c_str(), NULL);
 	channel.receiveMessage(part);
 	receiveMessage(&part);
+
+	removeChannel(channel);
 
 	ostringstream oss;
 	oss << "Client " << _nickname << " left channel " << channel.getName();

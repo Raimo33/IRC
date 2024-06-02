@@ -80,7 +80,7 @@ fclean: clean
 	@echo "$(RED)removed log files$(NC)"
 
 leaks: all
-	@valgrind $(VALGRIND_FLAGS) ./$(SERVER_NAME) 9999 beet 2> $(LEAK_REPORT)
+	@valgrind $(VALGRIND_FLAGS) ./$(SERVER_NAME) 7777 beet 2> $(LEAK_REPORT)
 	@echo "$(GREEN)leak report generated$(NC)"
 
 re: fclean all

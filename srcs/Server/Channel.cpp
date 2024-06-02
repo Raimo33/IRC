@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 23:51:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/03 00:05:42 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,8 +165,6 @@ void Channel::removeMember(const string &nickname)
 	ostringstream oss;
 	oss << "Channel " << _name << ", member removed: " << nickname;
 	_logger.logEvent(oss.str());
-	if (_members.empty())
-		delete this;
 }
 
 const set<const Client *> &Channel::getOperators(void) const
