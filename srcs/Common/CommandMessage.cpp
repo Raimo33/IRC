@@ -6,20 +6,19 @@
 /*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 19:04:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 15:40:21 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 17:30:02 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommandMessage.hpp"
-#include "Exceptions.hpp"
+#include "common_exceptions.hpp"
 #include "ReplyMessage.hpp"
+#include "common_utils.hpp"
 
 #include <cstdarg>
 
-using std::string;
 using std::map;
-
-static string get_next_token(string::iterator &it, const string::const_iterator &end, const char delim);
+using std::string;
 
 CommandMessage::CommandMessage(void)
 {
@@ -30,14 +29,16 @@ CommandMessage::CommandMessage(const std::string &raw_input)
 	parse(raw_input);
 }
 
-CommandMessage::CommandMessage(const string &prefix, const enum e_commands command, ...)
+CommandMessage::CommandMessage(const string &prefix, int command, ...)
 {
-	va_list		args;
-	const char	*param;
+	va_list args;
+	const char *param;
 
+	if (command < PASS || command > MODE)
+		throw InternalErrorException("CommandMessage::CommandMessage: invalid command");
 	va_start(args, command);
 	_prefix = prefix;
-	_command = command;
+	_command = static_cast<e_commands>(command);
 	while ((param = va_arg(args, const char *)) != NULL)
 		_params.push_back(param);
 	va_end(args);
@@ -53,13 +54,12 @@ CommandMessage::CommandMessage(const string &prefix, const enum e_commands comma
 		_params.push_back(param);
 }
 
-CommandMessage::CommandMessage(const CommandMessage &copy) :
-	AMessage(copy),
-	_command(copy._command) {}
+CommandMessage::CommandMessage(const CommandMessage &copy) : AMessage(copy),
+															 _command(copy._command) {}
 
 CommandMessage::~CommandMessage(void) {}
 
-CommandMessage	&CommandMessage::operator=(const CommandMessage &copy)
+CommandMessage &CommandMessage::operator=(const CommandMessage &copy)
 {
 	if (this != &copy)
 	{
@@ -83,8 +83,9 @@ void CommandMessage::parse(string raw_input)
 	command = get_next_token(it, raw_input.end(), ' ');
 	const map<string, e_commands>::const_iterator it_command = g_commands.find(command);
 	if (it_command == g_commands.end())
-		throw ProtocolErrorException(ERR_UNKNOWNCOMMAND, command.c_str(), g_default_replies.at(ERR_UNKNOWNCOMMAND), NULL);
-	_command = it_command->second;
+		_command = UNKNOWN;
+	else
+		_command = it_command->second;
 	while (it != raw_input.end())
 	{
 		if (*it == ':')
@@ -95,26 +96,29 @@ void CommandMessage::parse(string raw_input)
 	}
 }
 
-static string get_next_token(string::iterator &it, const string::const_iterator &end, const char delim)
+void CommandMessage::unwrapMessage(string &first_part, string &second_part) const
 {
-	const string::iterator start = it;
-	string token;
-
-	while (it != end && *it == delim) // Skip leading delimiters
-		it++;
-	while (it != end && *it != delim) // Extract the token
-		it++;
-	token = string(start, it);
-	while (it != end && *it == delim) // Skip trailing delimiters
-		it++;
-	return token;
+	if (!_prefix.empty())
+		first_part += ":" + _prefix + " ";
+	for (map<string, enum e_commands>::const_iterator it = g_commands.begin(); it != g_commands.end(); it++)
+	{
+		if (it->second == _command)
+		{
+			first_part += it->first;
+			break;
+		}
+	}
+	for (vector<string>::const_iterator it = _params.begin(); it != _params.end() - 1; it++)
+		second_part += " " + *it;
+	if (!_params.empty())
+		second_part += " :" + _params.back();
 }
 
 const std::map<std::string, enum e_commands> g_commands = create_commands_map();
 
-const std::map<std::string, enum e_commands>	create_commands_map(void)
+const std::map<std::string, enum e_commands> create_commands_map(void)
 {
-	std::map<std::string, enum e_commands>	commands;
+	std::map<std::string, enum e_commands> commands;
 
 	commands["PASS"] = PASS;
 	commands["NICK"] = NICK;
@@ -128,4 +132,5 @@ const std::map<std::string, enum e_commands>	create_commands_map(void)
 	commands["INVITE"] = INVITE;
 	commands["TOPIC"] = TOPIC;
 	commands["MODE"] = MODE;
+	return (commands);
 }

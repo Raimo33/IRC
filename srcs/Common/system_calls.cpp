@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   SystemCalls.cpp                                    :+:      :+:    :+:   */
+/*   system_calls.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 18:32:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 16:45:40 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "Exceptions.hpp"
-#include "SystemCalls.hpp"
+#include "system_calls.hpp"
 
 using std::string;
 

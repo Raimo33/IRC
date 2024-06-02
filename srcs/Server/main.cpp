@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 18:32:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 16:25:16 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,9 @@ int main(const int argc, const char **argv)
 		string		password;
 
 		get_args(&port_nbr, &password, argc, argv);
-		logger.init(LOG_FILENAME);
 
+		logger.setFile("server.log");
 		Server	server(logger, port_nbr, password);
-
 		server.run();
 	}
 	catch (const std::invalid_argument &e)

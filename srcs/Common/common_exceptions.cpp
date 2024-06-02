@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Exceptions.cpp                                     :+:      :+:    :+:   */
+/*   common_exceptions.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 15:27:57 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 18:32:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 17:12:11 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,7 @@
 #include <errno.h>
 #include <cstring>
 
-#include "Exceptions.hpp"
-#include "Constants.hpp"
-#include "Message.hpp"
-#include "EventHandler.hpp"
+#include "common_exceptions.hpp"
 
 using std::string;
 using std::map;
@@ -40,27 +37,4 @@ InternalErrorException::InternalErrorException(const string &msg) : runtime_erro
 const char *InternalErrorException::what(void) const throw()
 {
 	return runtime_error::what();
-}
-
-ProtocolErrorException::ProtocolErrorException(const int value, ...)
-{
-	va_list	args;
-
-	if (value < RPL_WELCOME || value > ERR_CHANOPRIVSNEEDED)
-		throw InternalErrorException("ProtocolErrorException::ProtocolErrorException: Invalid reply code");
-	va_start(args, value);
-	_content = Message(SERVER_NAME, value, args);
-	va_end(args);
-}
-
-ProtocolErrorException::~ProtocolErrorException(void) throw() {}
-
-const char *ProtocolErrorException::what(void) const throw()
-{
-	return _content.getParams().back().c_str();
-}
-
-Message	&ProtocolErrorException::getContent(void)
-{
-	return _content;
 }

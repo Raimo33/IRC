@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 10:41:25 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 16:31:10 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 
 class	Client;
 class	Logger;
-class	Message;
+class	AMessage;
 
 class Channel
 {
@@ -57,7 +57,7 @@ class Channel
 		bool									getMode(const char mode) const;
 		void									setMode(const char mode, const bool status, const std::string &param = "", const Client *setter = NULL);
 
-		void									receiveMessage(const Message &message, const Client *sender = NULL) const;
+		void									receiveMessage(const AMessage &message, const Client *sender = NULL) const;
 		bool									isOperator(const Client &user) const;
 		bool									isMember(const std::string &nickname) const;
 		bool									isMember(const Client &user) const;

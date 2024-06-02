@@ -1,40 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.hpp                                          :+:      :+:    :+:   */
+/*   common_utils.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:46:06 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 19:31:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 16:56:18 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef UTILS_HPP
-# define UTILS_HPP
+#ifndef COMMON_UTILS_HPP
+# define COMMON_UTILS_HPP
 
 # include <string>
 # include <vector>
 # include <sstream>
 # include <stdint.h>
 
-bool						is_channel_prefix(const char c);
-bool						is_valid_channel_name(const std::string &name);
-bool						is_valid_channel_key(const std::string &key);
-bool						is_valid_channel_mode(const char mode);
-bool						is_valid_nickname(const std::string &name);
 bool						has_crlf(const std::string &s);
-bool						channel_mode_requires_param(const char mode, const bool status);
 std::vector<std::string>	split(const std::string &str, const std::string &delim);
-std::string					hash(const std::string &s);
-uint64_t					ip_to_long(const std::string& ip);
+std::string					get_next_token(std::string::iterator &it, const std::string::const_iterator &end, const char delim);
 
 template <typename T>
-std::string					join(const std::vector<T>& elements, const std::string& delimiter);
+std::string join(const std::vector<T> &elements, const std::string &delimiter);
 template<typename T>
 std::string					to_string(T value);
 
-
-#include "utils.tpp"
+#include "common_utils.tpp"
 
 #endif

@@ -6,19 +6,19 @@
 /*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:36:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 15:36:58 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/02 17:51:09 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REPLYMESSAGE_HPP
-# define REPLYMESSAGE_HPP
+#define REPLYMESSAGE_HPP
 
 #include "AMessage.hpp"
 
 #include <map>
 #include <string>
 
-//https://github.com/williamkapke/irc-replies/blob/master/replies.json
+// https://github.com/williamkapke/irc-replies/blob/master/replies.json
 
 enum e_replyCodes
 {
@@ -56,6 +56,8 @@ enum e_replyCodes
 	ERR_BADCHANNELKEY = 475,
 	ERR_NOCHANMODES = 477,
 	ERR_CHANOPRIVSNEEDED = 482,
+
+	RPL_UNKNOWN = -1
 };
 
 class ReplyMessage : public AMessage
@@ -63,23 +65,24 @@ class ReplyMessage : public AMessage
 	public:
 		ReplyMessage(void);
 		ReplyMessage(const std::string &raw_input);
-		ReplyMessage(const std::string &prefix, const enum e_replyCodes code, ...);
-		ReplyMessage(const std::string &prefix, const int value, va_list args);
+		ReplyMessage(const std::string &prefix, int reply_code, ...);
+		ReplyMessage(const std::string &prefix, const enum e_replyCodes reply_code, va_list args);
 		ReplyMessage(const ReplyMessage &copy);
 		~ReplyMessage(void);
-	
-		ReplyMessage		&operator=(const ReplyMessage &copy);
-		
-		void				setReplyCode(const enum e_replyCodes code);
-		enum e_replyCodes	getReplyCode(void) const;
-	
-	private:
-		void				parse(std::string raw_input);
 
-		enum e_replyCodes	_reply_code;
+		ReplyMessage		&operator=(const ReplyMessage &copy);
+
+		void 				setReplyCode(const enum e_replyCodes code);
+		enum e_replyCodes	getReplyCode(void) const;
+
+	private:
+		void 				parse(std::string raw_input);
+		void 				unwrapMessage(std::string &first_part, std::string &second_part) const;
+
+		enum e_replyCodes _reply_code;
 };
 
-const std::map<enum e_replyCodes, const char *>			create_default_replies_map(void); //TODO mettere statici dentro la classe
-extern const std::map<enum e_replyCodes, const char *>	g_default_replies;
+const std::map<enum e_replyCodes, const char *> create_g_default_replies_map(void); // TODO mettere statici dentro la classe
+extern const std::map<enum e_replyCodes, const char *> g_default_replies_map;
 
 #endif

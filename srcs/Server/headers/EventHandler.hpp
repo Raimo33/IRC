@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 17:06:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 17:46:15 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,8 @@
 # include <vector>
 # include <map>
 
-# include "utils.hpp"
-# include "Constants.hpp"
-# include "Message.hpp"
+# include "server_utils.hpp"
+# include "CommandMessage.hpp"
 
 class Client;
 class Server;
@@ -37,16 +36,10 @@ class EventHandler
 
 		void 											processInput(std::string &raw_input);
 
-		static void										sendBufferedMessage(const Client &receiver, const Message &msg);
-		static void										sendBufferedMessage(const int socket, const Message &msg);
-
 	private:
+		typedef void (EventHandler::*CommandHandler)(const std::vector<std::string> &);
 
-		typedef void (EventHandler::*CommandHandler)(const std::vector<std::string>&);
-
-		static void										unwrapMessage(const Message &msg, string *first_part, string *second_part);
-
-		const std::map<e_commands, CommandHandler>		initHandlers(void);
+		const std::map<enum e_commands, CommandHandler>	initHandlers(void);
 		static std::map<uint16_t, std::string>			initCommandStrings(void);
 		void											handlePass(const std::vector<std::string> &params);
 		void											handleNick(const std::vector<std::string> &params);

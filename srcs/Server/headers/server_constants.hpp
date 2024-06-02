@@ -1,17 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Constants.hpp                                      :+:      :+:    :+:   */
+/*   server_constants.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 03:05:20 by craimond          #+#    #+#             */
-/*   Updated: 2024/05/31 17:49:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 17:47:21 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONSTANTS_HPP
-# define CONSTANTS_HPP
+#ifndef SERVER_CONSTANTS_HPP
+# define SERVER_CONSTANTS_HPP
+
+# include "common_constants.hpp"
 
 # include <stdint.h>
 
@@ -22,7 +24,6 @@ const uint8_t		MAX_NICKNAME_LEN = 9;
 const uint16_t		MAX_CHANNEL_NAME_LEN = 200;
 const uint16_t		MAX_CHANNEL_TOPIC_LEN = 390;
 const uint8_t		MAX_CHANNEL_KEY_LEN = 50;
-const uint16_t		BUFFER_SIZE = 512;
 const uint8_t		MAX_SERVER_PASSWORD_LEN = 64;
 const uint8_t		N_COMMANDS = 11;
 const char *const	SUPPORTED_CHANNEL_MODES = "itkol";

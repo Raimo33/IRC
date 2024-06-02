@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandMessage.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:37:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 19:05:59 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 17:51:19 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,20 @@
 
 enum e_commands
 {
-	PASS,
-	NICK,
-	USER,
-	JOIN,
-	PART,
-	PRIVMSG,
-	QUIT,
-	SEND,
-	KICK,
-	INVITE,
-	TOPIC,
-	MODE,
+	PASS = 0,
+	NICK = 1,
+	USER = 2,
+	JOIN = 3,
+	PART = 4,
+	PRIVMSG = 5,
+	QUIT = 6,
+	SEND = 7,
+	KICK = 8,
+	INVITE = 9,
+	TOPIC = 10,
+	MODE = 11,
+
+	CMD_UNKNOWN = -1
 };
 
 class CommandMessage : public AMessage
@@ -39,7 +41,7 @@ class CommandMessage : public AMessage
 	public:
 		CommandMessage(void);
 		CommandMessage(const std::string &raw_input);
-		CommandMessage(const std::string &prefix, const enum e_commands command, ...);
+		CommandMessage(const std::string &prefix, int command, ...);
 		CommandMessage(const std::string &prefix, const enum e_commands command, va_list args);
 		CommandMessage(const CommandMessage &copy);
 		virtual ~CommandMessage(void);
@@ -51,6 +53,7 @@ class CommandMessage : public AMessage
 
 	private:
 		void					parse(std::string raw_input);
+		void					unwrapMessage(std::string &first_part, std::string &second_part) const;
 
 		enum e_commands			_command;
 };

@@ -3,20 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 18:32:06 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 16:45:40 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "SystemCalls.hpp"
+#include "system_calls.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
-#include "SystemCalls.hpp"
+#include "system_calls.hpp"
 #include "EventHandler.hpp"
-#include "Message.hpp"
 #include "Exceptions.hpp"
 
 #include <algorithm>
@@ -29,17 +28,16 @@ using std::map;
 using std::string;
 using std::vector;
 
-Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
-	_port(port_no),
-	_pwd_hash(hash(password)),
-	_epoll_fd(epoll_create1_p(0)),
-	_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
-	_handler(EventHandler(logger, *this)),
-	_logger(logger)
+Server::Server(Logger &logger, const uint16_t port_no, const string &password) : _port(port_no),
+																				 _pwd_hash(hash(password)),
+																				 _epoll_fd(epoll_create1_p(0)),
+																				 _socket(socket_p(AF_INET, SOCK_STREAM, 0)),
+																				 _handler(EventHandler(logger, *this)),
+																				 _logger(logger)
 {
-	struct sockaddr_in	server_addr;
-    socklen_t			addr_len = sizeof(server_addr);
-	char				ipstr[INET_ADDRSTRLEN];
+	struct sockaddr_in server_addr;
+	socklen_t addr_len = sizeof(server_addr);
+	char ipstr[INET_ADDRSTRLEN];
 
 	memset(&server_addr, 0, sizeof(server_addr));
 	configureNonBlocking(_socket);
@@ -55,22 +53,21 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 	event.data.fd = _socket;
 	epoll_ctl_p(_epoll_fd, EPOLL_CTL_ADD, _socket, &event);
 
-    getsockname_p(_socket, (struct sockaddr *)&server_addr, &addr_len);
-    inet_ntop(AF_INET, &server_addr.sin_addr, ipstr, sizeof(ipstr));
+	getsockname_p(_socket, (struct sockaddr *)&server_addr, &addr_len);
+	inet_ntop(AF_INET, &server_addr.sin_addr, ipstr, sizeof(ipstr));
 	ostringstream oss;
 	oss << "Server listening on " << ipstr << ":" << _port;
-    _logger.logEvent(oss.str());
+	_logger.logEvent(oss.str());
 }
 
-Server::Server(const Server &copy) : 
-	_port(copy._port),
-	_pwd_hash(copy._pwd_hash),
-	_clients(copy._clients),
-	_channels(copy._channels),
-	_epoll_fd(copy._epoll_fd),
-	_socket(copy._socket),
-	_handler(copy._handler),
-	_logger(copy._logger) {}
+Server::Server(const Server &copy) : _port(copy._port),
+									 _pwd_hash(copy._pwd_hash),
+									 _clients(copy._clients),
+									 _channels(copy._channels),
+									 _epoll_fd(copy._epoll_fd),
+									 _socket(copy._socket),
+									 _handler(copy._handler),
+									 _logger(copy._logger) {}
 
 Server::~Server(void)
 {
@@ -144,7 +141,7 @@ Client &Server::getClient(const string &nickname) const
 		if (it->second->getNickname() == nickname)
 			return *it->second;
 	}
-	throw ProtocolErrorException(ERR_NOSUCHNICK, nickname.c_str(), default_replies.at(ERR_NOSUCHNICK), NULL);
+	throw ProtocolErrorException(ERR_NOSUCHNICK, nickname.c_str(), g_default_replies_map.at(ERR_NOSUCHNICK), NULL);
 }
 
 void Server::addClient(Client &client)
@@ -180,7 +177,7 @@ Channel &Server::getChannel(const string &name) const
 	map<string, Channel *>::const_iterator it = _channels.find(name);
 
 	if (it == _channels.end())
-		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name.c_str(), default_replies.at(ERR_NOSUCHCHANNEL), NULL);
+		throw ProtocolErrorException(ERR_NOSUCHCHANNEL, name.c_str(), g_default_replies_map.at(ERR_NOSUCHCHANNEL), NULL);
 	return *it->second;
 }
 
@@ -236,17 +233,17 @@ void Server::configureNonBlocking(const int socket) const
 
 void Server::handleNewClient(void)
 {
-	Client				*client;
-	struct sockaddr_in	client_addr;
-	socklen_t			client_addr_len = sizeof(client_addr);
-	const int			client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
+	Client *client;
+	struct sockaddr_in client_addr;
+	socklen_t client_addr_len = sizeof(client_addr);
+	const int client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
 
 	configureNonBlocking(client_socket);
 
-	const std::string	client_ip_addr = std::string(inet_ntoa(client_addr.sin_addr));
-	const uint16_t		client_port = ntohs(client_addr.sin_port);
+	const std::string client_ip_addr = std::string(inet_ntoa(client_addr.sin_addr));
+	const uint16_t client_port = ntohs(client_addr.sin_port);
 
-	struct epoll_event	event;
+	struct epoll_event event;
 	memset(&event, 0, sizeof(event));
 	event.events = EPOLLIN | EPOLLHUP | EPOLLERR;
 	event.data.fd = client_socket;
@@ -260,15 +257,15 @@ void Server::handleNewClient(void)
 
 void Server::handleClient(const int client_socket)
 {
-	Client	*client = getClient(client_socket);
+	Client *client = getClient(client_socket);
 
 	if (!client)
 		return;
 
 	try
 	{
-		string	raw_input;
-		char	buffer[BUFFER_SIZE];
+		string raw_input;
+		char buffer[BUFFER_SIZE];
 
 		raw_input.reserve(BUFFER_SIZE);
 		while (true)
@@ -289,14 +286,14 @@ void Server::handleClient(const int client_socket)
 		_handler.setClient(*client);
 		_handler.processInput(raw_input);
 	}
-	catch (ProtocolErrorException &e) //TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
+	catch (ProtocolErrorException &e) // TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
 	{
-		Message	&reply = e.getContent();
+		ReplyMessage &reply = e.getContent();
 		if (client->getIsAuthenticated())
 			reply.setParam(client->getNickname(), 0);
 		else
 			reply.setParam(SERVER_NAME, 0);
-		client->receiveMessage(reply);
+		client->receiveMessage(&reply);
 		_logger.logError(&e);
 	}
 }

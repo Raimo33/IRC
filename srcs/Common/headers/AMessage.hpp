@@ -3,24 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   AMessage.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/23 15:38:24 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 19:03:40 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 17:21:15 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONTENT_HPP
-# define CONTENT_HPP
+#ifndef AMESSAGE_HPP
+# define AMESSAGE_HPP
 
 # include <string>
 # include <vector>
-
+# include <stdint.h>
 class AMessage
 {
 	public:
 		AMessage(void);
-		AMessage(const std::string &raw_input);
 		AMessage(const AMessage &copy);
 		virtual ~AMessage(void) = 0;
 
@@ -32,8 +31,11 @@ class AMessage
 		void							setParams(const std::vector<std::string> &params);
 		void							setParam(const std::string &param, const int32_t index = -1);
 
+		void							deliver(const int socket) const;
+
 	protected:
 		virtual void					parse(std::string raw_input) = 0;
+		virtual void 					unwrapMessage(std::string &first_part, std::string &second_part) const = 0;
 
 		std::string						_prefix;
 		std::vector<std::string>		_params;

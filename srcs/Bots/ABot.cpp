@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ABot.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 18:32:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 16:45:40 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,38 +15,36 @@
 #include "Message.hpp"
 #include "Client.hpp"
 #include "EventHandler.hpp"
-#include "SystemCalls.hpp"
+#include "system_calls.hpp"
 
 using std::string;
 
-ABot::ABot(const string &nickname, const string &username, const string &realname):
-	_nickname(nickname),
-	_username(username),
-	_realname(realname),
-	_socket(-1),
-	_connected(false) {}
+ABot::ABot(const string &nickname, const string &username, const string &realname) : _nickname(nickname),
+																					 _username(username),
+																					 _realname(realname),
+																					 _socket(-1),
+																					 _connected(false) {}
 
-ABot::ABot(const ABot &copy):
-	_nickname(copy._nickname),
-	_username(copy._username),
-	_realname(copy._realname),
-	_socket(copy._socket),
-	_connected(copy._connected),
-	_logger(copy._logger) {}
+ABot::ABot(const ABot &copy) : _nickname(copy._nickname),
+							   _username(copy._username),
+							   _realname(copy._realname),
+							   _socket(copy._socket),
+							   _connected(copy._connected),
+							   _logger(copy._logger) {}
 
 ABot::~ABot(void) {}
 
-const string	&ABot::getNickname(void) const { return _nickname; }
-const string	&ABot::getUsername(void) const { return _username; }
-const string	&ABot::getRealname(void) const { return _realname; }
-bool			ABot::isConnected(void) const { return _connected; }
-int				ABot::getSocket(void) const { return _socket; }
-void			ABot::setLogger(const Logger &logger) { _logger = logger; }
-const Logger	&ABot::getLogger(void) const { return _logger; }
-void			ABot::setConnected(bool connected) { _connected = connected; }
-void			ABot::setSocket(int socket) { _socket = socket; }
+const string &ABot::getNickname(void) const { return _nickname; }
+const string &ABot::getUsername(void) const { return _username; }
+const string &ABot::getRealname(void) const { return _realname; }
+bool ABot::isConnected(void) const { return _connected; }
+int ABot::getSocket(void) const { return _socket; }
+void ABot::setLogger(const Logger &logger) { _logger = logger; }
+const Logger &ABot::getLogger(void) const { return _logger; }
+void ABot::setConnected(bool connected) { _connected = connected; }
+void ABot::setSocket(int socket) { _socket = socket; }
 
-void	ABot::joinChannel(Channel &channel, const string &key)
+void ABot::joinChannel(Channel &channel, const string &key)
 {
 	const string &channel_name = channel.getName();
 
@@ -59,7 +57,7 @@ void	ABot::joinChannel(Channel &channel, const string &key)
 	_logger.logEvent("Bot joined channel " + channel_name);
 }
 
-void	ABot::leaveChannel(Channel &channel, const string &reason)
+void ABot::leaveChannel(Channel &channel, const string &reason)
 {
 	const string &channel_name = channel.getName();
 
@@ -72,7 +70,7 @@ void	ABot::leaveChannel(Channel &channel, const string &reason)
 	_logger.logEvent("Bot left channel " + channel_name);
 }
 
-void	ABot::sendText(const Channel &channel, const string &text)
+void ABot::sendText(const Channel &channel, const string &text)
 {
 	const string &channel_name = channel.getName();
 
@@ -84,7 +82,7 @@ void	ABot::sendText(const Channel &channel, const string &text)
 	_logger.logEvent("Bot sent message to channel " + channel_name);
 }
 
-void	ABot::sendText(const Client &user, const string &text)
+void ABot::sendText(const Client &user, const string &text)
 {
 	const string &user_name = user.getNickname();
 	const Message msg(_nickname, PRIVMSG, user_name.c_str(), text.c_str());
@@ -92,12 +90,12 @@ void	ABot::sendText(const Client &user, const string &text)
 	_logger.logEvent("Bot sent message to user " + user_name);
 }
 
-void	ABot::connect(const string &ip, const string &port, const string &password)
+void ABot::connect(const string &ip, const string &port, const string &password)
 {
 	struct addrinfo hints, *res;
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
 
 	getaddrinfo_p(ip.c_str(), port.c_str(), &hints, &res);
 	_socket = socket_p(res->ai_family, res->ai_socktype, res->ai_protocol);
@@ -107,7 +105,7 @@ void	ABot::connect(const string &ip, const string &port, const string &password)
 	authenticate(password);
 }
 
-void	ABot::disconnect(void)
+void ABot::disconnect(void)
 {
 	close_p(_socket);
 	_socket = -1;
@@ -115,7 +113,7 @@ void	ABot::disconnect(void)
 	_logger.logEvent("Bot disconnected from server");
 }
 
-void	ABot::authenticate(const string &password)
+void ABot::authenticate(const string &password)
 {
 	const Message pass(_nickname, PASS, password.c_str());
 	const Message nick(_nickname, NICK, _nickname.c_str());
@@ -125,4 +123,3 @@ void	ABot::authenticate(const string &password)
 	EventHandler::sendBufferedMessage(_socket, nick);
 	EventHandler::sendBufferedMessage(_socket, user);
 }
-
