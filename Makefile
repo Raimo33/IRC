@@ -3,28 +3,28 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+         #
+#    By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/26 15:33:59 by craimond          #+#    #+#              #
-#    Updated: 2024/06/01 18:31:43 by craimond         ###   ########.fr        #
+#    Updated: 2024/06/02 15:50:37 by egualand         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SERVER_NAME = ircserv
 BOT_NAME = beetlebot
 
-SERVER_SRCS = $(addprefix srcs/Server/, main.cpp Channel.cpp Client.cpp EventHandler.cpp Server.cpp Exceptions.cpp)
-SERVER_HDRS = $(addprefix srcs/Server/headers/,  Channel.hpp Client.hpp EventHandler.hpp Server.hpp Exceptions.hpp)
-SERVER_OBJS = $(SRCS:.cpp=.o)
+SERVER_SRCS = $(addprefix srcs/Server/, main.cpp Channel.cpp Client.cpp EventHandler.cpp Server.cpp)
+SERVER_HDRS = $(addprefix srcs/Server/headers/,  Channel.hpp Client.hpp EventHandler.hpp Server.hpp)
+SERVER_OBJS = $(SERVER_SRCS:.cpp=.o)
 SERVER_INCS_DIR = srcs/Server/headers
 
-BOT_SRCS = $(addprefix srcs/, main.cpp ABot.cpp BeetleJuice.cpp)
-BOT_HDRS = $(addprefix srcs/headers/bot/, ABot.hpp BeetleJuice.hpp)
-BOT_OBJS = $(BOT_SRCS:.o=.cpp)
+BOT_SRCS = $(addprefix srcs/Bots/, main.cpp ABot.cpp BeetleJuice.cpp)
+BOT_HDRS = $(addprefix srcs/Bots/headers, ABot.hpp BeetleJuice.hpp)
+BOT_OBJS = $(BOT_SRCS:.cpp=.o)
 BOT_INCS_DIR = srcs/Bots/headers
 
-COMMON_SRCS = $(addprefix srcs/Common/, Logger.cpp Message.cpp SystemCalls.cpp Utils.cpp)
-COMMON_HDRS = $(addprefix srcs/Common/headers/, Logger.hpp Message.hpp SystemCalls.hpp Utils.hpp)
+COMMON_SRCS = $(addprefix srcs/Common/, Logger.cpp Message.cpp SystemCalls.cpp Utils.cpp Exceptions.cpp)
+COMMON_HDRS = $(addprefix srcs/Common/headers/, Logger.hpp Message.hpp SystemCalls.hpp Utils.hpp Exceptions.hpp)
 COMMON_OBJS = $(COMMON_SRCS:.cpp=.o)
 COMMON_INCS_DIR = srcs/Common/headers
 
@@ -57,12 +57,13 @@ $(BOT_NAME): $(BOT_OBJS) $(COMMON_OBJS) $(BOT_HDRS) $(COMMON_HDRS)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@$(RM) $(SERVER_OBJS)
-	@echo "$(RED)removed $(SERVER_OBJS)$(NC)"
+	@$(RM) $(SERVER_OBJS) $(BOT_OBJS) $(COMMON_OBJS)
+	@echo "$(RED)removed $(SERVER_OBJS) $(BOT_OBJS) $(COMMON_OBJS)$(NC)"
 
 fclean: clean
-	@$(RM) $(SERVER_NAME)
+	@$(RM) $(SERVER_NAME) $(BOT_NAME)
 	@echo "$(RED)removed $(SERVER_NAME)$(NC)"
+	@echo "$(RED)removed $(BOT_NAME)$(NC)"
 	@$(RM) $(LEAK_REPORT)
 	@echo "$(RED)removed $(LEAK_REPORT)$(NC)"
 	@$(RM) *.log

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ReplyMessage.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:36:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 19:06:05 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 15:36:58 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ class ReplyMessage : public AMessage
 	private:
 		void				parse(std::string raw_input);
 
-		enum e_replyCodes	_replyCode;
+		enum e_replyCodes	_reply_code;
 };
 
 const std::map<enum e_replyCodes, const char *>			create_default_replies_map(void); //TODO mettere statici dentro la classe

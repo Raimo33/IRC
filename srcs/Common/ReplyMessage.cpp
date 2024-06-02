@@ -3,16 +3,52 @@
 /*                                                        :::      ::::::::   */
 /*   ReplyMessage.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:54:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/01 18:54:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/02 15:39:19 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ReplyMessage.hpp"
 
-const map<enum e_replyCodes, const char *> create_default_replies(void)
+using std::map;
+using std::make_pair;
+
+ReplyMessage::ReplyMessage(void) {}
+
+ReplyMessage::ReplyMessage(const std::string &raw_input)
+{
+	parse(raw_input);
+}
+
+ReplyMessage::ReplyMessage(const ReplyMessage &copy) :
+	AMessage(copy),
+	_reply_code(copy._reply_code) {}
+
+ReplyMessage::~ReplyMessage(void) {}
+
+ReplyMessage	&ReplyMessage::operator=(const ReplyMessage &copy)
+{
+	if (this != &copy)
+	{
+		AMessage::operator=(copy);
+		_reply_code = copy._reply_code;
+	}
+	return (*this);
+}
+
+enum e_replyCodes	ReplyMessage::getReplyCode(void) const { return (_reply_code); }
+void				ReplyMessage::setReplyCode(const enum e_replyCodes reply_code) { _reply_code = reply_code; }
+
+void				ReplyMessage::parse(std::string raw_input)
+{
+	//TODO: implement
+}
+
+const map<enum e_replyCodes, const char *> g_default_replies = create_default_replies_map();
+
+const map<enum e_replyCodes, const char *> create_default_replies_map(void)
 {
 	map<enum e_replyCodes, const char *> default_replies;
 	default_replies.insert(make_pair(RPL_WELCOME, "Welcome to the Internet Relay Network"));
@@ -50,5 +86,3 @@ const map<enum e_replyCodes, const char *> create_default_replies(void)
 	default_replies.insert(make_pair(ERR_CHANOPRIVSNEEDED, "You're not channel operator"));
 	return default_replies;
 }
-
-const map<enum e_replyCodes, const char *> default_replies = create_default_replies();
