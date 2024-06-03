@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/03 16:11:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/03 17:44:57 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,8 +265,7 @@ void Server::handleClient(const int client_socket)
 	{
 		char	buffer[BUFFER_SIZE] = {0};
 
-		int bytes_read = recv_p(client_socket, buffer, sizeof(buffer) - 1, 0);
-		if (bytes_read == 0)
+		if (recv_p(client_socket, buffer, sizeof(buffer) - 1, 0) == 0)
 			return ;
 		_handler.setClient(*client);
 		_handler.processInput(buffer);

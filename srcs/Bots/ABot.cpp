@@ -6,16 +6,21 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/03 17:08:37 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/03 18:20:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ABot.hpp"
 #include "CommandMessage.hpp"
 #include "system_calls.hpp"
+#include "common_exceptions.hpp"
 #include "common_utils.hpp"
+#include "common_constants.hpp"
+#include "AAction.hpp"
 
 using std::string;
+using std::vector;
+using std::map;
 
 ABot::ABot(const string &nickname, const string &username, const string &realname) :
 	_nickname(nickname),
@@ -31,8 +36,8 @@ ABot::ABot(const ABot &copy) :
 	_realname(copy._realname),
 	_connected(copy._connected),
 	_logger(copy._logger),
-	_server_socket(copy._server_socket),
-	_actions(copy._actions) {}
+	_actions(copy._actions),
+	_server_socket(copy._server_socket) {}
 
 ABot::~ABot(void) {}
 
@@ -67,19 +72,6 @@ void	ABot::connect(void)
 	freeaddrinfo(res);
 }
 
-void	ABot::disconnect(void)
-{
-	close_p(_server_socket);
-	_server_socket = -1;
-	_connected = false;
-	_logger.logEvent("Bot disconnected from server");
-}
-
-void	ABot::sendMessage(const CommandMessage &msg) const
-{
-	msg.getDelivered(_server_socket);
-}
-
 void	ABot::authenticate(void)
 {
 	const CommandMessage nick(_nickname, NICK, _nickname.c_str(), NULL);
@@ -95,4 +87,50 @@ void	ABot::authenticate(void)
 	user.getDelivered(_server_socket);
 
 	_connected = true;
+}
+
+void	ABot::routine(void)
+{
+	while (true)
+	{
+		const AMessage	*input = receiveMessage();
+		const AMessage	*output = NULL;
+
+		if (dynamic_cast<const ReplyMessage *>(input))
+			continue;
+		
+		const CommandMessage	&command_message = *dynamic_cast<const CommandMessage *>(input);
+		const enum e_commands	&command = command_message.getCommand();
+
+		const map<enum e_commands, AAction *>::const_iterator it = _actions.find(command);
+		if (it == _actions.end())
+			output = new ReplyMessage(_nickname, ERR_UNKNOWNCOMMAND, g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
+		else
+			output = it->second->beExecuted(command_message);
+		sendMessage(*output);
+	}
+}
+
+void	ABot::disconnect(void)
+{
+	close_p(_server_socket);
+	_server_socket = -1;
+	_connected = false;
+	_logger.logEvent("Bot disconnected from server");
+}
+
+void	ABot::sendMessage(const AMessage &msg) const
+{
+	msg.getDelivered(_server_socket);
+}
+
+const AMessage	*ABot::receiveMessage(void) const
+{
+	char	buffer[BUFFER_SIZE] = {0};
+
+	if (recv_p(_server_socket, buffer, BUFFER_SIZE - 1, 0) == 0)
+		throw SystemErrorException("Server disconnected");
+
+	//TODO controllo e ritornare o reply o command message
+	return ;
 }
