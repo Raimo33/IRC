@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 22:47:23 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/03 15:50:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class EventHandler
 		const Client									&getClient(void) const;
 		void											setClient(Client &client);
 
-		void 											processInput(std::string &raw_input);
+		void 											processInput(std::string raw_input);
 
 	private:
 		typedef void (EventHandler::*CommandHandler)(const std::vector<std::string> &);

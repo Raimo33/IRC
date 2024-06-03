@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/03 00:18:58 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/03 16:29:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,8 @@ Client::Client(const Client &copy) :
 
 Client::~Client(void)
 {
-	for (map<string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++)
-		leaveChannel(*it->second, "Client disconnected");
+	while (!_channels.empty())
+		leaveChannel(*_channels.begin()->second);
 }
 
 const map<string, Channel *> &Client::getChannels(void) const
@@ -83,7 +83,7 @@ void Client::addChannel(Channel &channel)
 
 void Client::removeChannel(Channel &channel)
 {
-	const string &channel_name = channel.getName();
+	const string channel_name = channel.getName();
 	map<string, Channel *>::iterator it = _channels.find(channel_name);
 
 	if (it == _channels.end()) // se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
@@ -247,7 +247,7 @@ void Client::joinChannel(Channel &channel, const string &key)
 	if (channel_topic.empty())
 		topic_reply = ReplyMessage(SERVER_NAME, RPL_NOTOPIC, _nickname.c_str(), channel_name.c_str(), g_default_replies_map.at(RPL_NOTOPIC), NULL);
 	else
-		topic_reply = ReplyMessage(SERVER_NAME, RPL_TOPIC, _nickname.c_str(), channel_name.c_str(), channel_topic.c_str(), g_default_replies_map.at(RPL_TOPIC), NULL);
+		topic_reply = ReplyMessage(SERVER_NAME, RPL_TOPIC, _nickname.c_str(), channel_name.c_str(), channel_topic.c_str(), NULL);
 
 	const ReplyMessage namreply(SERVER_NAME, RPL_NAMREPLY, _nickname.c_str(), "=", channel_name.c_str(), channel.getMembersString().c_str(), NULL);
 	const ReplyMessage endofnames(SERVER_NAME, RPL_ENDOFNAMES, _nickname.c_str(), channel_name.c_str(), g_default_replies_map.at(RPL_ENDOFNAMES), NULL);
@@ -258,7 +258,8 @@ void Client::joinChannel(Channel &channel, const string &key)
 }
 
 void Client::leaveChannel(Channel &channel, const string &reason)
-{	
+{
+	const string channel_name = channel.getName();
 	channel.removeMember(_nickname);
 
 	const CommandMessage part(_nickname.c_str(), PART, channel.getName().c_str(), reason.c_str(), NULL);
@@ -267,8 +268,8 @@ void Client::leaveChannel(Channel &channel, const string &reason)
 
 	removeChannel(channel);
 
-	ostringstream oss;
-	oss << "Client " << _nickname << " left channel " << channel.getName();
+	ostringstream	oss;
+	oss << "Client " << _nickname << " left channel " << channel_name;
 	_logger.logEvent(oss.str());
 }
 
@@ -347,7 +348,7 @@ void Client::topicSet(Channel &channel, const string &new_topic) const
 	const string &channel_name = channel.getName();
 
 	if (channel.getMode('t') && !channel.isOperator(*this))
-		throw ActionFailedException(ERR_CHANOPRIVSNEEDED, _nickname.c_str(), channel_name.c_str(), g_default_replies_map.at(ERR_CHANOPRIVSNEEDED), NULL);
+		throw ActionFailedException(ERR_CHANOPRIVSNEEDED, channel_name.c_str(), g_default_replies_map.at(ERR_CHANOPRIVSNEEDED), NULL);
 
 	ostringstream oss;
 	oss << "Client " << _nickname << " tries to set topic of channel " << channel_name << " to " << new_topic;

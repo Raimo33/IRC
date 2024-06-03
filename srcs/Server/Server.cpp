@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/03 00:27:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/03 16:11:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,12 +27,13 @@ using std::map;
 using std::string;
 using std::vector;
 
-Server::Server(Logger &logger, const uint16_t port_no, const string &password) : _port(port_no),
-																				 _pwd_hash(hash(password)),
-																				 _epoll_fd(epoll_create1_p(0)),
-																				 _socket(socket_p(AF_INET, SOCK_STREAM, 0)),
-																				 _handler(EventHandler(logger, *this)),
-																				 _logger(logger)
+Server::Server(Logger &logger, const uint16_t port_no, const string &password) : 
+	_port(port_no),
+	_pwd_hash(hash(password)),
+	_epoll_fd(epoll_create1_p(0)),
+	_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
+	_handler(EventHandler(logger, *this)),
+	_logger(logger)
 {
 	struct sockaddr_in server_addr;
 	socklen_t addr_len = sizeof(server_addr);
@@ -71,8 +72,6 @@ Server::Server(const Server &copy) : _port(copy._port),
 Server::~Server(void)
 {
 	for (map<string, Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		disconnectClient(*it->second);
-	for (map<string, Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++)
 		delete it->second;
 	close_p(_socket);
 	close_p(_epoll_fd);
@@ -80,8 +79,8 @@ Server::~Server(void)
 
 void Server::run(void)
 {
-	const int MAX_EVENTS = 10;
-	struct epoll_event events[MAX_EVENTS];
+	const int			MAX_EVENTS = 10;
+	struct epoll_event	events[MAX_EVENTS];
 
 	while (true)
 	{
@@ -102,7 +101,7 @@ void Server::run(void)
 				if (client)
 					disconnectClient(*client);
 				else
-					_logger.logEvent("Client disconnected: " + client->getIpAddr());
+					_logger.logEvent("Client disconnected");
 			}
 		}
 	}
@@ -211,20 +210,21 @@ bool Server::isClientConnected(const string &nickname) const
 
 void Server::disconnectClient(Client &client)
 {
-	int		socket = client.getSocket();
+	int				socket = client.getSocket();
+	const string	ip_addr = client.getIpAddr();
 
+	removeClient(client);
+	delete &client;
 	shutdown_p(socket, SHUT_RDWR);
 	close_p(socket);
-	removeClient(client);
-	_logger.logEvent("Client disconnected: " + client.getIpAddr());
-	delete &client;
+	_logger.logEvent("Client disconnected: " + ip_addr);
 }
 
 void Server::configureNonBlocking(const int socket) const
 {
 	int flags;
 
-	uint32_t buf_size = BUFFER_SIZE;
+	uint32_t buf_size = BUFFER_SIZE - 1;
 	flags = fcntl_p(socket, F_GETFL);
 	fcntl_p(socket, F_SETFL, flags | O_NONBLOCK);
 	setsockopt_p(socket, SOL_SOCKET, SO_RCVBUF, &buf_size, sizeof(buf_size));
@@ -263,27 +263,13 @@ void Server::handleClient(const int client_socket)
 
 	try
 	{
-		string raw_input;
-		char buffer[BUFFER_SIZE];
+		char	buffer[BUFFER_SIZE] = {0};
 
-		raw_input.reserve(BUFFER_SIZE);
-		while (true)
-		{
-			memset(buffer, 0, sizeof(buffer));
-			int bytes_read = recv(client->getSocket(), buffer, sizeof(buffer), 0);
-			if (bytes_read <= 0)
-			{
-				disconnectClient(*client);
-				if (bytes_read < 0)
-					throw SystemErrorException(strerror(errno));
-				break;
-			}
-			raw_input += buffer;
-			if (raw_input.find("\r\n") != string::npos)
-				break;
-		}
+		int bytes_read = recv_p(client_socket, buffer, sizeof(buffer) - 1, 0);
+		if (bytes_read == 0)
+			return ;
 		_handler.setClient(*client);
-		_handler.processInput(raw_input);
+		_handler.processInput(buffer);
 	}
 	catch (ActionFailedException &e) // TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
 	{

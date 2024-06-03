@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 23:53:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/03 16:54:26 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void EventHandler::setClient(Client &client)
 	_client = &client;
 }
 
-void EventHandler::processInput(string &raw_input)
+void EventHandler::processInput(string raw_input)
 {
 	vector<string> inputs = ::split(raw_input, "\r\n");
 
@@ -68,7 +68,7 @@ void EventHandler::processInput(string &raw_input)
 		if (command == CMD_UNKNOWN)
 		{
 			const string &first_param = _client->getIsAuthenticated() ? _client->getNickname() : SERVER_NAME;
-			ReplyMessage reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, first_param.c_str(), input.getStringFromCommand(command).c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
+			ReplyMessage reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, first_param.c_str(), inputs[i].c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
 			_client->receiveMessage(&reply);
 			continue;
 		}
