@@ -6,12 +6,14 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:45:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 22:37:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/03 17:10:39 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ABOT_HPP
 # define ABOT_HPP
+
+//TODO capire come gestire l'entrata in canali con password
 
 #include <string>
 #include <map>
@@ -59,7 +61,7 @@ class ABot
 
 		void								connect(void);
 		void								disconnect(void);
-		void								authenticate(const std::string &password = "");
+		void								authenticate(void);
 
 		int									_server_socket; // socket to the 
 		std::string							_server_ip;
