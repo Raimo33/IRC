@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 19:09:13 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 16:49:38 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 18:59:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,6 @@ std::map<std::string, AAction *> BeetleBot::initActions(void) const
 {
 	map<string, AAction *> actions;
 
-	actions["!BEET"] = new SendLinkAction();
+	actions["!JUICE"] = new SendLinkAction();
 	return actions;
 }

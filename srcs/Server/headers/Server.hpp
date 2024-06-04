@@ -6,11 +6,11 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 17:06:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 19:06:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// TODO aggiungere bot
+// TODO Bypassing the Password: When a user is invited to a private channel, they can join the channel without needing to provide the channel password. The invitation overrides the password requirement. This mechanism is especially useful for channels that are set with an invite-only mode (+i) or have a password set (+k).
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
@@ -36,16 +36,16 @@ class Server
 	~Server(void);
 
 	uint16_t                                getPort(void) const;
-	const std::string                      &getPwdHash(void) const;
+	const std::string	                  &getPwdHash(void) const;
 	const std::map<std::string, Client *>  &getClients(void) const;
 	void                                    setClients(const std::map<std::string, Client *> &clients);
-	Client                                 &getClient(const std::string &nickname) const;
-	Client                                 *getClient(const int socket) const;
+	Client	                             &getClient(const std::string &nickname) const;
+	Client	                             *getClient(const int socket) const;
 	void                                    addClient(Client &client);
 	void                                    removeClient(const Client &client);
 	const std::map<std::string, Channel *> &getChannels(void) const;
 	void                                    setChannels(const std::map<std::string, Channel *> &channels);
-	Channel                                &getChannel(const std::string &name) const;
+	Channel	                            &getChannel(const std::string &name) const;
 	void                                    addChannel(Channel &channel);
 	void                                    removeChannel(const Channel &channel);
 	int                                     getSocket(void) const;
@@ -66,7 +66,7 @@ class Server
 	const int                        _epoll_fd;
 	const int                        _socket;
 	EventHandler                     _handler;
-	Logger                          &_logger;
+	Logger	                      &_logger;
 };
 
 #endif

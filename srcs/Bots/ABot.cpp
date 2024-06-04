@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ABot.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 17:56:48 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 19:21:03 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ void ABot::connect(void)
 	connect_p(_socket, res->ai_addr, res->ai_addrlen);
 	freeaddrinfo(res);
 
-	//TODO valutare se mettere select, poll etc anche qua
+	// TODO valutare se mettere select, poll etc anche qua
 }
 
 void ABot::authenticate(void)
@@ -119,21 +119,31 @@ void ABot::routine(void)
 {
 	while (_connected)
 	{
-		const AMessage *input  = receiveMessage();
-		const AMessage *output = NULL;
+		const AMessage       *input         = receiveMessage();
+		const AMessage       *output        = NULL;
+		const CommandMessage *input_message = NULL;
 
 		if (dynamic_cast<const ReplyMessage *>(input))
-			continue;
+			goto cleanup;
 
-		const CommandMessage &command_message = *dynamic_cast<const CommandMessage *>(input);
-		const string         &command         = command_message.getParams().front();
+		input_message = dynamic_cast<const CommandMessage *>(input);
+		if (input_message->getCommand() == INVITE)
+		{
+			const string &channel_name = input_message->getParams().at(0);
+			output                     = new CommandMessage(_nickname, JOIN, channel_name.c_str(), NULL);
+		}
+		else
+		{
+			const string			                    &action    = input_message->getParams().front();
+			const map<string, AAction *>::const_iterator action_it = _actions.find(action);
+			if (action_it == _actions.end())
+				goto cleanup;
+			output = action_it->second->beExecuted(*input_message, *this);
+		}
 
-		const map<string, AAction *>::const_iterator action_it = _actions.find(command);
-		if (action_it == _actions.end())
-			output = new ReplyMessage(_nickname, ERR_UNKNOWNCOMMAND, g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
-		else // TODO mettere una ACTION per il comando IVNITE che risponde con JOIN
-			output = action_it->second->beExecuted(command_message, *this);
 		sendMessage(*output);
+
+	cleanup:
 		delete input;
 		delete output;
 	}

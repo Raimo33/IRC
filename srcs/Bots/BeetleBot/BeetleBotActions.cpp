@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   BeetleBotActions.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/04 13:42:53 by egualand          #+#    #+#             */
-/*   Updated: 2024/06/04 15:48:46 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 19:21:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 using std::string;
 
 SendLinkAction::SendLinkAction(void) :
-    AAction("JUICE") {}
+    AAction("!JUICE") {}
 
 SendLinkAction::~SendLinkAction(void) {}
 
