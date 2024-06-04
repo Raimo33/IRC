@@ -6,7 +6,7 @@
 /*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 14:16:12 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 14:37:53 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,6 @@ void ABot::authenticate(void)
 		pass.getDelivered(_server_socket);
 	}
 
-	const AMessage *msg = receiveMessage();
 	check_for_authentication_success();
 	nick.getDelivered(_server_socket);
 	check_for_authentication_success();
