@@ -154,6 +154,7 @@ void EventHandler::handleJoin(const vector<string> &args)
 	if (args.size() > 1)
 		keys = ::split(args[1], ",");
 
+	//TODO refactor con ternaries
 	for (size_t i = 0; i < channels_to_join.size(); i++)
 	{
 		if (channels.find(channels_to_join[i]) == channels.end())
@@ -343,6 +344,7 @@ void EventHandler::handleMode(const vector<string> &args)
 
 	Channel &channel = _server->getChannel(args[0]);
 
+	//TODO refactor
 	if (n_args == 1)
 	{
 		const map<char, bool> &modes = channel.getModes();
