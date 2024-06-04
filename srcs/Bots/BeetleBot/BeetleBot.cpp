@@ -3,30 +3,34 @@
 /*                                                        :::      ::::::::   */
 /*   BeetleBot.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 19:09:13 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 15:48:37 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 16:49:38 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "BeetleBot.hpp"
 #include "BeetleBotActions.hpp"
 
-using std::string;
 using std::map;
+using std::string;
 
 BeetleBot::BeetleBot(const string &nickname, const string &username, const string &realname) :
-	ABot(nickname, username, realname) {}
+    ABot(nickname, username, realname)
+{
+	_actions = initActions();
+}
 
-BeetleBot::BeetleBot(const BeetleBot &copy) : ABot(copy) {}
+BeetleBot::BeetleBot(const BeetleBot &copy) :
+    ABot(copy) {}
 
 BeetleBot::~BeetleBot(void) {}
 
-const std::map<std::string, AAction *>	BeetleBot::initActions(void) const
+std::map<std::string, AAction *> BeetleBot::initActions(void) const
 {
 	map<string, AAction *> actions;
 
-	actions["BEET"] = new SendLinkAction();
+	actions["!BEET"] = new SendLinkAction();
 	return actions;
 }

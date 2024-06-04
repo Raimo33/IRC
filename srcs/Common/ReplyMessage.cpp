@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:54:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 23:28:44 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 16:07:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,12 @@
 #include <iomanip>
 #include <sstream>
 
+using std::istringstream;
+using std::make_pair;
+using std::map;
+using std::ostringstream;
 using std::string;
 using std::vector;
-using std::map;
-using std::make_pair;
-using std::ostringstream;
-using std::istringstream;
 
 ReplyMessage::ReplyMessage(void) {}
 
@@ -33,12 +33,12 @@ ReplyMessage::ReplyMessage(const string &raw_input)
 
 ReplyMessage::ReplyMessage(const string &prefix, const int reply_code, ...)
 {
-	va_list		args;
-	const char	*param;
+	va_list     args;
+	const char *param;
 
 	if (reply_code < RPL_WELCOME || reply_code > ERR_CHANOPRIVSNEEDED)
 		throw InternalErrorException("ReplyMessage::ReplyMessage: invalid reply code");
-	_prefix = prefix;
+	_prefix     = prefix;
 	_reply_code = static_cast<enum e_replyCodes>(reply_code);
 	va_start(args, reply_code);
 	while ((param = va_arg(args, const char *)) != NULL)
@@ -48,21 +48,28 @@ ReplyMessage::ReplyMessage(const string &prefix, const int reply_code, ...)
 
 ReplyMessage::ReplyMessage(const string &prefix, const enum e_replyCodes reply_code, va_list args)
 {
-	const char	*param;
+	const char *param;
 
-	_prefix = prefix;
+	_prefix     = prefix;
 	_reply_code = reply_code;
 	while ((param = va_arg(args, const char *)) != NULL)
 		_params.push_back(param);
 }
 
+ReplyMessage::ReplyMessage(const string &prefix, const enum e_replyCodes reply_code, const vector<string> &params) :
+    _reply_code(reply_code)
+{
+	_prefix = prefix;
+	_params = params;
+}
+
 ReplyMessage::ReplyMessage(const ReplyMessage &copy) :
-	AMessage(copy),
-	_reply_code(copy._reply_code) {}
+    AMessage(copy),
+    _reply_code(copy._reply_code) {}
 
 ReplyMessage::~ReplyMessage(void) {}
 
-ReplyMessage	&ReplyMessage::operator=(const ReplyMessage &copy)
+ReplyMessage &ReplyMessage::operator=(const ReplyMessage &copy)
 {
 	if (this != &copy)
 	{
@@ -72,16 +79,16 @@ ReplyMessage	&ReplyMessage::operator=(const ReplyMessage &copy)
 	return (*this);
 }
 
-enum e_replyCodes	ReplyMessage::getReplyCode(void) const { return (_reply_code); }
-void				ReplyMessage::setReplyCode(const enum e_replyCodes reply_code) { _reply_code = reply_code; }
+enum e_replyCodes ReplyMessage::getReplyCode(void) const { return (_reply_code); }
+void              ReplyMessage::setReplyCode(const enum e_replyCodes reply_code) { _reply_code = reply_code; }
 
-void	ReplyMessage::parse(string raw_input)
+void ReplyMessage::parse(string raw_input)
 {
-	string				reply_code_str;
-	string				param;
-	string::iterator	it;
-	istringstream		iss;
-	uint16_t			reply_code;
+	string           reply_code_str;
+	string           param;
+	string::iterator it;
+	istringstream    iss;
+	uint16_t         reply_code;
 
 	if (*raw_input.rbegin() == '\n')
 		raw_input.resize(raw_input.size() - 1);
@@ -93,7 +100,7 @@ void	ReplyMessage::parse(string raw_input)
 	iss >> reply_code;
 	if (reply_code < RPL_WELCOME || reply_code > ERR_CHANOPRIVSNEEDED)
 		_reply_code = RPL_UNKNOWN;
-	else	
+	else
 		_reply_code = static_cast<enum e_replyCodes>(reply_code);
 	while (it != raw_input.end())
 	{
@@ -105,7 +112,7 @@ void	ReplyMessage::parse(string raw_input)
 	}
 }
 
-void	ReplyMessage::unwrapMessage(string &first_part, string &second_part) const
+void ReplyMessage::unwrapMessage(string &first_part, string &second_part) const
 {
 	if (!_prefix.empty())
 		first_part += ":" + _prefix + " ";

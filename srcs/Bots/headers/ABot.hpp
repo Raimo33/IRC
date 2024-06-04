@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ABot.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:45:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 15:36:33 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 16:48:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,21 +37,28 @@ class ABot
 	const std::string &getUsername(void) const;
 	const std::string &getRealname(void) const;
 	bool               isConnected(void) const;
-	int                getSocket(void) const;
 	void               setLogger(const Logger &logger);
 	const Logger      &getLogger(void) const;
+	int                getSocket(void) const;
+	void			   setServerIp(const std::string &ip);
+	const std::string		&getServerIp(void) const;
+	void			   setServerPort(uint16_t port);
+	uint16_t		   getServerPort(void) const;
+	void			   setServerPassword(const std::string &password);
+	const std::string		&getServerPassword(void) const;
 
-	void run(void);
+	void	bindServer(const std::string &ip, uint16_t port, const std::string &password);
+	void	run(void);
 
   protected:
-	virtual const std::map<std::string, AAction *> initActions(void) const = 0;
+	virtual std::map<std::string, AAction *> initActions(void) const = 0;
 
 	const std::string                      _nickname;
 	const std::string                      _username;
 	const std::string                      _realname;
 	bool                                   _connected;
 	Logger                                 _logger;
-	const std::map<std::string, AAction *> _actions;
+	std::map<std::string, AAction *> 		_actions;
 
   private:
 	ABot(void);
@@ -67,7 +74,7 @@ class ABot
 	const AMessage *receiveMessage(void) const;             // receives a message from the server
 	void            check_for_authentication_success(void) const;
 
-	int         _server_socket; // socket to the
+	int         _socket; // socket to the
 	std::string _server_ip;
 	uint16_t    _server_port;
 	std::string _server_password;

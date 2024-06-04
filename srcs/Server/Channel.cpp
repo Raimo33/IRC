@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/03 23:56:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 16:15:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,11 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-Channel::Channel(Logger & logger, const string & name, Client & op, const string & key) :
-	_name(name),
-	_member_limit(-1),
-	_modes(initModes()),
-	_logger(logger)
+Channel::Channel(Logger &logger, const string &name, Client &op, const string &key) :
+    _name(name),
+    _member_limit(-1),
+    _modes(initModes()),
+    _logger(logger)
 {
 	checkName(name);
 	_operators.insert(&op);
@@ -45,16 +45,16 @@ Channel::Channel(Logger & logger, const string & name, Client & op, const string
 	_logger.logEvent(oss.str());
 }
 
-Channel::Channel(const Channel & copy) :
-	_name(copy._name),
-	_key(copy._key),
-	_topic(copy._topic),
-	_member_limit(copy._member_limit),
-	_members(copy._members),
-	_operators(copy._operators),
-	_pending_invitations(copy._pending_invitations),
-	_modes(copy._modes),
-	_logger(copy._logger)
+Channel::Channel(const Channel &copy) :
+    _name(copy._name),
+    _key(copy._key),
+    _topic(copy._topic),
+    _member_limit(copy._member_limit),
+    _members(copy._members),
+    _operators(copy._operators),
+    _pending_invitations(copy._pending_invitations),
+    _modes(copy._modes),
+    _logger(copy._logger)
 {
 	ostringstream oss;
 	oss << "Channel created: " << _name;
@@ -68,12 +68,12 @@ Channel::~Channel(void)
 	_logger.logEvent(oss.str());
 }
 
-const string & Channel::getName(void) const
+const string &Channel::getName(void) const
 {
 	return _name;
 }
 
-void Channel::setName(const string & new_name)
+void Channel::setName(const string &new_name)
 {
 	checkName(new_name);
 	ostringstream oss;
@@ -82,12 +82,12 @@ void Channel::setName(const string & new_name)
 	_name = new_name;
 }
 
-const string & Channel::getKey(void) const
+const string &Channel::getKey(void) const
 {
 	return _key;
 }
 
-void Channel::setKey(const string & new_key)
+void Channel::setKey(const string &new_key)
 {
 	if (!is_valid_channel_key(new_key))
 		throw ActionFailedException(ERR_BADCHANNELKEY, _name.c_str(), (new_key + " is not a valid channel key").c_str(), NULL);
@@ -97,12 +97,12 @@ void Channel::setKey(const string & new_key)
 	_logger.logEvent(oss.str());
 }
 
-const string & Channel::getTopic(void) const
+const string &Channel::getTopic(void) const
 {
 	return _topic;
 }
 
-void Channel::setTopic(const string & new_topic)
+void Channel::setTopic(const string &new_topic)
 {
 	if (new_topic.length() > MAX_CHANNEL_TOPIC_LEN)
 		throw ActionFailedException(RPL_NOTOPIC, _name.c_str(), (new_topic + " is too long").c_str(), NULL);
@@ -122,26 +122,26 @@ void Channel::setMemberLimit(const uint32_t new_limit)
 	_member_limit = new_limit;
 }
 
-const map<string, Client *> & Channel::getMembers(void) const
+const map<string, Client *> &Channel::getMembers(void) const
 {
 	return _members;
 }
 
-void Channel::setMembers(const map<string, Client *> & new_members)
+void Channel::setMembers(const map<string, Client *> &new_members)
 {
 	_members = new_members;
 }
 
-Client & Channel::getMember(const string & nickname) const
+Client &Channel::getMember(const string &nickname) const
 {
 	if (!isMember(nickname))
 		throw ActionFailedException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), g_default_replies_map.at(ERR_USERNOTINCHANNEL), NULL);
 	return *(_members.at(nickname));
 }
 
-void Channel::addMember(Client & user)
+void Channel::addMember(Client &user)
 {
-	const string & nickname = user.getNickname();
+	const string &nickname = user.getNickname();
 
 	if (_modes['i'] && _pending_invitations.find(&user) == _pending_invitations.end())
 		throw ActionFailedException(ERR_INVITEONLYCHAN, _name.c_str(), ("You must be invited to join " + _name).c_str(), NULL);
@@ -155,9 +155,9 @@ void Channel::addMember(Client & user)
 	_logger.logEvent(oss.str());
 }
 
-void Channel::removeMember(const string & nickname)
+void Channel::removeMember(const string &nickname)
 {
-	Client & user = getMember(nickname);
+	Client &user = getMember(nickname);
 	if (isOperator(user))
 		_operators.erase(&user);
 	_members.erase(nickname);
@@ -166,19 +166,19 @@ void Channel::removeMember(const string & nickname)
 	_logger.logEvent(oss.str());
 }
 
-const set<const Client *> & Channel::getOperators(void) const
+const set<const Client *> &Channel::getOperators(void) const
 {
 	return _operators;
 }
 
-void Channel::setOperators(const set<const Client *> & new_operators)
+void Channel::setOperators(const set<const Client *> &new_operators)
 {
 	_operators = new_operators;
 }
 
-void Channel::addOperator(const string & nickname)
+void Channel::addOperator(const string &nickname)
 {
-	const Client & user = getMember(nickname);
+	const Client &user = getMember(nickname);
 	if (isOperator(user))
 		throw ActionFailedException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is already an operator of " + _name).c_str(), NULL);
 	_operators.insert(&user);
@@ -188,9 +188,9 @@ void Channel::addOperator(const string & nickname)
 	_logger.logEvent(oss.str());
 }
 
-void Channel::removeOperator(const string & nickname)
+void Channel::removeOperator(const string &nickname)
 {
-	const Client & user = getMember(nickname);
+	const Client &user = getMember(nickname);
 	if (!isOperator(user))
 		throw ActionFailedException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is not an operator of " + _name).c_str(), NULL);
 	_operators.erase(&user);
@@ -200,19 +200,19 @@ void Channel::removeOperator(const string & nickname)
 	_logger.logEvent(oss.str());
 }
 
-const set<const Client *> & Channel::getPendingInvitations(void) const
+const set<const Client *> &Channel::getPendingInvitations(void) const
 {
 	return _pending_invitations;
 }
 
-void Channel::setPendingInvitations(const set<const Client *> & new_invitations)
+void Channel::setPendingInvitations(const set<const Client *> &new_invitations)
 {
 	_pending_invitations = new_invitations;
 }
 
-void Channel::addPendingInvitation(Client & user)
+void Channel::addPendingInvitation(Client &user)
 {
-	const string & nickname = user.getNickname();
+	const string &nickname = user.getNickname();
 
 	if (isMember(user))
 		throw ActionFailedException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), g_default_replies_map.at(ERR_USERONCHANNEL), NULL);
@@ -224,9 +224,9 @@ void Channel::addPendingInvitation(Client & user)
 	_logger.logEvent(oss.str());
 }
 
-void Channel::removePendingInvitation(Client & user)
+void Channel::removePendingInvitation(Client &user)
 {
-	const string & nickname = user.getNickname();
+	const string &nickname = user.getNickname();
 
 	if (_pending_invitations.find(&user) == _pending_invitations.end())
 		throw ActionFailedException(ERR_USERNOTINCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " was not invited to " + _name).c_str(), NULL);
@@ -236,12 +236,12 @@ void Channel::removePendingInvitation(Client & user)
 	_logger.logEvent(oss.str());
 }
 
-const map<char, bool> & Channel::getModes(void) const
+const map<char, bool> &Channel::getModes(void) const
 {
 	return _modes;
 }
 
-void Channel::setModes(const map<char, bool> & modes, const vector<string> & params, const Client * setter)
+void Channel::setModes(const map<char, bool> &modes, const vector<string> &params, const Client *setter)
 {
 	uint32_t i = 0;
 
@@ -266,7 +266,7 @@ bool Channel::getMode(const char mode) const
 	return it->second;
 }
 
-void Channel::setMode(const char mode, const bool status, const string & param, const Client * setter)
+void Channel::setMode(const char mode, const bool status, const string &param, const Client *setter)
 {
 	if (channel_mode_requires_param(mode, status) && param.empty())
 		throw InternalErrorException("Channel::setMode: missing parameter for mode");
@@ -282,7 +282,7 @@ void Channel::setMode(const char mode, const bool status, const string & param, 
 		if (status)
 		{
 			stringstream ss(param);
-			uint32_t	 new_limit;
+			uint32_t     new_limit;
 
 			if (!(ss >> new_limit) || !ss.eof())
 				throw ActionFailedException(ERR_NEEDMOREPARAMS, _name.c_str(), "Invalid parameter for mode 'l'");
@@ -302,30 +302,30 @@ void Channel::setMode(const char mode, const bool status, const string & param, 
 	}
 	_modes[mode] = status;
 
-	string				 prefix	  = setter ? setter->getNickname() : SERVER_NAME;
-	string				 mode_str = (status ? "+" : "-") + string(1, mode);
+	string               prefix   = setter ? setter->getNickname() : SERVER_NAME;
+	string               mode_str = (status ? "+" : "-") + string(1, mode);
 	const CommandMessage mode_change(prefix, MODE, _name.c_str(), mode_str.c_str(), param.c_str(), NULL);
 	receiveMessage(mode_change);
 }
 
-void Channel::receiveMessage(const AMessage & msg, const Client * sender) const
+void Channel::receiveMessage(const AMessage &msg, const Client *sender) const
 {
 	for (map<string, Client *>::const_iterator receiver = _members.begin(); receiver != _members.end(); receiver++)
 		if (!sender || receiver->second != sender)
 			receiver->second->receiveMessage(&msg);
 }
 
-bool Channel::isOperator(const Client & user) const
+bool Channel::isOperator(const Client &user) const
 {
 	return _operators.find(&user) != _operators.end();
 }
 
-bool Channel::isMember(const string & nickname) const
+bool Channel::isMember(const string &nickname) const
 {
 	return _members.find(nickname) != _members.end();
 }
 
-bool Channel::isMember(const Client & user) const
+bool Channel::isMember(const Client &user) const
 {
 	return isMember(user.getNickname());
 }
@@ -358,13 +358,13 @@ const map<char, bool> Channel::initModes(void) const
 	return modes;
 }
 
-void Channel::checkName(const string & name) const
+void Channel::checkName(const string &name) const
 {
 	if (!is_valid_channel_name(name))
 		throw ActionFailedException(ERR_NOSUCHCHANNEL, name.c_str(), (name + " is not a valid channel name").c_str(), NULL);
 }
 
-void Channel::checkKey(const string & key) const
+void Channel::checkKey(const string &key) const
 {
 	if (key != _key)
 		throw ActionFailedException(ERR_BADCHANNELKEY, _name.c_str(), ("wrong key for " + _name).c_str(), NULL);

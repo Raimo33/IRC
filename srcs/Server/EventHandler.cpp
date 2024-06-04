@@ -3,25 +3,26 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 13:00:53 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 17:01:38 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EventHandler.hpp"
-#include "Server.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
-#include "Client.hpp"
-#include "server_utils.hpp"
-#include "ReplyMessage.hpp"
 #include "CommandMessage.hpp"
-#include "server_exceptions.hpp"
+#include "ReplyMessage.hpp"
+#include "Server.hpp"
 #include "server_constants.hpp"
+#include "server_exceptions.hpp"
+#include "server_utils.hpp"
 
 #include <algorithm>
+
+// TODO quit da netcat dopo NICK non manda il messaggio indietro
 
 using std::map;
 using std::string;
@@ -30,17 +31,17 @@ using std::vector;
 static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
 
-EventHandler::EventHandler(Logger &logger, Server &server) : 
-	_server(&server),
-	_client(NULL),
-	_handlers(initHandlers()),
-	_logger(logger) {}
+EventHandler::EventHandler(Logger &logger, Server &server) :
+    _server(&server),
+    _client(NULL),
+    _handlers(initHandlers()),
+    _logger(logger) {}
 
 EventHandler::EventHandler(const EventHandler &copy) :
-	_server(copy._server),
-	_client(copy._client),
-	_handlers(copy._handlers),
-	_logger(copy._logger) {}
+    _server(copy._server),
+    _client(copy._client),
+    _handlers(copy._handlers),
+    _logger(copy._logger) {}
 
 EventHandler::~EventHandler(void) {}
 
@@ -63,12 +64,12 @@ void EventHandler::processInput(string raw_input)
 		if (inputs[i].empty())
 			continue;
 
-		const CommandMessage input(inputs[i]);
+		const CommandMessage  input(inputs[i]);
 		const enum e_commands command = input.getCommand();
 		if (command == CMD_UNKNOWN)
 		{
 			const string &first_param = _client->getIsAuthenticated() ? _client->getNickname() : SERVER_NAME;
-			ReplyMessage reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, first_param.c_str(), inputs[i].c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
+			ReplyMessage  reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, first_param.c_str(), inputs[i].c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
 			_client->receiveMessage(&reply);
 			continue;
 		}
@@ -80,19 +81,19 @@ const map<e_commands, EventHandler::CommandHandler> EventHandler::initHandlers(v
 {
 	map<e_commands, CommandHandler> handlers;
 
-	handlers[PASS] = &EventHandler::handlePass;
-	handlers[NICK] = &EventHandler::handleNick;
-	handlers[USER] = &EventHandler::handleUser;
-	handlers[JOIN] = &EventHandler::handleJoin;
-	handlers[PART] = &EventHandler::handlePart;
+	handlers[PASS]    = &EventHandler::handlePass;
+	handlers[NICK]    = &EventHandler::handleNick;
+	handlers[USER]    = &EventHandler::handleUser;
+	handlers[JOIN]    = &EventHandler::handleJoin;
+	handlers[PART]    = &EventHandler::handlePart;
 	handlers[PRIVMSG] = &EventHandler::handlePrivmsg;
-	handlers[QUIT] = &EventHandler::handleQuit;
-	handlers[SEND] = &EventHandler::handleSend;
+	handlers[QUIT]    = &EventHandler::handleQuit;
+	handlers[SEND]    = &EventHandler::handleSend;
 
-	handlers[KICK] = &EventHandler::handleKick;
+	handlers[KICK]   = &EventHandler::handleKick;
 	handlers[INVITE] = &EventHandler::handleInvite;
-	handlers[TOPIC] = &EventHandler::handleTopic;
-	handlers[MODE] = &EventHandler::handleMode;
+	handlers[TOPIC]  = &EventHandler::handleTopic;
+	handlers[MODE]   = &EventHandler::handleMode;
 
 	return handlers;
 }
@@ -142,13 +143,13 @@ void EventHandler::handleJoin(const vector<string> &args)
 {
 	checkConnection(_client);
 	checkAuthentication(_client);
-	
+
 	if (args.size() < 1)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]", NULL);
 
-	const vector<string> channels_to_join = ::split(args[0], ",");
-	const map<string, Channel *> &channels = _server->getChannels();
-	vector<string> keys;
+	const vector<string>          channels_to_join = ::split(args[0], ",");
+	const map<string, Channel *> &channels         = _server->getChannels();
+	vector<string>                keys;
 
 	if (args.size() > 1)
 		keys = ::split(args[1], ",");
@@ -183,7 +184,7 @@ void EventHandler::handlePart(const vector<string> &args)
 	if (n_args < 1)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "PART", "usage: PART <channel>{,<channel>} [<reason>]", NULL);
 
-	const string reason = (n_args > 1) ? args[1] : "";
+	const string         reason   = (n_args > 1) ? args[1] : "";
 	const vector<string> channels = split(args[0], ",");
 
 	for (vector<string>::const_iterator it = channels.begin(); it != channels.end(); it++)
@@ -219,14 +220,14 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 
 void EventHandler::handleQuit(const vector<string> &args)
 {
-	const string					&reason = args.size() > 0 ? args[0] : "Client quit";
-	const string					quitting_nickname = _client->getNickname();
-	const CommandMessage			quit(quitting_nickname, QUIT, reason.c_str(), NULL);
-	const map<string, Channel *>	&channels = _client->getChannels();
+	const string                 &reason            = args.size() > 0 ? args[0] : "Client quit";
+	const string                  quitting_nickname = _client->getNickname();
+	const CommandMessage          quit(quitting_nickname, QUIT, reason.c_str(), NULL);
+	const map<string, Channel *> &channels = _client->getChannels();
 
 	for (map<string, Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
 	{
-		const Channel *channel = it_channel->second;
+		const Channel               *channel = it_channel->second;
 		const map<string, Client *> &members = channel->getMembers();
 
 		for (map<string, Client *>::const_iterator it_member = members.begin(); it_member != members.end(); it_member++)
@@ -251,12 +252,12 @@ void EventHandler::handleSend(const vector<string> &args)
 	if (args.size() < 2)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "SEND", "usage: SEND <nick|channel> <filename> [filesize]", NULL);
 
-	const string &sender_ip = _client->getIpAddr();
+	const string   &sender_ip   = _client->getIpAddr();
 	const uint16_t &sender_port = getRandomPort();
-	const string &filename = args[1];
-	const uint32_t file_size = args.size() > 2 ? std::atol(args[2].c_str()) : 0;
-	const uint64_t ip_long = ip_to_long(sender_ip);
-	ostringstream dcc_send;
+	const string   &filename    = args[1];
+	const uint32_t  file_size   = args.size() > 2 ? std::atol(args[2].c_str()) : 0;
+	const uint64_t  ip_long     = ip_to_long(sender_ip);
+	ostringstream   dcc_send;
 
 	dcc_send << "DCC SEND " << filename << " " << ip_long << " " << sender_port << " " << file_size;
 	const CommandMessage msg(_client->getNickname(), PRIVMSG, args[0].c_str(), dcc_send.str().c_str(), NULL);
@@ -283,7 +284,7 @@ void EventHandler::handleKick(const vector<string> &args)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> [<reason>]", NULL);
 
 	Channel &channel = _server->getChannel(args[0]);
-	Client &target = _server->getClient(args[1]);
+	Client  &target  = _server->getClient(args[1]);
 
 	args.size() > 2 ? _client->kick(target, channel, args[2]) : _client->kick(target, channel);
 }
@@ -296,7 +297,7 @@ void EventHandler::handleInvite(const vector<string> &args)
 	if (args.size() < 2)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>", NULL);
 
-	Client &target = _server->getClient(args[0]);
+	Client  &target  = _server->getClient(args[0]);
 	Channel &channel = _server->getChannel(args[1]);
 
 	_client->invite(target, channel);
@@ -315,10 +316,10 @@ void EventHandler::handleTopic(const vector<string> &args)
 	Channel &channel = _client->getChannel(args[0]);
 	if (n_args == 1)
 	{
-		const string &topic = channel.getTopic();
-		const string &channel_name = channel.getName();
+		const string &topic           = channel.getTopic();
+		const string &channel_name    = channel.getName();
 		const string &issuer_nickname = _client->getNickname();
-		ReplyMessage topic_reply;
+		ReplyMessage  topic_reply;
 
 		if (topic.empty())
 			topic_reply = ReplyMessage(SERVER_NAME, RPL_NOTOPIC, issuer_nickname.c_str(), channel_name.c_str(), g_default_replies_map.at(RPL_NOTOPIC), NULL);
@@ -345,7 +346,7 @@ void EventHandler::handleMode(const vector<string> &args)
 	if (n_args == 1)
 	{
 		const map<char, bool> &modes = channel.getModes();
-		string modes_str;
+		string                 modes_str;
 
 		for (map<char, bool>::const_iterator it = modes.begin(); it != modes.end(); it++)
 		{
@@ -362,11 +363,11 @@ void EventHandler::handleMode(const vector<string> &args)
 	if (args[1][0] != '+' && args[1][0] != '-')
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}", NULL);
 
-	char mode;
-	bool status;
-	uint16_t j = 2;
+	char            mode;
+	bool            status;
+	uint16_t        j = 2;
 	map<char, bool> new_modes;
-	vector<string> params;
+	vector<string>  params;
 
 	params.reserve(n_args - 2);
 	for (uint32_t i = 0; i < args[1].size(); i++)
@@ -419,5 +420,3 @@ static void checkAuthentication(const Client *client)
 	if (!client->getIsAuthenticated())
 		throw ActionFailedException(ERR_NOTREGISTERED, "you are not registered, use NICK <nickname> and USER <username> first", NULL);
 }
-
-

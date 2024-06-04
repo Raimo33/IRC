@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   BeetleBot.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:43:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 15:45:33 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 16:34:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class BeetleBot: public ABot
 		BeetleBot(const BeetleBot &copy);
 		~BeetleBot(void);
 
-		const std::map<std::string, AAction *>	initActions(void) const;
+		std::map<std::string, AAction *>	initActions(void) const;
 };
 
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 13:11:32 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 17:06:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ class Server
 	int                                     getSocket(void) const;
 	bool                                    isClientConnected(const std::string &nickname) const;
 	void                                    disconnectClient(Client &client);
-	void                                    configureNonBlocking(const int client_socket) const;
 	void                                    run(void);
 	void                                    stop(void);
 

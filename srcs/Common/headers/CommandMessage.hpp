@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandMessage.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:37:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 15:28:39 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 16:01:58 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,22 +18,23 @@
 #include <cstdarg>
 #include <map>
 #include <string>
+#include <vector>
 
 enum e_commands
 {
-	PASS       = 0,
-	NICK       = 1,
-	USER       = 2,
-	JOIN       = 3,
-	PART       = 4,
-	PRIVMSG    = 5,
-	QUIT       = 6,
-	SEND       = 7,
-	KICK       = 8,
-	INVITE     = 9,
-	TOPIC      = 10,
-	MODE       = 11,
-	BOT_ACTION = 12,
+	PASS      = 0,
+	NICK      = 1,
+	USER      = 2,
+	JOIN      = 3,
+	PART      = 4,
+	PRIVMSG   = 5,
+	QUIT      = 6,
+	SEND      = 7,
+	KICK      = 8,
+	INVITE    = 9,
+	TOPIC     = 10,
+	MODE      = 11,
+	BOT_QUERY = 12,
 
 	CMD_UNKNOWN = -1
 };
@@ -45,6 +46,7 @@ class CommandMessage : public AMessage
 	CommandMessage(const std::string &raw_input);
 	CommandMessage(const std::string &prefix, int command, ...);
 	CommandMessage(const std::string &prefix, const enum e_commands command, va_list args);
+	CommandMessage(const std::string &prefix, const enum e_commands command, const std::vector<std::string> &params);
 	CommandMessage(const CommandMessage &copy);
 	virtual ~CommandMessage(void);
 
