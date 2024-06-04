@@ -6,7 +6,7 @@
 /*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 14:37:53 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 15:46:54 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,11 @@ ABot::ABot(const ABot &copy) :
     _actions(copy._actions),
     _server_socket(copy._server_socket) {}
 
-ABot::~ABot(void) {}
+ABot::~ABot(void)
+{
+	for (map<string, AAction *>::const_iterator it = _actions.begin(); it != _actions.end(); ++it)
+		delete it->second;
+}
 
 const string &ABot::getNickname(void) const { return _nickname; }
 const string &ABot::getUsername(void) const { return _username; }
@@ -103,14 +107,16 @@ void ABot::routine(void)
 			continue;
 
 		const CommandMessage &command_message = *dynamic_cast<const CommandMessage *>(input);
-		const string         &command         = g_cmd_str_map.at(command_message.getCommand());
+		const string          command         = command_message.getParams().front();
 
 		const map<string, AAction *>::const_iterator it = _actions.find(command);
 		if (it == _actions.end())
 			output = new ReplyMessage(_nickname, ERR_UNKNOWNCOMMAND, g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
 		else
-			output = it->second->beExecuted(command_message);
+			output = it->second->beExecuted(command_message, *this);
 		sendMessage(*output);
+		delete input;
+		delete output;
 	}
 }
 

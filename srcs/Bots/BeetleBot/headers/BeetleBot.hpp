@@ -6,7 +6,7 @@
 /*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:43:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 13:38:00 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 15:45:33 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class BeetleBot: public ABot
 		BeetleBot(const BeetleBot &copy);
 		~BeetleBot(void);
 
-		void	routine(void);
+		const std::map<std::string, AAction *>	initActions(void) const;
 };
 
 

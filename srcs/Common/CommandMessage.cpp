@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandMessage.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 19:04:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/03 16:50:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 15:32:30 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,6 +156,7 @@ const map<string, enum e_commands> create_str_cmd_map(void)
 	str_cmd_map["INVITE"] = INVITE;
 	str_cmd_map["TOPIC"] = TOPIC;
 	str_cmd_map["MODE"] = MODE;
+	str_cmd_map["!"] = BOT_ACTION;
 	return (str_cmd_map);
 }
 
@@ -175,6 +176,7 @@ const map<enum e_commands, string> create_cmd_str_map(void)
 	cmd_str_map[INVITE] = "INVITE";
 	cmd_str_map[TOPIC] = "TOPIC";
 	cmd_str_map[MODE] = "MODE";
+	cmd_str_map[BOT_ACTION] = "!";
 	return (cmd_str_map);
 }
 

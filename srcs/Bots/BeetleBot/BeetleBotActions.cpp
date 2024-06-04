@@ -6,20 +6,23 @@
 /*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/04 13:42:53 by egualand          #+#    #+#             */
-/*   Updated: 2024/06/04 14:18:54 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 15:48:46 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "BeetleBotActions.hpp"
+#include "ABot.hpp"
 
 using std::string;
 
-SendLinkAction::SendLinkAction(const ABot &owner) : AAction("JUICE", owner) {}
+SendLinkAction::SendLinkAction(void) :
+    AAction("JUICE") {}
 
 SendLinkAction::~SendLinkAction(void) {}
 
-const AMessage	*SendLinkAction::beExecuted(const CommandMessage &msg)
+const AMessage *SendLinkAction::beExecuted(const CommandMessage &msg, const ABot &executor) const
 {
-	const string &destination = msg.getParams().at(0); //TODO controllare se funziona
-	return CommandMessage(_owner.getNickname(), PRIVMSG,
+	const string &destination = msg.getParams().at(0);
+	const char   *link        = "https://shorturl.at/YxRoE";
+	return new CommandMessage(executor.getNickname(), PRIVMSG, destination.c_str(), link);
 }

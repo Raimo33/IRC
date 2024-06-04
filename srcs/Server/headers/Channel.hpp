@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:07:03 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 00:02:51 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 15:12:21 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <vector>
 
 class Client;
+class ABot;
 class Logger;
 class AMessage;
 
@@ -74,6 +75,7 @@ class Channel
 	uint32_t						_member_limit;
 	std::map<std::string, Client *> _members; // {nickname, client}
 	std::set<const Client *>		_operators;
+	std::set<const ABot *>			_bots;
 	std::set<const Client *>		_pending_invitations;
 	std::map<char, bool>			_modes; // {mode, status}
 	Logger &						_logger;
