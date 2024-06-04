@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ABot.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 17:05:30 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 17:56:48 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,8 @@ void ABot::connect(void)
 	configure_non_blocking(_socket);
 	connect_p(_socket, res->ai_addr, res->ai_addrlen);
 	freeaddrinfo(res);
+
+	//TODO valutare se mettere select, poll etc anche qua
 }
 
 void ABot::authenticate(void)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 17:06:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 17:57:40 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,6 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
     _logger(logger)
 {
 	struct sockaddr_in server_addr;
-	socklen_t          addr_len = sizeof(server_addr);
-	char               ipstr[INET_ADDRSTRLEN];
 
 	memset(&server_addr, 0, sizeof(server_addr));
 	configure_non_blocking(_socket);
@@ -53,10 +51,10 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 	event.data.fd = _socket;
 	epoll_ctl_p(_epoll_fd, EPOLL_CTL_ADD, _socket, &event);
 
-	getsockname_p(_socket, (struct sockaddr *)&server_addr, &addr_len);
-	inet_ntop(AF_INET, &server_addr.sin_addr, ipstr, sizeof(ipstr));
+	//TODO valutare se mettere select()
+
 	ostringstream oss;
-	oss << "Server listening on " << ipstr << ":" << _port;
+	oss << "Server listening on port " << _port;
 	_logger.logEvent(oss.str());
 }
 
