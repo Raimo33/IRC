@@ -3,35 +3,35 @@
 /*                                                        :::      ::::::::   */
 /*   system_calls.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 13:22:19 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 19:53:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "common_exceptions.hpp"
 #include "system_calls.hpp"
+#include "common_exceptions.hpp"
 
 using std::string;
 
-int	bind_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
+int bind_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
 	if (bind(sockfd, addr, addrlen) == -1)
 		throw SystemErrorException(errno);
 	return (0);
 }
 
-int	listen_p(int sockfd, int backlog)
+int listen_p(int sockfd, int backlog)
 {
 	if (listen(sockfd, backlog) == -1)
 		throw SystemErrorException(errno);
 	return (0);
 }
 
-int	accept_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+int accept_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
-	int	new_sockfd;
+	int new_sockfd;
 
 	new_sockfd = accept(sockfd, addr, addrlen);
 	if (new_sockfd == -1)
@@ -39,16 +39,16 @@ int	accept_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 	return (new_sockfd);
 }
 
-int	connect_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
+int connect_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
 	if (connect(sockfd, addr, addrlen) == -1)
 		throw SystemErrorException(errno);
 	return (0);
 }
 
-int	socket_p(int domain, int type, int protocol)
+int socket_p(int domain, int type, int protocol)
 {
-	int	sockfd;
+	int sockfd;
 
 	sockfd = socket(domain, type, protocol);
 	if (sockfd == -1)
@@ -56,9 +56,9 @@ int	socket_p(int domain, int type, int protocol)
 	return (sockfd);
 }
 
-int	close_p(int fd)
+int close_p(int fd)
 {
-	int	ret;
+	int ret;
 
 	ret = close(fd);
 	if (ret == -1)
@@ -66,9 +66,9 @@ int	close_p(int fd)
 	return (ret);
 }
 
-int	shutdown_p(int sockfd, int how)
+int shutdown_p(int sockfd, int how)
 {
-	int	ret;
+	int ret;
 
 	ret = shutdown(sockfd, how);
 	if (ret == -1)
@@ -76,9 +76,9 @@ int	shutdown_p(int sockfd, int how)
 	return (ret);
 }
 
-ssize_t	send_p(int sockfd, const void *buf, size_t len, int flags)
+ssize_t send_p(int sockfd, const void *buf, size_t len, int flags)
 {
-	ssize_t	ret;
+	ssize_t ret;
 
 	ret = send(sockfd, buf, len, flags);
 	if (ret == -1)
@@ -86,9 +86,9 @@ ssize_t	send_p(int sockfd, const void *buf, size_t len, int flags)
 	return (ret);
 }
 
-ssize_t	recv_p(int sockfd, void *buf, size_t len, int flags)
+ssize_t recv_p(int sockfd, void *buf, size_t len, int flags)
 {
-	ssize_t	ret;
+	ssize_t ret;
 
 	ret = recv(sockfd, buf, len, flags);
 	if (ret == -1)
@@ -96,9 +96,9 @@ ssize_t	recv_p(int sockfd, void *buf, size_t len, int flags)
 	return (ret);
 }
 
-int	getsockname_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+int getsockname_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
-	int	ret;
+	int ret;
 
 	ret = getsockname(sockfd, addr, addrlen);
 	if (ret == -1)
@@ -106,9 +106,9 @@ int	getsockname_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 	return (ret);
 }
 
-int	setsockopt_p(int sockfd, int level, int optname, const void *optval, socklen_t optlen)
+int setsockopt_p(int sockfd, int level, int optname, const void *optval, socklen_t optlen)
 {
-	int	ret;
+	int ret;
 
 	ret = setsockopt(sockfd, level, optname, optval, optlen);
 	if (ret == -1)
@@ -116,7 +116,7 @@ int	setsockopt_p(int sockfd, int level, int optname, const void *optval, socklen
 	return (ret);
 }
 
-int	fcntl_p(int fd, int cmd, ...)
+int fcntl_p(int fd, int cmd, ...)
 {
 	va_list args;
 	va_start(args, cmd);
@@ -137,7 +137,7 @@ int	fcntl_p(int fd, int cmd, ...)
 		case F_GETLK:
 		case F_SETLK:
 		case F_SETLKW: {
-			struct flock* arg = va_arg(args, struct flock*);
+			struct flock *arg = va_arg(args, struct flock *);
 			result = fcntl(fd, cmd, arg);
 			break;
 		}
@@ -155,9 +155,9 @@ int	fcntl_p(int fd, int cmd, ...)
 	return result;
 }
 
-int	epoll_create1_p(int flags)
+int epoll_create1_p(int flags)
 {
-	int	ret;
+	int ret;
 
 	ret = epoll_create1(flags);
 	if (ret == -1)
@@ -165,9 +165,9 @@ int	epoll_create1_p(int flags)
 	return (ret);
 }
 
-int	epoll_ctl_p(int epfd, int op, int fd, struct epoll_event *event)
+int epoll_ctl_p(int epfd, int op, int fd, struct epoll_event *event)
 {
-	int	ret;
+	int ret;
 
 	ret = epoll_ctl(epfd, op, fd, event);
 	if (ret == -1)
@@ -175,9 +175,9 @@ int	epoll_ctl_p(int epfd, int op, int fd, struct epoll_event *event)
 	return (ret);
 }
 
-int	epoll_wait_p(int epfd, struct epoll_event *events, int maxevents, int timeout)
+int epoll_wait_p(int epfd, struct epoll_event *events, int maxevents, int timeout)
 {
-	int	ret;
+	int ret;
 
 	ret = epoll_wait(epfd, events, maxevents, timeout);
 	if (ret == -1)
@@ -187,7 +187,7 @@ int	epoll_wait_p(int epfd, struct epoll_event *events, int maxevents, int timeou
 
 int getaddrinfo_p(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res)
 {
-	int	ret;
+	int ret;
 
 	ret = getaddrinfo(node, service, hints, res);
 	if (ret != 0)
@@ -195,3 +195,12 @@ int getaddrinfo_p(const char *node, const char *service, const struct addrinfo *
 	return (ret);
 }
 
+int poll_p(struct pollfd *fds, nfds_t nfds, int timeout)
+{
+	int ret;
+
+	ret = poll(fds, nfds, timeout);
+	if (ret == -1)
+		throw SystemErrorException(errno);
+	return (ret);
+}

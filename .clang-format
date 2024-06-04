@@ -1,13 +1,13 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 TabWidth: 4
-UseTab: ForIndentation
+UseTab: Always
 BreakBeforeBraces: Custom
 AllowShortIfStatementsOnASingleLine: true
 ColumnLimit: 0
 AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: true
+AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: true
 AlignEscapedNewlines: Left
 AlignOperands: false

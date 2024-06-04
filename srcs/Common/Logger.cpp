@@ -6,21 +6,21 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:16:50 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 18:16:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 20:13:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
 #include "common_exceptions.hpp"
 
-# include <ctime>
+#include <ctime>
 
-using std::string;
 using std::cerr;
-using std::exception;
-using std::ostringstream;
 using std::cout;
 using std::endl;
+using std::exception;
+using std::ostringstream;
+using std::string;
 
 Logger::Logger(void) {}
 
@@ -34,8 +34,7 @@ Logger::Logger(const string &filename) :
 
 Logger::Logger(const Logger &copy) :
 	_filename(copy._filename),
-	_file(_filename.c_str()),
-	_timestamp(copy._timestamp)
+	_file(_filename.c_str())
 {
 	if (!_filename.empty() && !_file.is_open())
 		throw SystemErrorException("Failed to open log file");
@@ -47,7 +46,7 @@ Logger::~Logger(void)
 		_file.close();
 }
 
-Logger	&Logger::operator=(const Logger &rhs)
+Logger &Logger::operator=(const Logger &rhs)
 {
 	if (this == &rhs)
 		return *this;
@@ -55,16 +54,15 @@ Logger	&Logger::operator=(const Logger &rhs)
 	_file.open(_filename.c_str());
 	if (!_file.is_open())
 		throw SystemErrorException("Failed to open log file");
-	_timestamp = rhs._timestamp;
 	return *this;
 }
 
-const string	&Logger::getFilename(void) const
+const string &Logger::getFilename(void) const
 {
 	return _filename;
 }
 
-void	Logger::setFile(const string &filename)
+void Logger::setFile(const string &filename)
 {
 	_filename = filename;
 	_file.open(_filename.c_str());
@@ -72,17 +70,18 @@ void	Logger::setFile(const string &filename)
 		throw SystemErrorException("Failed to open log file");
 }
 
-void	Logger::logEvent(const string &message)
+void Logger::logEvent(const string &message) const
+
 {
 	log(message, BLUE);
 }
 
-void	Logger::logError(const exception *e)
+void Logger::logError(const exception *e) const
 {
 	if (!e)
-		return ; //per evitare potenziali loop infiniti non chiamo InternalErrorException
+		return; // per evitare potenziali loop infiniti non chiamo InternalErrorException
 
-	const string	message(e->what());
+	const string message(e->what());
 
 	if (dynamic_cast<const InternalErrorException *>(e))
 		log("Internal error: " + message, RED);
@@ -92,35 +91,30 @@ void	Logger::logError(const exception *e)
 		log("Unknown error: " + message, YELLOW);
 }
 
-void	Logger::log(const string &message, const char *const color)
+void Logger::log(const string &message, const char *const color) const
 {
-	updateTimestamp();
-	logToConsole(message, color);
-	logToFile(message);
+	const string &timestamp = getTimestamp();
+	logToConsole(timestamp, message, color);
+	logToFile(timestamp, message);
 }
 
-void	Logger::logToFile(const string &message)
+void Logger::logToFile(const string &timestamp, const string &message) const
 {
 	if (!_filename.empty() && _file.is_open())
-		_file << getTimestamp() << " - " << message << endl;
+		_file << timestamp << " - " << message << endl;
 }
 
-void	Logger::logToConsole(const string &message, const char *const color) const
+void Logger::logToConsole(const string &timestamp, const string &message, const char *const color) const
 {
-	cout << getTimestamp() << " - " << color << message << RESET << endl;
+	cout << timestamp << " - " << color << message << RESET << endl;
 }
 
-void	Logger::updateTimestamp(void)
+const string Logger::getTimestamp(void) const
 {
-	std::time_t	now = std::time(NULL);
-	std::tm		*localTime = std::localtime(&now);
+	std::time_t now = std::time(NULL);
+	std::tm	*localTime = std::localtime(&now);
 	char		buffer[80];
 
 	std::strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", localTime);
-	_timestamp = string(buffer);
-}
-
-const string	&Logger::getTimestamp(void) const
-{
-	return _timestamp;
+	return string(buffer);
 }

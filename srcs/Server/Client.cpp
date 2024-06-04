@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 00:00:29 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 20:04:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,29 +21,29 @@ using std::map;
 using std::set;
 using std::string;
 
-Client::Client(Logger & logger, Server * server, const int socket, const string & ip_addr, const uint16_t port) :
-	_is_connected(false),
-	_is_authenticated(false),
-	_port(port),
-	_ip_addr(ip_addr),
-	_socket(socket),
-	_pk(_ip_addr + ::to_string(_port)),
-	_server(server),
-	_logger(logger) {}
+Client::Client(Logger &logger, Server *server, const int socket, const string &ip_addr, const uint16_t port) :
+    _is_connected(false),
+    _is_authenticated(false),
+    _port(port),
+    _ip_addr(ip_addr),
+    _socket(socket),
+    _pk(_ip_addr + ::to_string(_port)),
+    _server(server),
+    _logger(logger) {}
 
-Client::Client(const Client & copy) :
-	_channels(copy._channels),
-	_nickname(copy._nickname),
-	_username(copy._username),
-	_realname(copy._realname),
-	_is_connected(copy._is_connected),
-	_is_authenticated(copy._is_authenticated),
-	_port(copy._port),
-	_ip_addr(copy._ip_addr),
-	_socket(copy._socket),
-	_pk(copy._pk),
-	_server(copy._server),
-	_logger(copy._logger) {}
+Client::Client(const Client &copy) :
+    _channels(copy._channels),
+    _nickname(copy._nickname),
+    _username(copy._username),
+    _realname(copy._realname),
+    _is_connected(copy._is_connected),
+    _is_authenticated(copy._is_authenticated),
+    _port(copy._port),
+    _ip_addr(copy._ip_addr),
+    _socket(copy._socket),
+    _pk(copy._pk),
+    _server(copy._server),
+    _logger(copy._logger) {}
 
 Client::~Client(void)
 {
@@ -51,17 +51,17 @@ Client::~Client(void)
 		leaveChannel(*_channels.begin()->second);
 }
 
-const map<string, Channel *> & Client::getChannels(void) const
+const map<string, Channel *> &Client::getChannels(void) const
 {
 	return _channels;
 }
 
-void Client::setChannels(const map<string, Channel *> & channels)
+void Client::setChannels(const map<string, Channel *> &channels)
 {
 	_channels = channels;
 }
 
-Channel & Client::getChannel(const string & channel_name) const
+Channel &Client::getChannel(const string &channel_name) const
 {
 	map<string, Channel *>::const_iterator it = _channels.find(channel_name);
 
@@ -70,7 +70,7 @@ Channel & Client::getChannel(const string & channel_name) const
 	return *it->second;
 }
 
-void Client::addChannel(Channel & channel)
+void Client::addChannel(Channel &channel)
 {
 	if (_channels.size() >= MAX_CHANNELS_PER_USER)
 		throw ActionFailedException(ERR_TOOMANYCHANNELS, channel.getName().c_str(), g_default_replies_map.at(ERR_TOOMANYCHANNELS), NULL);
@@ -81,10 +81,10 @@ void Client::addChannel(Channel & channel)
 	_logger.logEvent(oss.str());
 }
 
-void Client::removeChannel(Channel & channel)
+void Client::removeChannel(Channel &channel)
 {
-	const string					 channel_name = channel.getName();
-	map<string, Channel *>::iterator it			  = _channels.find(channel_name);
+	const string                     channel_name = channel.getName();
+	map<string, Channel *>::iterator it = _channels.find(channel_name);
 
 	if (it == _channels.end()) // se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
 		throw ActionFailedException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
@@ -100,12 +100,12 @@ void Client::removeChannel(Channel & channel)
 	_logger.logEvent(oss.str());
 }
 
-const string & Client::getNickname(void) const
+const string &Client::getNickname(void) const
 {
 	return _nickname;
 }
 
-void Client::setNickname(const string & nickname)
+void Client::setNickname(const string &nickname)
 {
 	_nickname = nickname;
 
@@ -114,12 +114,12 @@ void Client::setNickname(const string & nickname)
 	_logger.logEvent(oss.str());
 }
 
-const string & Client::getUsername(void) const
+const string &Client::getUsername(void) const
 {
 	return _username;
 }
 
-void Client::setUsername(const string & username)
+void Client::setUsername(const string &username)
 {
 	_username = username;
 
@@ -128,12 +128,12 @@ void Client::setUsername(const string & username)
 	_logger.logEvent(oss.str());
 }
 
-const string & Client::getRealname(void) const
+const string &Client::getRealname(void) const
 {
 	return _realname;
 }
 
-void Client::setRealname(const string & realname)
+void Client::setRealname(const string &realname)
 {
 	_realname = realname;
 
@@ -185,11 +185,11 @@ void Client::setAuthenticated(bool is_authenticated)
 
 	oss.str("");
 	oss << "Welcome to the Internet Relay Network " << _nickname << "!" << _username << "@" << _ip_addr;
-	const string	   welcome_msg = oss.str();
+	const string       welcome_msg = oss.str();
 	const ReplyMessage welcome(SERVER_NAME, RPL_WELCOME, _nickname.c_str(), welcome_msg.c_str(), NULL);
 	oss.str("");
 	oss << "Your host is " << SERVER_NAME << ", running version " << SERVER_VERSION;
-	const string	   host_msg = oss.str();
+	const string       host_msg = oss.str();
 	const ReplyMessage yourhost(SERVER_NAME, RPL_YOURHOST, _nickname.c_str(), host_msg.c_str(), NULL);
 	receiveMessage(&welcome);
 	receiveMessage(&yourhost);
@@ -200,7 +200,7 @@ uint16_t Client::getPort(void) const
 	return _port;
 }
 
-const string & Client::getIpAddr(void) const
+const string &Client::getIpAddr(void) const
 {
 	return _ip_addr;
 }
@@ -215,14 +215,14 @@ string Client::getPk(void) const
 	return _pk;
 }
 
-Server & Client::getServer(void) const
+Server &Client::getServer(void) const
 {
 	return *_server;
 }
 
-void Client::joinChannel(Channel & channel, const string & key)
+void Client::joinChannel(Channel &channel, const string &key)
 {
-	const set<const Client *> & pending_invitations = channel.getPendingInvitations();
+	const set<const Client *> &pending_invitations = channel.getPendingInvitations();
 
 	if (!_is_authenticated)
 		throw ActionFailedException(ERR_NOTREGISTERED, g_default_replies_map.at(ERR_NOTREGISTERED), NULL);
@@ -238,11 +238,11 @@ void Client::joinChannel(Channel & channel, const string & key)
 	channel.addMember(*this);
 	addChannel(channel);
 
-	const string &		 channel_name  = channel.getName();
-	const string &		 channel_topic = channel.getTopic();
-	const string		 prefix		   = _nickname + "!" + _username + "@" + _ip_addr;
+	const string        &channel_name = channel.getName();
+	const string        &channel_topic = channel.getTopic();
+	const string         prefix = _nickname + "!" + _username + "@" + _ip_addr;
 	const CommandMessage join_notification(prefix, JOIN, channel_name.c_str(), NULL);
-	ReplyMessage		 topic_reply;
+	ReplyMessage         topic_reply;
 
 	if (channel_topic.empty())
 		topic_reply = ReplyMessage(SERVER_NAME, RPL_NOTOPIC, _nickname.c_str(), channel_name.c_str(), g_default_replies_map.at(RPL_NOTOPIC), NULL);
@@ -257,7 +257,7 @@ void Client::joinChannel(Channel & channel, const string & key)
 	receiveMessage(&endofnames);
 }
 
-void Client::leaveChannel(Channel & channel, const string & reason)
+void Client::leaveChannel(Channel &channel, const string &reason)
 {
 	const string channel_name = channel.getName();
 	channel.removeMember(_nickname);
@@ -273,9 +273,9 @@ void Client::leaveChannel(Channel & channel, const string & reason)
 	_logger.logEvent(oss.str());
 }
 
-void Client::sendMessage(const Channel & channel, const AMessage & msg) const
+void Client::sendMessage(const Channel &channel, const AMessage &msg) const
 {
-	const string & channel_name = channel.getName();
+	const string &channel_name = channel.getName();
 
 	if (_channels.find(channel_name) == _channels.end())
 		throw ActionFailedException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
@@ -286,7 +286,7 @@ void Client::sendMessage(const Channel & channel, const AMessage & msg) const
 	_logger.logEvent(oss.str());
 }
 
-void Client::sendMessage(const Client & receiver, const AMessage & msg) const
+void Client::sendMessage(const Client &receiver, const AMessage &msg) const
 {
 	if (!receiver.getIsAuthenticated())
 		throw ActionFailedException(ERR_NOLOGIN, receiver.getNickname().c_str(), g_default_replies_map.at(ERR_NOLOGIN), NULL);
@@ -297,17 +297,17 @@ void Client::sendMessage(const Client & receiver, const AMessage & msg) const
 	_logger.logEvent(oss.str());
 }
 
-void Client::receiveMessage(const AMessage * msg) const
+void Client::receiveMessage(const AMessage *msg) const
 {
 	msg->getDelivered(this->getSocket());
 }
 
-void Client::kick(Client & user, Channel & channel, const string & reason) const
+void Client::kick(Client &user, Channel &channel, const string &reason) const
 {
 	checkPrivilege(channel);
 
-	const string & channel_name	 = channel.getName();
-	const string & user_nickname = user.getNickname();
+	const string &channel_name = channel.getName();
+	const string &user_nickname = user.getNickname();
 
 	ostringstream oss;
 	oss << "Client " << _nickname << " tries to kick " << user_nickname << " from channel " << channel_name;
@@ -320,32 +320,32 @@ void Client::kick(Client & user, Channel & channel, const string & reason) const
 
 	oss.str("");
 	oss << _nickname << "!" << _username << "@" << _ip_addr;
-	const string		 prefix = oss.str();
+	const string         prefix = oss.str();
 	const CommandMessage kick_notification(prefix, KICK, channel_name.c_str(), user_nickname.c_str(), reason.c_str(), NULL);
 	channel.receiveMessage(kick_notification);
 	user.receiveMessage(&kick_notification);
 }
 
-void Client::invite(Client & user, Channel & channel) const
+void Client::invite(Client &user, Channel &channel) const
 {
 	checkPrivilege(channel);
 
-	const string & nickname		= user.getNickname();
-	const string & channel_name = channel.getName();
+	const string &nickname = user.getNickname();
+	const string &channel_name = channel.getName();
 
 	ostringstream oss;
 	oss << "Client " << _nickname << " tries to invite " << nickname << " to channel " << channel_name;
 	_logger.logEvent(oss.str());
 	channel.addPendingInvitation(user);
-	const ReplyMessage	 reply_to_issuer(SERVER_NAME, RPL_INVITING, _nickname.c_str(), nickname.c_str(), channel_name.c_str(), g_default_replies_map.at(RPL_INVITING), NULL);
+	const ReplyMessage   reply_to_issuer(SERVER_NAME, RPL_INVITING, _nickname.c_str(), nickname.c_str(), channel_name.c_str(), g_default_replies_map.at(RPL_INVITING), NULL);
 	const CommandMessage message_to_target(_nickname, INVITE, _nickname.c_str(), nickname.c_str(), channel_name.c_str(), NULL);
 	receiveMessage(&reply_to_issuer);
 	user.receiveMessage(&message_to_target);
 }
 
-void Client::topicSet(Channel & channel, const string & new_topic) const
+void Client::topicSet(Channel &channel, const string &new_topic) const
 {
-	const string & channel_name = channel.getName();
+	const string &channel_name = channel.getName();
 
 	if (channel.getMode('t') && !channel.isOperator(*this))
 		throw ActionFailedException(ERR_CHANOPRIVSNEEDED, channel_name.c_str(), g_default_replies_map.at(ERR_CHANOPRIVSNEEDED), NULL);
@@ -359,7 +359,7 @@ void Client::topicSet(Channel & channel, const string & new_topic) const
 	channel.receiveMessage(topic);
 }
 
-void Client::modeChange(Channel & channel, const char mode, const bool status, const string & param) const
+void Client::modeChange(Channel &channel, const char mode, const bool status, const string &param) const
 {
 	checkPrivilege(channel);
 
@@ -369,7 +369,7 @@ void Client::modeChange(Channel & channel, const char mode, const bool status, c
 	channel.setMode(mode, status, param, this);
 }
 
-void Client::modesChange(Channel & channel, const map<char, bool> & modes, const vector<string> & params) const
+void Client::modesChange(Channel &channel, const map<char, bool> &modes, const vector<string> &params) const
 {
 	checkPrivilege(channel);
 
@@ -387,11 +387,11 @@ void Client::modesChange(Channel & channel, const map<char, bool> & modes, const
 	}
 }
 
-void Client::promoteOperator(Channel & channel, Client & user)
+void Client::promoteOperator(Channel &channel, Client &user) const
 {
 	checkPrivilege(channel);
-	const string & channel_name	 = channel.getName();
-	const string & user_nickname = user.getNickname();
+	const string &channel_name = channel.getName();
+	const string &user_nickname = user.getNickname();
 
 	ostringstream oss;
 	oss << "Client " << _nickname << " tries to promote operator " << user_nickname << " in channel " << channel_name;
@@ -401,11 +401,11 @@ void Client::promoteOperator(Channel & channel, Client & user)
 	user.receiveMessage(&youreoper);
 }
 
-void Client::demoteOperator(Channel & channel, Client & op)
+void Client::demoteOperator(Channel &channel, Client &op) const
 {
 	checkPrivilege(channel);
-	const string & channel_name	 = channel.getName();
-	const string & user_nickname = op.getNickname();
+	const string &channel_name = channel.getName();
+	const string &user_nickname = op.getNickname();
 
 	ostringstream oss;
 	oss << "Client " << _nickname << " tries to demote operator " << user_nickname << " in channel " << channel_name;
@@ -415,7 +415,7 @@ void Client::demoteOperator(Channel & channel, Client & op)
 	op.receiveMessage(&notoperanymore);
 }
 
-void Client::checkPrivilege(const Channel & channel) const
+void Client::checkPrivilege(const Channel &channel) const
 {
 	if (!channel.isOperator(*this))
 		throw ActionFailedException(ERR_CHANOPRIVSNEEDED, channel.getName().c_str(), g_default_replies_map.at(ERR_CHANOPRIVSNEEDED), NULL);

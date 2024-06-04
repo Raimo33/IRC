@@ -76,8 +76,10 @@ clean:
 	@echo "$(RED)removed object files$(NC)"
 
 fclean: clean
-	@$(RM) $(SERVER_NAME) $(BOT_NAME)
-	@echo "$(RED)removed $(SERVER_NAME) and $(BOT_NAME) binaries$(NC)"
+	@$(RM) $(SERVER_NAME)
+	@echo "$(RED)removed $(SERVER_NAME) binary$(NC)"
+	@$(RM) $(BOT_NAME)
+	@echo "$(RED)removed $(BOT_NAME) binary$(NC)"
 	@$(RM) $(LEAK_REPORT)
 	@echo "$(RED)removed $(LEAK_REPORT)$(NC)"
 	@$(RM) *.log

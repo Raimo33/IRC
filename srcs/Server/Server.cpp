@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 17:57:40 by egualand         ###   ########.fr       */
+/*   Updated: 2024/06/04 19:55:32 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,19 +39,17 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 
 	memset(&server_addr, 0, sizeof(server_addr));
 	configure_non_blocking(_socket);
-	server_addr.sin_family      = AF_INET;
+	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
-	server_addr.sin_port        = htons(_port);
+	server_addr.sin_port = htons(_port);
 	bind_p(_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
 	listen_p(_socket, 5);
 
 	struct epoll_event event;
 	memset(&event, 0, sizeof(event));
-	event.events  = EPOLLIN;
+	event.events = EPOLLIN | EPOLLHUP | EPOLLERR;
 	event.data.fd = _socket;
 	epoll_ctl_p(_epoll_fd, EPOLL_CTL_ADD, _socket, &event);
-
-	//TODO valutare se mettere select()
 
 	ostringstream oss;
 	oss << "Server listening on port " << _port;
@@ -209,7 +207,7 @@ bool Server::isClientConnected(const string &nickname) const
 
 void Server::disconnectClient(Client &client)
 {
-	int          socket  = client.getSocket();
+	int          socket = client.getSocket();
 	const string ip_addr = client.getIpAddr();
 
 	removeClient(client);
@@ -221,19 +219,19 @@ void Server::disconnectClient(Client &client)
 
 void Server::handleNewClient(void)
 {
-	Client            *client;
+	Client	        *client;
 	struct sockaddr_in client_addr;
 	socklen_t          client_addr_len = sizeof(client_addr);
-	const int          client_socket   = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
+	const int          client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
 
 	configure_non_blocking(client_socket);
 
 	const std::string client_ip_addr = std::string(inet_ntoa(client_addr.sin_addr));
-	const uint16_t    client_port    = ntohs(client_addr.sin_port);
+	const uint16_t    client_port = ntohs(client_addr.sin_port);
 
 	struct epoll_event event;
 	memset(&event, 0, sizeof(event));
-	event.events  = EPOLLIN | EPOLLHUP | EPOLLERR;
+	event.events = EPOLLIN | EPOLLHUP | EPOLLERR;
 	event.data.fd = client_socket;
 	epoll_ctl_p(_epoll_fd, EPOLL_CTL_ADD, client_socket, &event);
 

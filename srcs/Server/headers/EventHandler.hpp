@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:15:37 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 16:19:39 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 20:08:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,10 @@ class EventHandler
 	void                                            checkNicknameValidity(const std::string &nickname) const;
 	uint16_t                                        getRandomPort(void) const;
 
-	Server                                         *_server;
-	Client                                         *_client;
+	Server	                                     *_server;
+	Client	                                     *_client;
 	const std::map<enum e_commands, CommandHandler> _handlers;
-	Logger                                         &_logger;
+	Logger	                                     &_logger;
 };
 
 #endif
