@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AAction.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/03 17:34:21 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/03 18:19:59 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 14:07:18 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,20 @@
 #include "AMessage.hpp"
 #include "CommandMessage.hpp"
 
+#include <string>
+
 class AAction
 {
 	public:
-		explicit AAction(const enum e_commands &trigger_command);
+		explicit AAction(const std::string &trigger_command, const ABot &owner);
 		virtual ~AAction(void) = 0;
 
 		virtual const AMessage	*beExecuted(const CommandMessage &msg) = 0;  //TODO deve ritornare un messaggio malloccato da inviare al server
-		const enum e_commands	&getTriggerCommand(void) const;
+		const std::string		&getTriggerCommand(void) const;
 		
 	private:
-		const enum e_commands	_trigger_command;
+		const std::string		_trigger_command;
+		const ABot				&_owner;
 };
 
 #endif

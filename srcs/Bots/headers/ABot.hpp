@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ABot.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:45:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/03 18:19:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 14:16:19 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ class ABot
 		const std::string						_realname;
 		bool									_connected;
 		Logger									_logger;
-		std::map<enum e_commands, AAction *>	_actions;
+		std::map<std::string, AAction *>		_actions;
 	
 	private:
 
@@ -66,6 +66,7 @@ class ABot
 		void									disconnect(void);
 		void									sendMessage(const AMessage &msg) const; //sends a message to the server
 		const AMessage							*receiveMessage(void) const; //receives a message from the server
+		void									check_for_authentication_success(void) const;
 
 		int										_server_socket; // socket to the 
 		std::string								_server_ip;

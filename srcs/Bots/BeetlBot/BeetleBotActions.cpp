@@ -1,22 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   AAction.cpp                                        :+:      :+:    :+:   */
+/*   BeetleBotActions.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/03 17:36:13 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 14:07:25 by egualand         ###   ########.fr       */
+/*   Created: 2024/06/04 13:42:53 by egualand          #+#    #+#             */
+/*   Updated: 2024/06/04 14:18:54 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "AAction.hpp"
-#include "ABot.hpp"
+#include "BeetleBotActions.hpp"
 
 using std::string;
 
-AAction::AAction(const std::string &trigger_command, const ABot &owner) :
-    _trigger_command(trigger_command),
-    _owner(owner) {}
+SendLinkAction::SendLinkAction(const ABot &owner) : AAction("JUICE", owner) {}
 
-const std::string &AAction::getTriggerCommand(void) const { return _trigger_command; }
+SendLinkAction::~SendLinkAction(void) {}
+
+const AMessage	*SendLinkAction::beExecuted(const CommandMessage &msg)
+{
+	const string &destination = msg.getParams().at(0); //TODO controllare se funziona
+	return CommandMessage(_owner.getNickname(), PRIVMSG,
+}

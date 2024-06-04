@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 00:00:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 13:00:57 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,7 +271,7 @@ void Server::handleClient(const int client_socket)
 		_handler.setClient(*client);
 		_handler.processInput(buffer);
 	}
-	catch (ActionFailedException & e) // TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
+	catch (ActionFailedException &e) // TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
 	{
 		ReplyMessage & reply = e.getContent();
 		if (client->getIsAuthenticated())

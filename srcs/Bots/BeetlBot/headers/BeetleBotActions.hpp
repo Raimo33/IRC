@@ -1,22 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   AAction.cpp                                        :+:      :+:    :+:   */
+/*   BeetleBotActions.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/03 17:36:13 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 14:07:25 by egualand         ###   ########.fr       */
+/*   Created: 2024/06/04 13:41:12 by egualand          #+#    #+#             */
+/*   Updated: 2024/06/04 14:08:27 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "AAction.hpp"
-#include "ABot.hpp"
+#ifndef BEETLE_BOT_ACTIONS_HPP
+# define BEETLE_BOT_ACTIONS_HPP
 
-using std::string;
+# include "AAction.hpp"
 
-AAction::AAction(const std::string &trigger_command, const ABot &owner) :
-    _trigger_command(trigger_command),
-    _owner(owner) {}
+class ABot;
 
-const std::string &AAction::getTriggerCommand(void) const { return _trigger_command; }
+class SendLinkAction : public AAction
+{
+	public:
+		explicit SendLinkAction(const ABot &owner);
+		~SendLinkAction(void);
+
+		const AMessage	*beExecuted(const CommandMessage &msg);
+};
+
+#endif

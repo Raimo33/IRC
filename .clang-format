@@ -5,7 +5,7 @@ UseTab: ForIndentation
 BreakBeforeBraces: Custom
 AllowShortIfStatementsOnASingleLine: true
 ColumnLimit: 0
-AccessModifierOffset: 0
+AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
@@ -51,7 +51,7 @@ IndentWrappedFunctionNames: true
 KeepEmptyLinesAtTheStartOfBlocks: true
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-PointerAlignment: Middle
+PointerAlignment: Right
 ReflowComments: true
 SortIncludes: true
 IncludeCategories:
@@ -65,4 +65,3 @@ SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
 Standard: Cpp11
-UseTab: true

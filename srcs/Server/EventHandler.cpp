@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/03 16:54:26 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 13:00:53 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,7 @@ void EventHandler::handleJoin(const vector<string> &args)
 {
 	checkConnection(_client);
 	checkAuthentication(_client);
+	
 	if (args.size() < 1)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]", NULL);
 
@@ -418,3 +419,5 @@ static void checkAuthentication(const Client *client)
 	if (!client->getIsAuthenticated())
 		throw ActionFailedException(ERR_NOTREGISTERED, "you are not registered, use NICK <nickname> and USER <username> first", NULL);
 }
+
+

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   BeetleBot.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
+/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:43:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 19:11:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/04 13:38:00 by egualand         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 #include <string>
 
 #include "ABot.hpp"
-
 
 class BeetleBot: public ABot
 {
