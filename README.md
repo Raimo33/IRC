@@ -17,17 +17,25 @@ An basic Internet Relay Chat (IRC) server compatible with RFCs [1459](https://to
 1. **Clone the repository:**
     ```sh
     git clone https://github.com/Raimo33/IRC.git
+    CD ft_irc
     ```
 
 2. **Build the server:**
     ```sh
-    cd IRC
-    make
+    make ircserv
     ```
 
 3. **Run the server:**
     ```sh
     ./ircserv <port> <password>
+    ```
+4. **Build the bot:**
+    ```sh
+    make beetlebot
+    ```
+3. **Run the bot:**
+    ```sh
+    ./beetlebot <ip> <port> [<password>]
     ```
 
 ### Documentation
