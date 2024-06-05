@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 14:47:27 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 17:40:03 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ int main(const int argc, const char **argv)
 
 		get_args(&ip, &port, &password, argc, argv);
 
-		logger.setFile("BeetleBot.log"); // TODO il file di log e' vuoto
+		logger.setFile("BeetleBot.log");
 		BeetleBot bot("BeetBot", "BeetleBot", "Beetle Juice Bot");
 		bot.setLogger(logger);
 		bot.bindServer(ip, port, password);

@@ -6,23 +6,21 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 16:12:15 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 17:09:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// TODO Bypassing the Password: When a user is invited to a private channel, they can join the channel without needing to provide the channel password. The invitation overrides the password requirement. This mechanism is especially useful for channels that are set with an invite-only mode (+i) or have a password set (+k).
-
 #ifndef SERVER_HPP
-#define SERVER_HPP
+# define SERVER_HPP
 
-#include <map>
-#include <string>
-#include <vector>
+# include <map>
+# include <string>
+# include <vector>
 
-#include "EventHandler.hpp"
-#include "Logger.hpp"
-#include "server_constants.hpp"
-#include "system_calls.hpp"
+# include "EventHandler.hpp"
+# include "Logger.hpp"
+# include "server_constants.hpp"
+# include "system_calls.hpp"
 
 class Client;
 class Channel;

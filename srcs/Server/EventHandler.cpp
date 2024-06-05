@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 15:36:48 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 18:10:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@
 #include "server_utils.hpp"
 
 #include <algorithm>
-
-// TODO quit da netcat dopo NICK non manda il messaggio indietro
 
 using std::map;
 using std::string;
@@ -155,26 +153,21 @@ void EventHandler::handleJoin(const vector<string> &args)
 	if (args.size() > 1)
 		keys = ::split(args[1], ",");
 
-	// TODO refactor con ternaries
 	for (size_t i = 0; i < channels_to_join.size(); i++)
 	{
-		if (channels.find(channels_to_join[i]) == channels.end())
+		const std::map<string, Channel *>::const_iterator channel_it = channels.find(channels_to_join[i]);
+		if (channel_it == channels.end())
 		{
-			Channel *new_channel;
+			const string key = (i < keys.size()) ? keys[i] : "";
+			Channel		*new_channel = new Channel(_logger, channels_to_join[i], *_client, key);
 
-			if (i < keys.size())
-				new_channel = new Channel(_logger, channels_to_join[i], *_client, keys[i]);
-			else
-				new_channel = new Channel(_logger, channels_to_join[i], *_client);
 			_server->addChannel(*new_channel);
 		}
 		else
 		{
-			Channel &channel = _server->getChannel(channels_to_join[i]);
-			if (i < keys.size())
-				_client->joinChannel(channel, keys[i]);
-			else
-				_client->joinChannel(channel);
+			const string key = (i < keys.size()) ? keys[i] : "";
+			Channel		&channel = *channel_it->second;
+			_client->joinChannel(channel, key);
 		}
 	};
 }
@@ -345,7 +338,6 @@ void EventHandler::handleMode(const vector<string> &args)
 
 	Channel &channel = _server->getChannel(args[0]);
 
-	// TODO refactor
 	if (n_args == 1)
 	{
 		const map<char, bool> &modes = channel.getModes();
@@ -366,30 +358,28 @@ void EventHandler::handleMode(const vector<string> &args)
 	if (args[1][0] != '+' && args[1][0] != '-')
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}", NULL);
 
-	char			mode;
 	bool			status;
-	uint16_t		j = 2;
+	uint16_t		param_index = 2;
 	map<char, bool> new_modes;
 	vector<string>	params;
 
 	params.reserve(n_args - 2);
-	for (uint32_t i = 0; i < args[1].size(); i++)
+	for (string::const_iterator mode = args[1].begin() + 1; mode != args[1].end(); mode++)
 	{
-		if (args[1][i] == '+' || args[1][i] == '-')
+		if (*mode == '+' || *mode == '-')
 		{
-			status = (args[1][i] == '+');
+			status = (*mode == '+');
 			continue;
 		}
-		mode = args[1][i];
-		if (string(SUPPORTED_CHANNEL_MODES).find(mode) == string::npos)
-			throw ActionFailedException(ERR_UNKNOWNMODE, string(1, mode).c_str(), NULL);
-		if (channel_mode_requires_param(mode, status))
+		if (!is_valid_channel_mode(*mode))
+			throw ActionFailedException(ERR_UNKNOWNMODE, string(1, *mode).c_str(), NULL);
+		if (channel_mode_requires_param(*mode, status))
 		{
-			if (j >= n_args)
+			if (param_index >= n_args)
 				throw ActionFailedException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <channel> <mode> [<param>]", NULL);
-			params.push_back(args[j++]);
+			params.push_back(args[param_index++]);
 		}
-		new_modes[mode] = status;
+		new_modes[*mode] = status;
 	}
 	_client->modesChange(channel, new_modes, params);
 }

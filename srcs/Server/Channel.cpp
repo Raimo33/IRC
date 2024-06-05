@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 16:11:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 17:13:43 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,8 +219,6 @@ void Channel::addPendingInvitation(Client &user)
 
 	if (isMember(user))
 		throw ActionFailedException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), g_default_replies_map.at(ERR_USERONCHANNEL), NULL);
-	if (_pending_invitations.find(&user) != _pending_invitations.end())
-		throw ActionFailedException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is already invited to " + _name).c_str(), NULL);
 	_pending_invitations.insert(&user);
 	ostringstream oss;
 	oss << "Channel " << _name << ", invitation sent to: " << nickname;

@@ -6,14 +6,12 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:45:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 15:35:55 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 17:09:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ABOT_HPP
 #define ABOT_HPP
-
-// TODO capire come gestire l'entrata in canali con password
 
 #include <map>
 #include <stdint.h>

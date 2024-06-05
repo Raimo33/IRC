@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 15:05:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 17:08:11 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,8 +228,11 @@ void Client::joinChannel(Channel &channel, const string &key)
 		throw ActionFailedException(ERR_NOTREGISTERED, g_default_replies_map.at(ERR_NOTREGISTERED), NULL);
 	if (channel.getMode('i') && pending_invitations.find(this) == pending_invitations.end())
 		throw ActionFailedException(ERR_INVITEONLYCHAN, channel.getName().c_str(), g_default_replies_map.at(ERR_INVITEONLYCHAN), NULL);
-	if (channel.getMode('k') && channel.getKey() != key)
-		throw ActionFailedException(ERR_BADCHANNELKEY, channel.getName().c_str(), g_default_replies_map.at(ERR_BADCHANNELKEY), NULL);
+	if (channel.getMode('k'))
+	{
+		if (pending_invitations.find(this) == pending_invitations.end() && key != channel.getKey())
+			throw ActionFailedException(ERR_BADCHANNELKEY, channel.getName().c_str(), g_default_replies_map.at(ERR_BADCHANNELKEY), NULL);
+	}
 	if (channel.getMembers().size() >= channel.getMemberLimit())
 		throw ActionFailedException(ERR_CHANNELISFULL, channel.getName().c_str(), g_default_replies_map.at(ERR_CHANNELISFULL), NULL);
 	if (_channels.size() >= MAX_CHANNELS_PER_USER)

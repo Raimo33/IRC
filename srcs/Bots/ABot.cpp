@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 15:59:27 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 17:39:01 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ ABot::ABot(const string &nickname, const string &username, const string &realnam
 	_realname(realname),
 	_connected(false),
 	_authenticated(false),
-	_logger(Logger(nickname)),
 	_socket(-1) {}
 
 ABot::ABot(const ABot &copy) :
