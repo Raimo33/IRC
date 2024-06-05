@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 17:04:53 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 01:27:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ using std::vector;
 string get_next_token(string::iterator &it, const string::const_iterator &end, const char delim)
 {
 	const string::iterator start = it;
-	string                 token;
+	string				   token;
 
 	while (it != end && *it == delim) // Skip leading delimiters
 		it++;
@@ -36,26 +36,17 @@ string get_next_token(string::iterator &it, const string::const_iterator &end, c
 	return token;
 }
 
-bool has_crlf(const string &s)
-{
-	uint32_t len = s.length();
-
-	if (len < 2)
-		return false;
-	return (s[len - 2] == '\r' && s[len - 1] == '\n');
-}
-
 vector<string> split(const string &str, const string &delim)
 {
 	vector<string> tokens;
-	size_t         start = 0;
-	size_t         end   = str.find(delim);
+	size_t		   start = 0;
+	size_t		   end = str.find(delim);
 
 	while (end != string::npos)
 	{
 		tokens.push_back(str.substr(start, end - start));
 		start = end + delim.length();
-		end   = str.find(delim, start);
+		end = str.find(delim, start);
 	}
 	tokens.push_back(str.substr(start, end));
 	return tokens;
@@ -66,7 +57,7 @@ void configure_non_blocking(const int socket)
 	int flags;
 
 	uint32_t buf_size = BUFFER_SIZE - 1;
-	flags             = fcntl_p(socket, F_GETFL);
+	flags = fcntl_p(socket, F_GETFL);
 	fcntl_p(socket, F_SETFL, flags | O_NONBLOCK);
 	setsockopt_p(socket, SOL_SOCKET, SO_RCVBUF, &buf_size, sizeof(buf_size));
 }

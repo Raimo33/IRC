@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 20:14:35 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 02:04:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,11 +91,10 @@ void ABot::connect(void)
 	getaddrinfo_p(_server_ip.c_str(), ::to_string(_server_port).c_str(), &hints, &res);
 	_socket = socket_p(res->ai_family, res->ai_socktype, res->ai_protocol);
 	configure_non_blocking(_socket);
-	connect_p(_socket, res->ai_addr, res->ai_addrlen);
+	// TODO connect
 	freeaddrinfo(res);
 
 	_logger.logEvent("Bot connected to server");
-
 	_connected = true;
 }
 
@@ -107,17 +106,23 @@ void ABot::authenticate(void)
 	if (!_server_password.empty())
 	{
 		const CommandMessage pass(_nickname, PASS, _server_password.c_str(), NULL);
+		std::cout << "debug\n";
 		pass.getDelivered(_socket);
+		std::cout << "debug2\n";
+		check_for_authentication_success();
+		std::cout << "debug3\n";
 	}
 
-	check_for_authentication_success();
 	nick.getDelivered(_socket);
+	std::cout << "debug4\n";
 	check_for_authentication_success();
+	std::cout << "debug5\n";
 	user.getDelivered(_socket);
+	std::cout << "debug6\n";
 	check_for_authentication_success();
+	std::cout << "debug7\n";
 
 	_logger.logEvent("Bot authenticated successfully");
-
 	_authenticated = true;
 }
 
