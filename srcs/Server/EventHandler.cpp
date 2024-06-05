@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 18:13:24 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 19:03:01 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,7 +364,7 @@ void EventHandler::handleMode(const vector<string> &args)
 	vector<string>	params;
 
 	params.reserve(n_args - 2);
-	for (string::const_iterator mode = args[1].begin() + 1; mode != args[1].end(); mode++)
+	for (string::const_iterator mode = args[1].begin(); mode != args[1].end(); mode++)
 	{
 		if (*mode == '+' || *mode == '-')
 		{
