@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 14:43:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 18:12:23 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,12 @@ string get_next_token(string::iterator &it, const string::const_iterator &end, c
 	const string::iterator start = it;
 	string				   token;
 
-	while (it != end && *it == delim) // Skip leading delimiters
+	while (it != end && *it == delim)
 		it++;
-	while (it != end && *it != delim) // Extract the token
+	while (it != end && *it != delim)
 		it++;
 	token = string(start, it);
-	while (it != end && *it == delim) // Skip trailing delimiters
+	while (it != end && *it == delim)
 		it++;
 	return token;
 }

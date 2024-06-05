@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/01 19:18:40 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 12:38:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 18:14:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,28 +59,28 @@ class Client
 	void sendMessage(const Client &receiver, const AMessage &msg) const;
 	void receiveMessage(const AMessage *msg) const;
 
-	void kick(Client &user, Channel &channel, const std::string &reason = "") const;									 // chiama removeMember di Channel e removeChannel di Client
-	void invite(Client &user, Channel &channel) const;																	 // chiama addInvite di Channel
-	void topicSet(Channel &channel, const std::string &new_topic) const;												 // chiama setTopic di Channel
-	void modeChange(Channel &channel, const char mode, const bool status, const std::string &param = "") const;			 // chiama setMode di Channel
-	void modesChange(Channel &channel, const std::map<char, bool> &modes, const std::vector<std::string> &params) const; // chiama setModes di Channel
-	void promoteOperator(Channel &channel, Client &user) const;															 // chiama addOperator di Channel
-	void demoteOperator(Channel &channel, Client &op) const;															 // chiama removeOperator di Channel
+	void kick(Client &user, Channel &channel, const std::string &reason = "") const;
+	void invite(Client &user, Channel &channel) const;
+	void topicSet(Channel &channel, const std::string &new_topic) const;
+	void modeChange(Channel &channel, const char mode, const bool status, const std::string &param = "") const;
+	void modesChange(Channel &channel, const std::map<char, bool> &modes, const std::vector<std::string> &params) const;
+	void promoteOperator(Channel &channel, Client &user) const;
+	void demoteOperator(Channel &channel, Client &op) const;
 
   private:
 	void checkPrivilege(const Channel &channel) const;
 
-	std::map<std::string, Channel *> _channels; // {channel_name, channel}
+	std::map<std::string, Channel *> _channels;
 	std::string						 _nickname;
 	std::string						 _username;
-	std::string						 _realname;			// usato solo da WHOIS e company
-	bool							 _is_connected;		// dopo che ha fatto il comando PASS
-	bool							 _is_authenticated; // dopo che ha fatto il comando NICK e USER
+	std::string						 _realname;
+	bool							 _is_connected;
+	bool							 _is_authenticated;
 
 	const uint16_t	  _port;
-	const std::string _ip_addr; // aka hostname
+	const std::string _ip_addr;
 	const int		  _socket;
-	const std::string _pk; // ip_addr + port
+	const std::string _pk;
 	Server			 *_server;
 	Logger			 &_logger;
 };

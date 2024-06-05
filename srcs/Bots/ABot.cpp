@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 17:39:01 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 18:12:04 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,7 @@ void ABot::processInput(const string raw_input) const
 		_logger.logEvent("Message received: " + inputs[i]);
 
 		CommandMessage input(inputs[i]);
-		if (input.getCommand() == CMD_UNKNOWN) // anche se e' reply
+		if (input.getCommand() == CMD_UNKNOWN)
 			continue;
 
 		const AMessage *output;

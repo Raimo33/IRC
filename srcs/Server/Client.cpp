@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 17:08:11 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 18:13:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ Channel &Client::getChannel(const string &channel_name) const
 {
 	map<string, Channel *>::const_iterator it = _channels.find(channel_name);
 
-	if (it == _channels.end()) // se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
+	if (it == _channels.end())
 		throw ActionFailedException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
 	return *it->second;
 }
@@ -86,7 +86,7 @@ void Client::removeChannel(Channel &channel)
 	const string					 channel_name = channel.getName();
 	map<string, Channel *>::iterator it = _channels.find(channel_name);
 
-	if (it == _channels.end()) // se client::_channels non ha channel_name vuoldire che il client non è membro di quel canale
+	if (it == _channels.end())
 		throw ActionFailedException(ERR_NOTONCHANNEL, channel_name.c_str(), g_default_replies_map.at(ERR_NOTONCHANNEL), NULL);
 	_channels.erase(it);
 	if (channel.getMembers().empty())

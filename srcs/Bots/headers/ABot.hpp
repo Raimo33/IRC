@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:45:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 17:09:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 18:12:16 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,11 +71,11 @@ class ABot
 	void			handleRequest(void) const;
 	void			processInput(const std::string input) const;
 	void			disconnect(void);
-	void			sendMessage(const AMessage &msg) const; // sends a message to the server
-	const AMessage *receiveMessage(void) const;				// receives a message from the server
+	void			sendMessage(const AMessage &msg) const;
+	const AMessage *receiveMessage(void) const;
 	void			check_for_authentication_success(void);
 
-	int			_socket; // socket to the
+	int			_socket;
 	std::string _server_ip;
 	std::string _server_port;
 	std::string _server_password;

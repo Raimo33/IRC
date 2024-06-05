@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:16:50 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 14:50:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 18:12:28 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void Logger::logEvent(const string &message) const
 void Logger::logError(const exception *e) const
 {
 	if (!e)
-		return; // per evitare potenziali loop infiniti non chiamo InternalErrorException
+		return;
 
 	const string message(e->what());
 

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 17:13:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 18:13:08 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,6 @@ Channel::Channel(Logger &logger, const string &name, Client &op, const string &k
 	checkName(name);
 	_operators.insert(&op);
 	op.joinChannel(*this);
-	// setMode('o', true, op.getNickname());
-	// setMode('t', true);
 	if (!key.empty())
 		setMode('k', true, key);
 	ostringstream oss;

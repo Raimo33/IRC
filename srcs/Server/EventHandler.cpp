@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 18:10:22 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 18:13:24 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,7 +201,7 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 		throw ActionFailedException(ERR_NOTEXTTOSEND, g_default_replies_map.at(ERR_NOTEXTTOSEND), NULL);
 
 	const CommandMessage msg(_client->getNickname(), PRIVMSG, args[0].c_str(), args[1].c_str(), NULL);
-	if (is_channel_prefix(args[0][0])) // se il primo carattere e' #, &, + o !
+	if (is_channel_prefix(args[0][0]))
 	{
 		Channel &channel = _server->getChannel(args[0]);
 		_client->sendMessage(channel, msg);
