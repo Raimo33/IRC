@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 15:31:09 by egualand          #+#    #+#             */
-/*   Updated: 2024/06/05 13:34:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 13:40:46 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,10 @@ AMessage::~AMessage(void) {}
 
 AMessage &AMessage::operator=(const AMessage &copy)
 {
-	if (this != &copy)
-	{
-		_prefix = copy._prefix;
-		_params = copy._params;
-	}
+	if (this == &copy)
+		return (*this);
+	_prefix = copy._prefix;
+	_params = copy._params;
 	return (*this);
 }
 
@@ -69,7 +68,7 @@ void AMessage::getDelivered(const int socket) const
 
 	unwrapMessage(first_part, second_part);
 	block_size = BUFFER_SIZE - first_part.size() - 2;
-	while (!second_part.empty())
+	while (!second_part.empty()) // TODO ottimizzare con iterators
 	{
 		send_length = std::min(static_cast<size_t>(block_size), second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
