@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/23 15:38:24 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 13:34:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 14:43:54 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ class AMessage
 	void							setParams(const std::vector<std::string> &params);
 	void							setParam(const std::string &param, const int32_t index = -1);
 
+	bool			  isReply(void) const;
+	bool			  isCommand(void) const;
 	const std::string getRaw(void) const;
 	void			  getDelivered(const int socket) const;
 

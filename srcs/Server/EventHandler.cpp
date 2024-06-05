@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 13:08:07 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 15:36:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,10 @@ void EventHandler::setClient(Client &client)
 
 void EventHandler::processInput(string raw_input)
 {
-	vector<string> inputs = ::split(raw_input, "\r\n"); // TODO non viene correttamente rimosso il \r quando arriva messaggio dal bot
+	vector<string> inputs = ::split(raw_input, "\r\n");
+	int			   n_inputs = inputs.size();
 
-	for (uint8_t i = 0; i < inputs.size(); i++)
+	for (uint8_t i = 0; i < n_inputs; i++)
 	{
 		if (inputs[i].empty())
 			continue;

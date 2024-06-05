@@ -6,11 +6,13 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 15:31:09 by egualand          #+#    #+#             */
-/*   Updated: 2024/06/05 13:40:46 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 15:13:22 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "AMessage.hpp"
+#include "CommandMessage.hpp"
+#include "ReplyMessage.hpp"
 #include "common_constants.hpp"
 #include "common_exceptions.hpp"
 #include "system_calls.hpp"
@@ -54,6 +56,16 @@ void AMessage::setParam(const std::string &param, int32_t index)
 	_params.insert(_params.begin() + index, param);
 }
 
+bool AMessage::isReply(void) const
+{
+	return (dynamic_cast<const ReplyMessage *>(this) != NULL);
+}
+
+bool AMessage::isCommand(void) const
+{
+	return (dynamic_cast<const CommandMessage *>(this) != NULL);
+}
+
 const std::string AMessage::getRaw(void) const
 {
 	string first_part, second_part;
@@ -73,6 +85,6 @@ void AMessage::getDelivered(const int socket) const
 		send_length = std::min(static_cast<size_t>(block_size), second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
 		second_part = second_part.substr(send_length);
-		send_p(socket, to_send.c_str(), to_send.length(), 0);
+		send_p(socket, to_send.c_str(), to_send.size(), 0);
 	}
 }

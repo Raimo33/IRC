@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:46:06 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 01:27:29 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 14:43:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+
+class AMessage;
 
 std::vector<std::string> split(const std::string &str, const std::string &delim);
 std::string				 get_next_token(std::string::iterator &it, const std::string::const_iterator &end, const char delim);

@@ -6,36 +6,36 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/02 19:12:17 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 15:09:10 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
-#include "Server.hpp"
 #include "Logger.hpp"
+#include "Server.hpp"
 
-using std::string;
-using std::istringstream;
-using std::ostringstream;
 using std::cerr;
 using std::endl;
+using std::istringstream;
+using std::ostringstream;
+using std::string;
 
-static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv);
+static void get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv);
 
 int main(const int argc, const char **argv)
 {
-	Logger	logger;
+	Logger logger;
 
 	try
 	{
-		uint16_t	port_nbr;
-		string		password;
+		uint16_t port_nbr;
+		string	 password;
 
 		get_args(&port_nbr, &password, argc, argv);
 
-		logger.setFile("server.log");
-		Server	server(logger, port_nbr, password);
+		logger.setFile("ircserv.log");
+		Server server(logger, port_nbr, password);
 		server.run();
 	}
 	catch (const std::invalid_argument &e)
@@ -50,12 +50,12 @@ int main(const int argc, const char **argv)
 	return (1);
 }
 
-static void	get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv)
+static void get_args(uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv)
 {
 	if (argc != 3)
 		throw std::invalid_argument("Usage: ./irc <port> <password>");
 
-	istringstream	iss(argv[1]);
+	istringstream iss(argv[1]);
 
 	if (!(iss >> *port_nbr))
 		throw std::invalid_argument("Invalid port number format");

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 13:38:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 15:59:27 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,34 +146,38 @@ void ABot::routine(void)
 	}
 }
 
-void ABot::handleRequest(void)
+void ABot::processInput(const string raw_input) const
 {
-	const AMessage		 *input = receiveMessage();
-	const AMessage		 *output = NULL;
-	const CommandMessage *input_message = NULL;
+	vector<string> inputs = ::split(raw_input, "\r\n");
+	int			   n_inputs = inputs.size();
 
-	if (dynamic_cast<const ReplyMessage *>(input))
-		goto cleanup;
-
-	input_message = dynamic_cast<const CommandMessage *>(input);
-	if (input_message->getCommand() == INVITE)
+	for (int i = 0; i < n_inputs; i++)
 	{
-		const string &channel_name = input_message->getParams().at(2);
-		output = new CommandMessage(_nickname, JOIN, channel_name.c_str(), NULL);
-	}
-	else
-	{
-		const string								&action = input_message->getParams().front();
-		const map<string, AAction *>::const_iterator action_it = _actions.find(action);
-		if (action_it == _actions.end())
-			goto cleanup;
-		output = action_it->second->beExecuted(*input_message, *this);
-	}
+		if (inputs[i].empty())
+			continue;
 
-	sendMessage(*output);
-cleanup:
-	delete input;
-	delete output;
+		_logger.logEvent("Message received: " + inputs[i]);
+
+		CommandMessage input(inputs[i]);
+		if (input.getCommand() == CMD_UNKNOWN) // anche se e' reply
+			continue;
+
+		const AMessage *output;
+		if (input.getCommand() == INVITE)
+		{
+			const string &channel_name = input.getParams().at(2);
+			output = new CommandMessage(_nickname, JOIN, channel_name.c_str(), NULL);
+		}
+		else
+		{
+			const string								&action = input.getParams().back();
+			const map<string, AAction *>::const_iterator action_it = _actions.find(action);
+			if (action_it == _actions.end())
+				continue;
+			output = action_it->second->beExecuted(input, *this);
+		}
+		sendMessage(*output);
+	}
 }
 
 void ABot::disconnect(void)
@@ -192,29 +196,17 @@ void ABot::sendMessage(const AMessage &msg) const
 	_logger.logEvent(oss.str());
 }
 
-const AMessage *ABot::receiveMessage(void) const
+void ABot::handleRequest(void) const
 {
 	static string full_buffer;
 	char		  buffer[BUFFER_SIZE] = { 0 };
 
-	if (recv_p(_socket, buffer, BUFFER_SIZE - 1, 0) == 0)
+	if (recv_p(_socket, buffer, sizeof(buffer) - 1, 0) == 0)
 		throw SystemErrorException("Server disconnected");
-
 	full_buffer += buffer;
 	if (full_buffer.find("\r\n") == string::npos)
-		return NULL;
+		return;
 
-	AMessage	  *ret = NULL;
-	CommandMessage tmp(full_buffer);
-
-	ostringstream oss;
-	oss << "Message received: " << tmp.getRaw();
-	_logger.logEvent(oss.str());
-
-	if (tmp.getCommand() == CMD_UNKNOWN)
-		ret = new ReplyMessage(full_buffer);
-	else
-		ret = new CommandMessage(tmp);
+	processInput(full_buffer);
 	full_buffer.clear();
-	return ret;
 }

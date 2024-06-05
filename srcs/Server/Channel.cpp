@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 11:00:46 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 16:15:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 16:11:49 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,10 @@ using std::stringstream;
 using std::vector;
 
 Channel::Channel(Logger &logger, const string &name, Client &op, const string &key) :
-    _name(name),
-    _member_limit(-1),
-    _modes(initModes()),
-    _logger(logger)
+	_name(name),
+	_member_limit(-1),
+	_modes(initModes()),
+	_logger(logger)
 {
 	checkName(name);
 	_operators.insert(&op);
@@ -46,15 +46,15 @@ Channel::Channel(Logger &logger, const string &name, Client &op, const string &k
 }
 
 Channel::Channel(const Channel &copy) :
-    _name(copy._name),
-    _key(copy._key),
-    _topic(copy._topic),
-    _member_limit(copy._member_limit),
-    _members(copy._members),
-    _operators(copy._operators),
-    _pending_invitations(copy._pending_invitations),
-    _modes(copy._modes),
-    _logger(copy._logger)
+	_name(copy._name),
+	_key(copy._key),
+	_topic(copy._topic),
+	_member_limit(copy._member_limit),
+	_members(copy._members),
+	_operators(copy._operators),
+	_pending_invitations(copy._pending_invitations),
+	_modes(copy._modes),
+	_logger(copy._logger)
 {
 	ostringstream oss;
 	oss << "Channel created: " << _name;
@@ -149,6 +149,9 @@ void Channel::addMember(Client &user)
 		throw ActionFailedException(ERR_USERONCHANNEL, nickname.c_str(), _name.c_str(), (nickname + " is already on " + _name).c_str(), NULL);
 	if (_members.size() >= _member_limit)
 		throw ActionFailedException(ERR_CHANNELISFULL, _name.c_str(), g_default_replies_map.at(ERR_CHANNELISFULL), NULL);
+
+	if (_pending_invitations.find(&user) != _pending_invitations.end())
+		removePendingInvitation(user);
 	_members[nickname] = &user;
 	ostringstream oss;
 	oss << "Channel " << _name << ", member added: " << nickname;
@@ -282,7 +285,7 @@ void Channel::setMode(const char mode, const bool status, const string &param, c
 		if (status)
 		{
 			stringstream ss(param);
-			uint32_t     new_limit;
+			uint32_t	 new_limit;
 
 			if (!(ss >> new_limit) || !ss.eof())
 				throw ActionFailedException(ERR_NEEDMOREPARAMS, _name.c_str(), "Invalid parameter for mode 'l'");
@@ -302,8 +305,8 @@ void Channel::setMode(const char mode, const bool status, const string &param, c
 	}
 	_modes[mode] = status;
 
-	string               prefix   = setter ? setter->getNickname() : SERVER_NAME;
-	string               mode_str = (status ? "+" : "-") + string(1, mode);
+	string				 prefix = setter ? setter->getNickname() : SERVER_NAME;
+	string				 mode_str = (status ? "+" : "-") + string(1, mode);
 	const CommandMessage mode_change(prefix, MODE, _name.c_str(), mode_str.c_str(), param.c_str(), NULL);
 	receiveMessage(mode_change);
 }

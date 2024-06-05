@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 19:09:13 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 18:59:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 15:51:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,13 @@ using std::map;
 using std::string;
 
 BeetleBot::BeetleBot(const string &nickname, const string &username, const string &realname) :
-    ABot(nickname, username, realname)
+	ABot(nickname, username, realname)
 {
 	_actions = initActions();
 }
 
 BeetleBot::BeetleBot(const BeetleBot &copy) :
-    ABot(copy) {}
+	ABot(copy) {}
 
 BeetleBot::~BeetleBot(void) {}
 

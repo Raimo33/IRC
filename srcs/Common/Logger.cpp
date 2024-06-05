@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:16:50 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 12:14:18 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 14:50:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,6 @@ void Logger::setFile(const string &filename)
 }
 
 void Logger::logEvent(const string &message) const
-
 {
 	log(message, BLUE);
 }
