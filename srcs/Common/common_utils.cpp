@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/13 16:54:09 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 01:27:24 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 13:07:44 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ vector<string> split(const string &str, const string &delim)
 		start = end + delim.length();
 		end = str.find(delim, start);
 	}
-	tokens.push_back(str.substr(start, end));
+	tokens.push_back(str.substr(start));
 	return tokens;
 }
 

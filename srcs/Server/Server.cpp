@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 12:43:47 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 13:02:31 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,7 +260,7 @@ void Server::handleClient(const int client_socket)
 			return;
 		_handler.setClient(*client);
 		_handler.processInput(client_buffers[client]);
-		client_buffers[client].clear();
+		client_buffers.erase(client);
 	}
 	catch (ActionFailedException &e) // TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
 	{

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 20:08:24 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 13:08:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,16 +32,16 @@ static void checkConnection(const Client *client);
 static void checkAuthentication(const Client *client);
 
 EventHandler::EventHandler(Logger &logger, Server &server) :
-    _server(&server),
-    _client(NULL),
-    _handlers(initHandlers()),
-    _logger(logger) {}
+	_server(&server),
+	_client(NULL),
+	_handlers(initHandlers()),
+	_logger(logger) {}
 
 EventHandler::EventHandler(const EventHandler &copy) :
-    _server(copy._server),
-    _client(copy._client),
-    _handlers(copy._handlers),
-    _logger(copy._logger) {}
+	_server(copy._server),
+	_client(copy._client),
+	_handlers(copy._handlers),
+	_logger(copy._logger) {}
 
 EventHandler::~EventHandler(void) {}
 
@@ -57,7 +57,7 @@ void EventHandler::setClient(Client &client)
 
 void EventHandler::processInput(string raw_input)
 {
-	vector<string> inputs = ::split(raw_input, "\r\n");
+	vector<string> inputs = ::split(raw_input, "\r\n"); // TODO non viene correttamente rimosso il \r quando arriva messaggio dal bot
 
 	for (uint8_t i = 0; i < inputs.size(); i++)
 	{
@@ -147,14 +147,14 @@ void EventHandler::handleJoin(const vector<string> &args)
 	if (args.size() < 1)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "JOIN", "usage: JOIN <channel>{,<channel>} [<key>{,<key>}]", NULL);
 
-	const vector<string>          channels_to_join = ::split(args[0], ",");
+	const vector<string>		  channels_to_join = ::split(args[0], ",");
 	const map<string, Channel *> &channels = _server->getChannels();
-	vector<string>                keys;
+	vector<string>				  keys;
 
 	if (args.size() > 1)
 		keys = ::split(args[1], ",");
 
-	//TODO refactor con ternaries
+	// TODO refactor con ternaries
 	for (size_t i = 0; i < channels_to_join.size(); i++)
 	{
 		if (channels.find(channels_to_join[i]) == channels.end())
@@ -185,7 +185,7 @@ void EventHandler::handlePart(const vector<string> &args)
 	if (n_args < 1)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "PART", "usage: PART <channel>{,<channel>} [<reason>]", NULL);
 
-	const string         reason = (n_args > 1) ? args[1] : "";
+	const string		 reason = (n_args > 1) ? args[1] : "";
 	const vector<string> channels = split(args[0], ",");
 
 	for (vector<string>::const_iterator it = channels.begin(); it != channels.end(); it++)
@@ -221,14 +221,14 @@ void EventHandler::handlePrivmsg(const vector<string> &args)
 
 void EventHandler::handleQuit(const vector<string> &args)
 {
-	const string	             &reason = args.size() > 0 ? args[0] : "Client quit";
-	const string                  quitting_nickname = _client->getNickname();
-	const CommandMessage          quit(quitting_nickname, QUIT, reason.c_str(), NULL);
+	const string				 &reason = args.size() > 0 ? args[0] : "Client quit";
+	const string				  quitting_nickname = _client->getNickname();
+	const CommandMessage		  quit(quitting_nickname, QUIT, reason.c_str(), NULL);
 	const map<string, Channel *> &channels = _client->getChannels();
 
 	for (map<string, Channel *>::const_iterator it_channel = channels.begin(); it_channel != channels.end(); it_channel++)
 	{
-		const Channel               *channel = it_channel->second;
+		const Channel				*channel = it_channel->second;
 		const map<string, Client *> &members = channel->getMembers();
 
 		for (map<string, Client *>::const_iterator it_member = members.begin(); it_member != members.end(); it_member++)
@@ -256,9 +256,9 @@ void EventHandler::handleSend(const vector<string> &args)
 	const string   &sender_ip = _client->getIpAddr();
 	const uint16_t &sender_port = getRandomPort();
 	const string   &filename = args[1];
-	const uint32_t  file_size = args.size() > 2 ? std::atol(args[2].c_str()) : 0;
-	const uint64_t  ip_long = ip_to_long(sender_ip);
-	ostringstream   dcc_send;
+	const uint32_t	file_size = args.size() > 2 ? std::atol(args[2].c_str()) : 0;
+	const uint64_t	ip_long = ip_to_long(sender_ip);
+	ostringstream	dcc_send;
 
 	dcc_send << "DCC SEND " << filename << " " << ip_long << " " << sender_port << " " << file_size;
 	const CommandMessage msg(_client->getNickname(), PRIVMSG, args[0].c_str(), dcc_send.str().c_str(), NULL);
@@ -285,7 +285,7 @@ void EventHandler::handleKick(const vector<string> &args)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "KICK", "usage: KICK <channel> <nickname> [<reason>]", NULL);
 
 	Channel &channel = _server->getChannel(args[0]);
-	Client  &target = _server->getClient(args[1]);
+	Client	&target = _server->getClient(args[1]);
 
 	args.size() > 2 ? _client->kick(target, channel, args[2]) : _client->kick(target, channel);
 }
@@ -298,7 +298,7 @@ void EventHandler::handleInvite(const vector<string> &args)
 	if (args.size() < 2)
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "INVITE", "usage: INVITE <nickname> <channel>", NULL);
 
-	Client  &target = _server->getClient(args[0]);
+	Client	&target = _server->getClient(args[0]);
 	Channel &channel = _server->getChannel(args[1]);
 
 	_client->invite(target, channel);
@@ -344,11 +344,11 @@ void EventHandler::handleMode(const vector<string> &args)
 
 	Channel &channel = _server->getChannel(args[0]);
 
-	//TODO refactor
+	// TODO refactor
 	if (n_args == 1)
 	{
 		const map<char, bool> &modes = channel.getModes();
-		string                 modes_str;
+		string				   modes_str;
 
 		for (map<char, bool>::const_iterator it = modes.begin(); it != modes.end(); it++)
 		{
@@ -365,11 +365,11 @@ void EventHandler::handleMode(const vector<string> &args)
 	if (args[1][0] != '+' && args[1][0] != '-')
 		throw ActionFailedException(ERR_NEEDMOREPARAMS, "MODE", "usage: MODE <target> {[+|-]<modes> [<mode_params>]}", NULL);
 
-	char            mode;
-	bool            status;
-	uint16_t        j = 2;
+	char			mode;
+	bool			status;
+	uint16_t		j = 2;
 	map<char, bool> new_modes;
-	vector<string>  params;
+	vector<string>	params;
 
 	params.reserve(n_args - 2);
 	for (uint32_t i = 0; i < args[1].size(); i++)

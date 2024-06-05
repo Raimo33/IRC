@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 19:04:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 16:05:43 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 13:35:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,7 @@
 using std::map;
 using std::string;
 
-CommandMessage::CommandMessage(void)
-{
-}
+CommandMessage::CommandMessage(void) {}
 
 CommandMessage::CommandMessage(const std::string &raw_input)
 {
@@ -29,13 +27,13 @@ CommandMessage::CommandMessage(const std::string &raw_input)
 
 CommandMessage::CommandMessage(const string &prefix, int command, ...)
 {
-	va_list     args;
+	va_list		args;
 	const char *param;
 
 	if (command < PASS || command > MODE)
 		throw InternalErrorException("CommandMessage::CommandMessage: invalid command");
 	va_start(args, command);
-	_prefix  = prefix;
+	_prefix = prefix;
 	_command = static_cast<e_commands>(command);
 	while ((param = va_arg(args, const char *)) != NULL)
 		_params.push_back(param);
@@ -43,7 +41,7 @@ CommandMessage::CommandMessage(const string &prefix, int command, ...)
 }
 
 CommandMessage::CommandMessage(const string &prefix, const enum e_commands command, va_list args) :
-    _command(command)
+	_command(command)
 {
 	const char *param;
 
@@ -55,7 +53,7 @@ CommandMessage::CommandMessage(const string &prefix, const enum e_commands comma
 }
 
 CommandMessage::CommandMessage(const string &prefix, const enum e_commands command, const vector<string> &params) :
-    _command(command)
+	_command(command)
 {
 	if (command < PASS || command > MODE)
 		throw InternalErrorException("CommandMessage::CommandMessage: invalid command");
@@ -64,8 +62,8 @@ CommandMessage::CommandMessage(const string &prefix, const enum e_commands comma
 }
 
 CommandMessage::CommandMessage(const CommandMessage &copy) :
-    AMessage(copy),
-    _command(copy._command) {}
+	AMessage(copy),
+	_command(copy._command) {}
 
 CommandMessage::~CommandMessage(void) {}
 
@@ -109,16 +107,18 @@ const string CommandMessage::getStringFromCommand(const enum e_commands command)
 
 void CommandMessage::parse(string raw_input)
 {
-	string           command;
-	string           param;
+	string			 command;
+	string			 param;
 	string::iterator it;
 
+	if (raw_input.empty())
+		return;
 	if (*raw_input.rbegin() == '\n')
 		raw_input.resize(raw_input.size() - 1);
 	it = raw_input.begin();
 	if (*it == ':')
 		_prefix = get_next_token(++it, raw_input.end(), ' ');
-	command                                                  = get_next_token(it, raw_input.end(), ' ');
+	command = get_next_token(it, raw_input.end(), ' ');
 	const map<string, e_commands>::const_iterator it_command = g_str_cmd_map.find(command);
 	if (it_command == g_str_cmd_map.end())
 		_command = CMD_UNKNOWN;
@@ -156,19 +156,19 @@ const map<string, enum e_commands> create_str_cmd_map(void)
 {
 	map<string, enum e_commands> str_cmd_map;
 
-	str_cmd_map["PASS"]    = PASS;
-	str_cmd_map["NICK"]    = NICK;
-	str_cmd_map["USER"]    = USER;
-	str_cmd_map["JOIN"]    = JOIN;
-	str_cmd_map["PART"]    = PART;
+	str_cmd_map["PASS"] = PASS;
+	str_cmd_map["NICK"] = NICK;
+	str_cmd_map["USER"] = USER;
+	str_cmd_map["JOIN"] = JOIN;
+	str_cmd_map["PART"] = PART;
 	str_cmd_map["PRIVMSG"] = PRIVMSG;
-	str_cmd_map["QUIT"]    = QUIT;
-	str_cmd_map["SEND"]    = SEND;
-	str_cmd_map["KICK"]    = KICK;
-	str_cmd_map["INVITE"]  = INVITE;
-	str_cmd_map["TOPIC"]   = TOPIC;
-	str_cmd_map["MODE"]    = MODE;
-	str_cmd_map["!"]       = BOT_QUERY;
+	str_cmd_map["QUIT"] = QUIT;
+	str_cmd_map["SEND"] = SEND;
+	str_cmd_map["KICK"] = KICK;
+	str_cmd_map["INVITE"] = INVITE;
+	str_cmd_map["TOPIC"] = TOPIC;
+	str_cmd_map["MODE"] = MODE;
+	str_cmd_map["!"] = BOT_QUERY;
 	return (str_cmd_map);
 }
 
@@ -176,18 +176,18 @@ const map<enum e_commands, string> create_cmd_str_map(void)
 {
 	map<enum e_commands, string> cmd_str_map;
 
-	cmd_str_map[PASS]      = "PASS";
-	cmd_str_map[NICK]      = "NICK";
-	cmd_str_map[USER]      = "USER";
-	cmd_str_map[JOIN]      = "JOIN";
-	cmd_str_map[PART]      = "PART";
-	cmd_str_map[PRIVMSG]   = "PRIVMSG";
-	cmd_str_map[QUIT]      = "QUIT";
-	cmd_str_map[SEND]      = "SEND";
-	cmd_str_map[KICK]      = "KICK";
-	cmd_str_map[INVITE]    = "INVITE";
-	cmd_str_map[TOPIC]     = "TOPIC";
-	cmd_str_map[MODE]      = "MODE";
+	cmd_str_map[PASS] = "PASS";
+	cmd_str_map[NICK] = "NICK";
+	cmd_str_map[USER] = "USER";
+	cmd_str_map[JOIN] = "JOIN";
+	cmd_str_map[PART] = "PART";
+	cmd_str_map[PRIVMSG] = "PRIVMSG";
+	cmd_str_map[QUIT] = "QUIT";
+	cmd_str_map[SEND] = "SEND";
+	cmd_str_map[KICK] = "KICK";
+	cmd_str_map[INVITE] = "INVITE";
+	cmd_str_map[TOPIC] = "TOPIC";
+	cmd_str_map[MODE] = "MODE";
 	cmd_str_map[BOT_QUERY] = "!";
 	return (cmd_str_map);
 }

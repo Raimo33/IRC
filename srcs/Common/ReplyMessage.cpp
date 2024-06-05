@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:54:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 16:07:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 13:35:15 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,12 @@ ReplyMessage::ReplyMessage(const string &raw_input)
 
 ReplyMessage::ReplyMessage(const string &prefix, const int reply_code, ...)
 {
-	va_list     args;
+	va_list		args;
 	const char *param;
 
 	if (reply_code < RPL_WELCOME || reply_code > ERR_CHANOPRIVSNEEDED)
 		throw InternalErrorException("ReplyMessage::ReplyMessage: invalid reply code");
-	_prefix     = prefix;
+	_prefix = prefix;
 	_reply_code = static_cast<enum e_replyCodes>(reply_code);
 	va_start(args, reply_code);
 	while ((param = va_arg(args, const char *)) != NULL)
@@ -50,22 +50,22 @@ ReplyMessage::ReplyMessage(const string &prefix, const enum e_replyCodes reply_c
 {
 	const char *param;
 
-	_prefix     = prefix;
+	_prefix = prefix;
 	_reply_code = reply_code;
 	while ((param = va_arg(args, const char *)) != NULL)
 		_params.push_back(param);
 }
 
 ReplyMessage::ReplyMessage(const string &prefix, const enum e_replyCodes reply_code, const vector<string> &params) :
-    _reply_code(reply_code)
+	_reply_code(reply_code)
 {
 	_prefix = prefix;
 	_params = params;
 }
 
 ReplyMessage::ReplyMessage(const ReplyMessage &copy) :
-    AMessage(copy),
-    _reply_code(copy._reply_code) {}
+	AMessage(copy),
+	_reply_code(copy._reply_code) {}
 
 ReplyMessage::~ReplyMessage(void) {}
 
@@ -80,16 +80,18 @@ ReplyMessage &ReplyMessage::operator=(const ReplyMessage &copy)
 }
 
 enum e_replyCodes ReplyMessage::getReplyCode(void) const { return (_reply_code); }
-void              ReplyMessage::setReplyCode(const enum e_replyCodes reply_code) { _reply_code = reply_code; }
+void			  ReplyMessage::setReplyCode(const enum e_replyCodes reply_code) { _reply_code = reply_code; }
 
 void ReplyMessage::parse(string raw_input)
 {
-	string           reply_code_str;
-	string           param;
+	string			 reply_code_str;
+	string			 param;
 	string::iterator it;
-	istringstream    iss;
-	uint16_t         reply_code;
+	istringstream	 iss;
+	uint16_t		 reply_code;
 
+	if (raw_input.empty())
+		return;
 	if (*raw_input.rbegin() == '\n')
 		raw_input.resize(raw_input.size() - 1);
 	it = raw_input.begin();

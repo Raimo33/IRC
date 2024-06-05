@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 15:31:09 by egualand          #+#    #+#             */
-/*   Updated: 2024/06/05 12:15:49 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 13:34:34 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,12 @@ void AMessage::setParam(const std::string &param, int32_t index)
 	_params.insert(_params.begin() + index, param);
 }
 
-#include <iostream>
+const std::string AMessage::getRaw(void) const
+{
+	string first_part, second_part;
+	unwrapMessage(first_part, second_part);
+	return (first_part + second_part);
+}
 
 void AMessage::getDelivered(const int socket) const
 {
@@ -68,7 +73,6 @@ void AMessage::getDelivered(const int socket) const
 	{
 		send_length = std::min(static_cast<size_t>(block_size), second_part.size());
 		to_send = first_part + second_part.substr(0, send_length) + "\r\n";
-		std::cout << "Sending: " << to_send << "$" << std::endl;
 		second_part = second_part.substr(send_length);
 		send_p(socket, to_send.c_str(), to_send.length(), 0);
 	}

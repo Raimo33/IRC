@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 12:09:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 13:30:41 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,21 +187,34 @@ void ABot::disconnect(void)
 void ABot::sendMessage(const AMessage &msg) const
 {
 	msg.getDelivered(_socket);
-	_logger.logEvent("Message sent");
+	ostringstream oss;
+	oss << "Message sent: " << msg.getRaw();
+	_logger.logEvent(oss.str());
 }
 
 const AMessage *ABot::receiveMessage(void) const
 {
-	char buffer[BUFFER_SIZE] = { 0 };
+	static string full_buffer;
+	char		  buffer[BUFFER_SIZE] = { 0 };
 
 	if (recv_p(_socket, buffer, BUFFER_SIZE - 1, 0) == 0)
 		throw SystemErrorException("Server disconnected");
 
-	CommandMessage tmp(buffer);
+	full_buffer += buffer;
+	if (full_buffer.find("\r\n") == string::npos)
+		return NULL;
 
-	_logger.logEvent("Message received");
+	AMessage	  *ret = NULL;
+	CommandMessage tmp(full_buffer);
+
+	ostringstream oss;
+	oss << "Message received: " << tmp.getRaw();
+	_logger.logEvent(oss.str());
+
 	if (tmp.getCommand() == CMD_UNKNOWN)
-		return new ReplyMessage(buffer);
+		ret = new ReplyMessage(full_buffer);
 	else
-		return new CommandMessage(buffer);
+		ret = new CommandMessage(tmp);
+	full_buffer.clear();
+	return ret;
 }
