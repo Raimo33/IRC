@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 02:04:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 12:09:21 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,14 +59,14 @@ const Logger &ABot::getLogger(void) const { return _logger; }
 int			  ABot::getSocket(void) const { return _socket; }
 void		  ABot::setServerIp(const string &ip) { _server_ip = ip; }
 const string &ABot::getServerIp(void) const { return _server_ip; }
-void		  ABot::setServerPort(uint16_t port) { _server_port = port; }
-uint16_t	  ABot::getServerPort(void) const { return _server_port; }
+void		  ABot::setServerPort(const string &port) { _server_port = port; }
+const string &ABot::getServerPort(void) const { return _server_port; }
 void		  ABot::setServerPassword(const string &password) { _server_password = password; }
 const string &ABot::getServerPassword(void) const { return _server_password; }
 void		  ABot::setConnected(bool connected) { _connected = connected; }
 void		  ABot::setSocket(int socket) { _socket = socket; }
 
-void ABot::bindServer(const string &ip, uint16_t port, const string &password)
+void ABot::bindServer(const string &ip, const string &port, const string &password)
 {
 	setServerIp(ip);
 	setServerPort(port);
@@ -88,10 +88,22 @@ void ABot::connect(void)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
-	getaddrinfo_p(_server_ip.c_str(), ::to_string(_server_port).c_str(), &hints, &res);
+	getaddrinfo_p(_server_ip.c_str(), _server_port.c_str(), &hints, &res);
 	_socket = socket_p(res->ai_family, res->ai_socktype, res->ai_protocol);
 	configure_non_blocking(_socket);
-	// TODO connect
+	if (::connect(_socket, res->ai_addr, res->ai_addrlen) == -1 && errno != EINPROGRESS)
+		throw SystemErrorException(errno);
+	else if (errno == EINPROGRESS)
+	{
+		struct pollfd pfd;
+		pfd.fd = _socket;
+		pfd.events = POLLOUT;
+		poll_p(&pfd, 1, -1);
+		socklen_t len = sizeof(pfd.revents);
+		getsockopt_p(_socket, SOL_SOCKET, SO_ERROR, &pfd.revents, &len);
+		if (pfd.revents & (POLLHUP | POLLERR))
+			throw SystemErrorException("Connection failed");
+	}
 	freeaddrinfo(res);
 
 	_logger.logEvent("Bot connected to server");
@@ -106,21 +118,11 @@ void ABot::authenticate(void)
 	if (!_server_password.empty())
 	{
 		const CommandMessage pass(_nickname, PASS, _server_password.c_str(), NULL);
-		std::cout << "debug\n";
 		pass.getDelivered(_socket);
-		std::cout << "debug2\n";
-		check_for_authentication_success();
-		std::cout << "debug3\n";
 	}
 
 	nick.getDelivered(_socket);
-	std::cout << "debug4\n";
-	check_for_authentication_success();
-	std::cout << "debug5\n";
 	user.getDelivered(_socket);
-	std::cout << "debug6\n";
-	check_for_authentication_success();
-	std::cout << "debug7\n";
 
 	_logger.logEvent("Bot authenticated successfully");
 	_authenticated = true;
@@ -146,8 +148,8 @@ void ABot::routine(void)
 
 void ABot::handleRequest(void)
 {
-	const AMessage	   *input = receiveMessage();
-	const AMessage	   *output = NULL;
+	const AMessage		 *input = receiveMessage();
+	const AMessage		 *output = NULL;
 	const CommandMessage *input_message = NULL;
 
 	if (dynamic_cast<const ReplyMessage *>(input))
@@ -156,7 +158,7 @@ void ABot::handleRequest(void)
 	input_message = dynamic_cast<const CommandMessage *>(input);
 	if (input_message->getCommand() == INVITE)
 	{
-		const string &channel_name = input_message->getParams().at(0);
+		const string &channel_name = input_message->getParams().at(2);
 		output = new CommandMessage(_nickname, JOIN, channel_name.c_str(), NULL);
 	}
 	else
@@ -202,15 +204,4 @@ const AMessage *ABot::receiveMessage(void) const
 		return new ReplyMessage(buffer);
 	else
 		return new CommandMessage(buffer);
-}
-
-void ABot::check_for_authentication_success(void)
-{
-	const AMessage	   *msg = receiveMessage();
-	const ReplyMessage *reply = dynamic_cast<const ReplyMessage *>(msg);
-
-	if (!reply)
-		throw InternalErrorException("ABot::check_for_authentication_success: expected reply message");
-	if (reply->getReplyCode() != RPL_WELCOME)
-		throw SystemErrorException("Authentication failed");
 }

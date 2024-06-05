@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 16:58:45 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 11:51:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ using std::istringstream;
 using std::ostringstream;
 using std::string;
 
-static void get_args(string *ip, uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv);
+static void get_args(string *ip, string *port, string *password, const uint32_t argc, const char **argv);
 
 int main(const int argc, const char **argv)
 {
@@ -30,16 +30,16 @@ int main(const int argc, const char **argv)
 
 	try
 	{
-		string   ip;
-		uint16_t port_nbr;
-		string   password;
+		string ip;
+		string port;
+		string password;
 
-		get_args(&ip, &port_nbr, &password, argc, argv);
+		get_args(&ip, &port, &password, argc, argv);
 
 		BeetleBot bot("BeetBot", "BeetleBot", "Beetle Juice Bot");
 		logger.setFile(bot.getNickname() + ".log");
 		bot.setLogger(logger);
-		bot.bindServer(ip, port_nbr, password);
+		bot.bindServer(ip, port, password);
 		bot.run();
 	}
 	catch (const std::invalid_argument &e)
@@ -54,7 +54,7 @@ int main(const int argc, const char **argv)
 	return (1);
 }
 
-static void get_args(string *ip, uint16_t *port_nbr, string *password, const uint32_t argc, const char **argv)
+static void get_args(string *ip, string *port, string *password, const uint32_t argc, const char **argv)
 {
 	if (argc < 3 || argc > 4)
 	{
@@ -69,8 +69,8 @@ static void get_args(string *ip, uint16_t *port_nbr, string *password, const uin
 		throw std::invalid_argument("Invalid IP address format");
 	iss.clear();
 	iss.str(argv[2]);
-	if (!(iss >> *port_nbr))
-		throw std::invalid_argument("Invalid port number format");
+	if (!(iss >> *port))
+		throw std::invalid_argument("Invalid port format");
 	if (argc == 3)
 		return;
 	iss.clear();

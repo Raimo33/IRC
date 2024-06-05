@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 01:54:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 11:50:33 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int accept_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 
 int connect_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
-	if (connect(sockfd, addr, addrlen) == -1)
+	if (connect(sockfd, addr, addrlen) == -1 && errno != EINPROGRESS)
 		throw SystemErrorException(errno);
 	return (0);
 }
@@ -61,7 +61,7 @@ int close_p(int fd)
 	int ret;
 
 	ret = close(fd);
-	if (ret == -1)
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -71,7 +71,7 @@ int shutdown_p(int sockfd, int how)
 	int ret;
 
 	ret = shutdown(sockfd, how);
-	if (ret == -1)
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -81,7 +81,7 @@ ssize_t send_p(int sockfd, const void *buf, size_t len, int flags)
 	ssize_t ret;
 
 	ret = send(sockfd, buf, len, flags);
-	if (ret == -1)
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -91,7 +91,7 @@ ssize_t recv_p(int sockfd, void *buf, size_t len, int flags)
 	ssize_t ret;
 
 	ret = recv(sockfd, buf, len, flags);
-	if (ret == -1)
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -101,7 +101,7 @@ int getsockname_p(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 	int ret;
 
 	ret = getsockname(sockfd, addr, addrlen);
-	if (ret == -1)
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -111,7 +111,17 @@ int setsockopt_p(int sockfd, int level, int optname, const void *optval, socklen
 	int ret;
 
 	ret = setsockopt(sockfd, level, optname, optval, optlen);
-	if (ret == -1)
+	if (ret <= -1)
+		throw SystemErrorException(errno);
+	return (ret);
+}
+
+int getsockopt_p(int sockfd, int level, int optname, void *optval, socklen_t *optlen)
+{
+	int ret;
+
+	ret = getsockopt(sockfd, level, optname, optval, optlen);
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -160,7 +170,7 @@ int epoll_create1_p(int flags)
 	int ret;
 
 	ret = epoll_create1(flags);
-	if (ret == -1)
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -170,7 +180,7 @@ int epoll_ctl_p(int epfd, int op, int fd, struct epoll_event *event)
 	int ret;
 
 	ret = epoll_ctl(epfd, op, fd, event);
-	if (ret == -1)
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -180,7 +190,7 @@ int epoll_wait_p(int epfd, struct epoll_event *events, int maxevents, int timeou
 	int ret;
 
 	ret = epoll_wait(epfd, events, maxevents, timeout);
-	if (ret == -1)
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }
@@ -200,7 +210,7 @@ int poll_p(struct pollfd *fds, nfds_t nfds, int timeout)
 	int ret;
 
 	ret = poll(fds, nfds, timeout);
-	if (ret == -1)
+	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);
 }

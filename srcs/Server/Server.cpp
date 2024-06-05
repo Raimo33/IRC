@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 19:55:32 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 12:43:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,12 @@ using std::string;
 using std::vector;
 
 Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
-    _port(port_no),
-    _pwd_hash(hash(password)),
-    _epoll_fd(epoll_create1_p(0)),
-    _socket(socket_p(AF_INET, SOCK_STREAM, 0)),
-    _handler(EventHandler(logger, *this)),
-    _logger(logger)
+	_port(port_no),
+	_pwd_hash(hash(password)),
+	_epoll_fd(epoll_create1_p(0)),
+	_socket(socket_p(AF_INET, SOCK_STREAM, 0)),
+	_handler(EventHandler(logger, *this)),
+	_logger(logger)
 {
 	struct sockaddr_in server_addr;
 
@@ -57,14 +57,14 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 }
 
 Server::Server(const Server &copy) :
-    _port(copy._port),
-    _pwd_hash(copy._pwd_hash),
-    _clients(copy._clients),
-    _channels(copy._channels),
-    _epoll_fd(copy._epoll_fd),
-    _socket(copy._socket),
-    _handler(copy._handler),
-    _logger(copy._logger) {}
+	_port(copy._port),
+	_pwd_hash(copy._pwd_hash),
+	_clients(copy._clients),
+	_channels(copy._channels),
+	_epoll_fd(copy._epoll_fd),
+	_socket(copy._socket),
+	_handler(copy._handler),
+	_logger(copy._logger) {}
 
 Server::~Server(void)
 {
@@ -76,7 +76,7 @@ Server::~Server(void)
 
 void Server::run(void)
 {
-	const int          MAX_EVENTS = 10;
+	const int		   MAX_EVENTS = 10;
 	struct epoll_event events[MAX_EVENTS];
 
 	while (true)
@@ -207,7 +207,7 @@ bool Server::isClientConnected(const string &nickname) const
 
 void Server::disconnectClient(Client &client)
 {
-	int          socket = client.getSocket();
+	int			 socket = client.getSocket();
 	const string ip_addr = client.getIpAddr();
 
 	removeClient(client);
@@ -219,15 +219,15 @@ void Server::disconnectClient(Client &client)
 
 void Server::handleNewClient(void)
 {
-	Client	        *client;
+	Client			  *client;
 	struct sockaddr_in client_addr;
-	socklen_t          client_addr_len = sizeof(client_addr);
-	const int          client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
+	socklen_t		   client_addr_len = sizeof(client_addr);
+	const int		   client_socket = accept_p(_socket, (struct sockaddr *)&client_addr, &client_addr_len);
 
 	configure_non_blocking(client_socket);
 
 	const std::string client_ip_addr = std::string(inet_ntoa(client_addr.sin_addr));
-	const uint16_t    client_port = ntohs(client_addr.sin_port);
+	const uint16_t	  client_port = ntohs(client_addr.sin_port);
 
 	struct epoll_event event;
 	memset(&event, 0, sizeof(event));
@@ -243,7 +243,8 @@ void Server::handleNewClient(void)
 
 void Server::handleClient(const int client_socket)
 {
-	Client *client = getClient(client_socket);
+	Client						*client = getClient(client_socket);
+	static map<Client *, string> client_buffers;
 
 	if (!client)
 		return;
@@ -254,8 +255,12 @@ void Server::handleClient(const int client_socket)
 
 		if (recv_p(client_socket, buffer, sizeof(buffer) - 1, 0) == 0)
 			return;
+		client_buffers[client] += buffer;
+		if (client_buffers[client].find("\r\n") == string::npos)
+			return;
 		_handler.setClient(*client);
-		_handler.processInput(buffer);
+		_handler.processInput(client_buffers[client]);
+		client_buffers[client].clear();
 	}
 	catch (ActionFailedException &e) // TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
 	{

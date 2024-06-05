@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 11:16:50 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/04 20:13:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/06/05 12:14:18 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void Logger::logToConsole(const string &timestamp, const string &message, const 
 const string Logger::getTimestamp(void) const
 {
 	std::time_t now = std::time(NULL);
-	std::tm	*localTime = std::localtime(&now);
+	std::tm	   *localTime = std::localtime(&now);
 	char		buffer[80];
 
 	std::strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", localTime);
