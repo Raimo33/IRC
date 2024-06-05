@@ -9,7 +9,7 @@ An basic Internet Relay Chat (IRC) server compatible with RFCs [1459](https://to
 - Extensible commands and modes for both users and channels.
 - Logging capabilities.
 - File transfer.
-- Chatbot.
+- Bot building support.
 - Compatibility with popular IRC clients.
 
 ### Getting Started
@@ -41,8 +41,6 @@ An basic Internet Relay Chat (IRC) server compatible with RFCs [1459](https://to
 ### Documentation
 
 Detailed documentation is available in the [Wiki](https://github.com/Raimo33/IRC/wiki). It includes installation guides, configuration options, and usage instructions.
-
-IRC message format cheat sheet:
 
 ### IRC Message Format Cheat Sheet
 
