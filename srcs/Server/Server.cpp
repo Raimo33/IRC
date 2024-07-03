@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 16:08:34 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/03 18:04:50 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "EventHandler.hpp"
+#include "SignalHandler.hpp"
 #include "server_exceptions.hpp"
 #include "system_calls.hpp"
 
@@ -47,7 +48,7 @@ Server::Server(Logger &logger, const uint16_t port_no, const string &password) :
 
 	struct epoll_event event;
 	memset(&event, 0, sizeof(event));
-	event.events = EPOLLIN | EPOLLHUP | EPOLLERR;
+	event.events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLRDHUP;
 	event.data.fd = _socket;
 	epoll_ctl_p(_epoll_fd, EPOLL_CTL_ADD, _socket, &event);
 
@@ -72,6 +73,7 @@ Server::~Server(void)
 		delete it->second;
 	close_p(_socket);
 	close_p(_epoll_fd);
+	_logger.logEvent("Server shutting down");
 }
 
 void Server::run(void)
@@ -79,26 +81,26 @@ void Server::run(void)
 	const int		   MAX_EVENTS = 10;
 	struct epoll_event events[MAX_EVENTS];
 
-	while (true)
+	while (g_received_signal != SIGQUIT)
 	{
 		int n = epoll_wait_p(_epoll_fd, events, MAX_EVENTS, -1);
 
 		for (int i = 0; i < n; i++)
 		{
-			if (events[i].events & EPOLLIN)
-			{
-				if (events[i].data.fd == _socket)
-					handleNewClient();
-				else
-					handleClient(events[i].data.fd);
-			}
-			else if (events[i].events & (EPOLLHUP | EPOLLERR))
+			if (events[i].events & (EPOLLHUP | EPOLLERR | EPOLLRDHUP))
 			{
 				Client *client = getClient(events[i].data.fd);
 				if (client)
 					disconnectClient(*client);
 				else
 					_logger.logEvent("Client disconnected");
+			}
+			else if (events[i].events & EPOLLIN)
+			{
+				if (events[i].data.fd == _socket)
+					handleNewClient();
+				else
+					handleClient(events[i].data.fd);
 			}
 		}
 	}
@@ -231,7 +233,7 @@ void Server::handleNewClient(void)
 
 	struct epoll_event event;
 	memset(&event, 0, sizeof(event));
-	event.events = EPOLLIN | EPOLLHUP | EPOLLERR;
+	event.events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLRDHUP;
 	event.data.fd = client_socket;
 	epoll_ctl_p(_epoll_fd, EPOLL_CTL_ADD, client_socket, &event);
 
@@ -254,7 +256,10 @@ void Server::handleClient(const int client_socket)
 		char buffer[BUFFER_SIZE] = { 0 };
 
 		if (recv_p(client_socket, buffer, sizeof(buffer) - 1, 0) == 0)
-			return;
+		{
+			disconnectClient(*client);
+			goto cleanup;
+		}
 		client_buffers[client] += buffer;
 		if (client_buffers[client].find("\r\n") == string::npos)
 			return;
@@ -273,6 +278,7 @@ void Server::handleClient(const int client_socket)
 		oss << "Action failed: " << e.what();
 		_logger.logEvent(oss.str());
 	}
+cleanup:
 	client_buffers[client].clear();
 	client_buffers.erase(client);
 }

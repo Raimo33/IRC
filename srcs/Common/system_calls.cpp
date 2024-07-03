@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 11:42:44 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 11:50:33 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/03 17:55:47 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,6 +210,16 @@ int poll_p(struct pollfd *fds, nfds_t nfds, int timeout)
 	int ret;
 
 	ret = poll(fds, nfds, timeout);
+	if (ret <= -1)
+		throw SystemErrorException(errno);
+	return (ret);
+}
+
+int sigaction_p(int signum, const struct sigaction *act, struct sigaction *oldact)
+{
+	int ret;
+
+	ret = sigaction(signum, act, oldact);
 	if (ret <= -1)
 		throw SystemErrorException(errno);
 	return (ret);

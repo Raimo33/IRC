@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 17:40:03 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/03 17:56:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "BeetleBot.hpp"
 #include "Logger.hpp"
+#include "SignalHandler.hpp"
 #include "bot_constants.hpp"
 
 using std::cerr;
@@ -35,12 +36,14 @@ int main(const int argc, const char **argv)
 		string password;
 
 		get_args(&ip, &port, &password, argc, argv);
+		SignalHandler signal_handler;
 
 		logger.setFile("BeetleBot.log");
 		BeetleBot bot("BeetBot", "BeetleBot", "Beetle Juice Bot");
 		bot.setLogger(logger);
 		bot.bindServer(ip, port, password);
 		bot.run();
+		bot.stop();
 	}
 	catch (const std::invalid_argument &e)
 	{
@@ -49,7 +52,6 @@ int main(const int argc, const char **argv)
 	catch (const std::exception &e)
 	{
 		logger.logError(&e);
-		logger.logEvent("Bot shutting down");
 	}
 	return (1);
 }

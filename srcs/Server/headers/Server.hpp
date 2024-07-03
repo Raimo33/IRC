@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:09:02 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 17:09:28 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/03 17:39:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,14 @@
 # include <map>
 # include <string>
 # include <vector>
+# include <csignal>
 
 # include "EventHandler.hpp"
 # include "Logger.hpp"
 # include "server_constants.hpp"
 # include "system_calls.hpp"
+
+extern volatile sig_atomic_t sigquit_received;
 
 class Client;
 class Channel;

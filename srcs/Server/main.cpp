@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 16:04:16 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 15:09:10 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/03 17:51:55 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "Logger.hpp"
 #include "Server.hpp"
+#include "SignalHandler.hpp"
 
 using std::cerr;
 using std::endl;
@@ -33,10 +34,12 @@ int main(const int argc, const char **argv)
 		string	 password;
 
 		get_args(&port_nbr, &password, argc, argv);
+		SignalHandler signal_handler;
 
 		logger.setFile("ircserv.log");
 		Server server(logger, port_nbr, password);
 		server.run();
+		server.stop();
 	}
 	catch (const std::invalid_argument &e)
 	{
@@ -45,7 +48,6 @@ int main(const int argc, const char **argv)
 	catch (const std::exception &e)
 	{
 		logger.logError(&e);
-		logger.logEvent("Server shutting down");
 	}
 	return (1);
 }

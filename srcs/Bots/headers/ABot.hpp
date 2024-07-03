@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 23:45:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 18:12:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/03 17:39:29 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,12 @@
 #include <map>
 #include <stdint.h>
 #include <string>
-#include "CommandMessage.hpp"
+#include <csignal>
 
+#include "CommandMessage.hpp"
 #include "Logger.hpp"
+
+extern volatile sig_atomic_t sigquit_received;
 
 class AAction;
 class Logger;
@@ -47,6 +50,7 @@ class ABot
 
 	void bindServer(const std::string &ip, const std::string &port, const std::string &password);
 	void run(void);
+	void stop(void);
 
   protected:
 	virtual std::map<std::string, AAction *> initActions(void) const = 0;

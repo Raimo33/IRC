@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 15:30:07 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 18:12:04 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/03 18:05:07 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "bot_exceptions.hpp"
 #include "bot_utils.hpp"
 #include "system_calls.hpp"
+#include "SignalHandler.hpp"
 
 using std::map;
 using std::string;
@@ -45,8 +46,11 @@ ABot::ABot(const ABot &copy) :
 
 ABot::~ABot(void)
 {
+	if (_connected)
+		disconnect();
 	for (map<string, AAction *>::const_iterator it = _actions.begin(); it != _actions.end(); ++it)
 		delete it->second;
+	_logger.logEvent("Bot shutting down");
 }
 
 const string &ABot::getNickname(void) const { return _nickname; }
@@ -77,7 +81,12 @@ void ABot::run(void)
 	connect();
 	authenticate();
 	routine();
-	disconnect();
+	stop();
+}
+
+void ABot::stop(void)
+{
+	ABot::~ABot();
 }
 
 void ABot::connect(void)
@@ -134,7 +143,7 @@ void ABot::routine(void)
 	pfd.fd = _socket;
 	pfd.events = POLLIN | POLLHUP | POLLERR;
 
-	while (_connected)
+	while (g_received_signal != SIGINT)
 	{
 		poll_p(&pfd, 1, -1);
 

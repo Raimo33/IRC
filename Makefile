@@ -27,10 +27,10 @@ BEETLEBOT_INCS_DIR = srcs/Bots/BeetleBot/headers
 BOT_HDRS = $(addprefix $(BOT_INCS_DIR)/, ABot.hpp AAction.hpp bot_utils.hpp bot_exceptions.hpp bot_constants.hpp)
 BEETLEBOT_HDRS = $(addprefix $(BEETLEBOT_INCS_DIR)/, BeetleBot.hpp BeetleBotActions.hpp)
 
-COMMON_SRCS = $(addprefix srcs/Common/, AMessage.cpp CommandMessage.cpp ReplyMessage.cpp Logger.cpp system_calls.cpp common_utils.cpp common_exceptions.cpp)
+COMMON_SRCS = $(addprefix srcs/Common/, AMessage.cpp CommandMessage.cpp ReplyMessage.cpp Logger.cpp SignalHandler.cpp system_calls.cpp common_utils.cpp common_exceptions.cpp)
 COMMON_OBJS = $(patsubst srcs/Common/%.cpp, objs/Common/%.o, $(COMMON_SRCS))
 COMMON_INCS_DIR = srcs/Common/headers
-COMMON_HDRS = $(addprefix $(COMMON_INCS_DIR)/, AMessage.hpp CommandMessage.hpp ReplyMessage.hpp Logger.hpp system_calls.hpp common_utils.hpp common_exceptions.hpp common_constants.hpp)
+COMMON_HDRS = $(addprefix $(COMMON_INCS_DIR)/, AMessage.hpp CommandMessage.hpp ReplyMessage.hpp Logger.hpp SignalHandler.hpp system_calls.hpp common_utils.hpp common_exceptions.hpp common_constants.hpp)
 
 LEAK_REPORT = leaks.log
 

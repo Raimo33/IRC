@@ -22,6 +22,7 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <csignal>
 
 int		bind_p(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 int		listen_p(int sockfd, int backlog);
@@ -41,5 +42,6 @@ int		epoll_ctl_p(int epfd, int op, int fd, struct epoll_event *event);
 int		epoll_wait_p(int epfd, struct epoll_event *events, int maxevents, int timeout);
 int		getaddrinfo_p(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
 int		poll_p(struct pollfd *fds, nfds_t nfds, int timeout);
+int		sigaction_p(int signum, const struct sigaction *act, struct sigaction *oldact);
 
 #endif
