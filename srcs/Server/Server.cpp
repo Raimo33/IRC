@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/07/06 19:07:12 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/06 19:32:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,13 @@ void Server::run(void)
 
 		for (int i = 0; i < n; i++)
 		{
+			if (events[i].events & EPOLLIN)
+			{
+				if (events[i].data.fd == _socket)
+					handleNewClient();
+				else
+					handleClient(events[i].data.fd);
+			}
 			if (events[i].events & (EPOLLHUP | EPOLLERR | EPOLLRDHUP))
 			{
 				Client *client = getClient(events[i].data.fd);
@@ -94,13 +101,6 @@ void Server::run(void)
 					disconnectClient(*client);
 				else
 					_logger.logEvent("Client disconnected");
-			}
-			else if (events[i].events & EPOLLIN)
-			{
-				if (events[i].data.fd == _socket)
-					handleNewClient();
-				else
-					handleClient(events[i].data.fd);
 			}
 		}
 	}
@@ -256,10 +256,7 @@ void Server::handleClient(const int client_socket)
 		char buffer[BUFFER_SIZE] = { 0 };
 
 		if (recv_p(client_socket, buffer, sizeof(buffer) - 1, 0) == 0)
-		{
-			disconnectClient(*client);
 			goto cleanup;
-		}
 		client_buffers[client] += buffer;
 		if (client_buffers[client].find("\r\n") == string::npos)
 			return;
