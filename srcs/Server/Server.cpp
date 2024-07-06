@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/07/03 18:04:50 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/06 19:07:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,7 +266,7 @@ void Server::handleClient(const int client_socket)
 		_handler.setClient(*client);
 		_handler.processInput(client_buffers[client]);
 	}
-	catch (ActionFailedException &e) // TODO vlautare se catchare le SystemErrorException qui, dato che il server non deve mai crashare
+	catch (ActionFailedException &e)
 	{
 		ReplyMessage &reply = e.getContent();
 		if (client->getIsAuthenticated())
@@ -277,6 +277,10 @@ void Server::handleClient(const int client_socket)
 		ostringstream oss;
 		oss << "Action failed: " << e.what();
 		_logger.logEvent(oss.str());
+	}
+	catch (SystemErrorException &e)
+	{
+		_logger.logError(&e);
 	}
 cleanup:
 	client_buffers[client].clear();
