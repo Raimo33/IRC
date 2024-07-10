@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 19:04:18 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 13:35:21 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/07 11:39:12 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,17 @@
 using std::map;
 using std::string;
 
-CommandMessage::CommandMessage(void) {}
+CommandMessage::CommandMessage(void) :
+	_command(CMD_UNKNOWN) {}
 
-CommandMessage::CommandMessage(const std::string &raw_input)
+CommandMessage::CommandMessage(const std::string &raw_input) :
+	_command(CMD_UNKNOWN)
 {
 	parse(raw_input);
 }
 
 CommandMessage::CommandMessage(const string &prefix, int command, ...)
+	: _command(CMD_UNKNOWN)
 {
 	va_list		args;
 	const char *param;
@@ -121,7 +124,7 @@ void CommandMessage::parse(string raw_input)
 	command = get_next_token(it, raw_input.end(), ' ');
 	const map<string, e_commands>::const_iterator it_command = g_str_cmd_map.find(command);
 	if (it_command == g_str_cmd_map.end())
-		_command = CMD_UNKNOWN;
+		return ;
 	else
 		_command = it_command->second;
 	while (it != raw_input.end())

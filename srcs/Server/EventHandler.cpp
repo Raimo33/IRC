@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/07/10 14:39:36 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/10 14:41:01 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,20 +55,21 @@ void EventHandler::setClient(Client &client)
 
 void EventHandler::processInput(string raw_input)
 {
-	vector<string> inputs = ::split(raw_input, "\r\n");
-	int			   n_inputs = inputs.size();
+	vector<string>	inputs = ::split(raw_input, "\r\n");
+	uint16_t		n_inputs = inputs.size();
 
-	for (uint8_t i = 0; i < n_inputs; i++)
+	for (uint16_t i = 0; i < n_inputs; i++)
 	{
 		if (inputs[i].empty())
 			continue;
 
 		const CommandMessage  input(inputs[i]);
-		const enum e_commands command = input.getCommand();
-		if (command == CMD_UNKNOWN)
+		if (input.getCommand() == CMD_UNKNOWN)
 		{
-			const string &first_param = _client->getIsAuthenticated() ? _client->getNickname() : SERVER_NAME;
-			ReplyMessage  reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, first_param.c_str(), inputs[i].c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
+			const string		&prefix = _client->getIsAuthenticated() ? _client->getNickname() : SERVER_NAME;
+			string::iterator	begin = inputs[i].begin();
+			const string		command_str = get_next_token(begin, inputs[i].end(), ' ');
+			ReplyMessage  reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, prefix.c_str(), command_str.c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
 			_client->receiveMessage(&reply);
 			continue;
 		}
