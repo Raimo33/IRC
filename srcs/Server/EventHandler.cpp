@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/07/10 14:41:01 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/10 16:53:01 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ void EventHandler::processInput(string raw_input)
 			const string		&prefix = _client->getIsAuthenticated() ? _client->getNickname() : SERVER_NAME;
 			string::iterator	begin = inputs[i].begin();
 			const string		command_str = get_next_token(begin, inputs[i].end(), ' ');
-			ReplyMessage  reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, prefix.c_str(), command_str.c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
+			ReplyMessage		reply(SERVER_NAME, ERR_UNKNOWNCOMMAND, prefix.c_str(), command_str.c_str(), g_default_replies_map.at(ERR_UNKNOWNCOMMAND), NULL);
 			_client->receiveMessage(&reply);
 			continue;
 		}

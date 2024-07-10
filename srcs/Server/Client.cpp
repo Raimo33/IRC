@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 12:45:30 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 18:13:16 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/10 16:57:13 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -309,7 +309,7 @@ void Client::kick(Client &user, Channel &channel, const string &reason) const
 {
 	checkPrivilege(channel);
 
-	const string &channel_name = channel.getName();
+	const string channel_name = channel.getName();
 	const string &user_nickname = user.getNickname();
 
 	ostringstream oss;
