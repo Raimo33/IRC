@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server_utils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egualand <egualand@student.42firenze.it    +#+  +:+       +#+        */
+/*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 16:49:59 by egualand          #+#    #+#             */
-/*   Updated: 2024/06/02 17:00:04 by egualand         ###   ########.fr       */
+/*   Updated: 2024/07/10 14:37:48 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,4 +105,22 @@ uint64_t ip_to_long(const std::string &ip)
 
 	inet_pton(AF_INET, ip.c_str(), &(sa.sin_addr));
 	return ntohl(sa.sin_addr.s_addr);
+}
+
+bool	is_upper_finnish(const char c)
+{
+	return ((c >= 'A' && c <= 'Z') || (c >= '{' && c <= '}'));
+}
+
+string to_lower_finnish(const string &s)
+{
+	size_t	len = s.length();
+	string	res = s;
+
+	for (size_t i = 0; i < len; i++)
+	{
+		if (is_upper_finnish(res[i]))
+			res[i] += 32;
+	}
+	return res;
 }

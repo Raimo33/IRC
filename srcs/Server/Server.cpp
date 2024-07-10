@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 00:23:51 by craimond          #+#    #+#             */
-/*   Updated: 2024/07/06 19:32:13 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/10 14:39:39 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,7 +214,7 @@ void Server::disconnectClient(Client &client)
 
 	removeClient(client);
 	delete &client;
-	shutdown_p(socket, SHUT_RDWR);
+	shutdown(socket, SHUT_RDWR);
 	close_p(socket);
 	_logger.logEvent("Client disconnected: " + ip_addr);
 }

@@ -6,7 +6,7 @@
 /*   By: craimond <bomboclat@bidol.juis>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 12:21:17 by craimond          #+#    #+#             */
-/*   Updated: 2024/06/05 19:03:01 by craimond         ###   ########.fr       */
+/*   Updated: 2024/07/10 14:39:36 by craimond         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,8 +117,10 @@ void EventHandler::handleNick(const vector<string> &args)
 		throw ActionFailedException(ERR_ALREADYREGISTRED, g_default_replies_map.at(ERR_ALREADYREGISTRED), NULL);
 	if (args.size() < 1)
 		throw ActionFailedException(ERR_NONICKNAMEGIVEN, g_default_replies_map.at(ERR_NONICKNAMEGIVEN), NULL);
-	checkNicknameValidity(args[0]);
-	_client->setNickname(args[0]);
+
+	const string nickname = to_lower_finnish(args[0]);
+	checkNicknameValidity(nickname);
+	_client->setNickname(nickname);
 	if (!_client->getUsername().empty())
 		_client->setAuthenticated(true);
 }
