@@ -1,6 +1,6 @@
 ## Project Description
 
-An basic Internet Relay Chat (IRC) server and Automated Client (Bot) compatible with RFCs [1459](https://tools.ietf.org/html/rfc1459), [2810](https://tools.ietf.org/html/rfc2810), [2811](https://tools.ietf.org/html/rfc2811), [2812](https://tools.ietf.org/html/rfc), and [2813](https://tools.ietf.org/html/rfc2813).
+A basic Internet Relay Chat (IRC) server and Automated Client (Bot) compatible with RFCs [1459](https://tools.ietf.org/html/rfc1459), [2810](https://tools.ietf.org/html/rfc2810), [2811](https://tools.ietf.org/html/rfc2811), [2812](https://tools.ietf.org/html/rfc), and [2813](https://tools.ietf.org/html/rfc2813).
 
 ### Features
 
